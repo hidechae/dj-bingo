@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { BingoSize } from "@prisma/client";
+enum BingoSize {
+  THREE_BY_THREE = "THREE_BY_THREE",
+  FOUR_BY_FOUR = "FOUR_BY_FOUR", 
+  FIVE_BY_FIVE = "FIVE_BY_FIVE"
+}
 
 export const bingoRouter = createTRPCRouter({
   create: protectedProcedure
@@ -145,7 +149,7 @@ async function checkForWinners(db: any, bingoGameId: string) {
     const grid = Array(gridSize * gridSize).fill(null);
     
     // Fill the grid with played status
-    participant.participantSongs.forEach((ps) => {
+    participant.participantSongs.forEach((ps: any) => {
       grid[ps.position] = ps.song.isPlayed;
     });
 
@@ -169,6 +173,8 @@ function getGridSize(size: BingoSize): number {
       return 4;
     case BingoSize.FIVE_BY_FIVE:
       return 5;
+    default:
+      return 3;
   }
 }
 

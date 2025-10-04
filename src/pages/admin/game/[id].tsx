@@ -1,5 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
@@ -61,8 +62,8 @@ const AdminGameManagement: NextPage = () => {
     return null;
   }
 
-  const winnersCount = participants?.filter(p => p.hasWon).length ?? 0;
-  const completedGridsCount = participants?.filter(p => p.isGridComplete).length ?? 0;
+  const winnersCount = participants?.filter((p: any) => p.hasWon).length ?? 0;
+  const completedGridsCount = participants?.filter((p: any) => p.isGridComplete).length ?? 0;
 
   return (
     <>
@@ -96,9 +97,11 @@ const AdminGameManagement: NextPage = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">参加用QRコード</h3>
                 {qrCodeDataUrl && (
                   <div className="text-center">
-                    <img 
+                    <Image 
                       src={qrCodeDataUrl} 
                       alt="QR Code for game participation"
+                      width={200}
+                      height={200}
                       className="mx-auto mb-4"
                     />
                     <p className="text-sm text-gray-600">
@@ -128,7 +131,7 @@ const AdminGameManagement: NextPage = () => {
               <div className="bg-white shadow rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">楽曲リスト</h3>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {bingoGame.songs.map((song) => (
+                  {bingoGame.songs.map((song: any) => (
                     <div
                       key={song.id}
                       className={`flex items-center justify-between p-3 rounded-lg border ${
@@ -148,7 +151,7 @@ const AdminGameManagement: NextPage = () => {
                       </div>
                       <button
                         onClick={() => toggleSongPlayed(song.id, song.isPlayed)}
-                        disabled={markSongMutation.isLoading}
+                        disabled={markSongMutation.isPending}
                         className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
                           song.isPlayed
                             ? "bg-green-600 text-white hover:bg-green-700"
@@ -187,7 +190,7 @@ const AdminGameManagement: NextPage = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {participants.map((participant) => (
+                    {participants.map((participant: any) => (
                       <tr key={participant.id}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {participant.name}

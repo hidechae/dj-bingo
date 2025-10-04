@@ -4,7 +4,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
-import { BingoSize } from "@prisma/client";
+enum BingoSize {
+  THREE_BY_THREE = "THREE_BY_THREE",
+  FOUR_BY_FOUR = "FOUR_BY_FOUR", 
+  FIVE_BY_FIVE = "FIVE_BY_FIVE"
+}
 
 interface Song {
   title: string;
@@ -19,7 +23,7 @@ const CreateBingo: NextPage = () => {
   const [songs, setSongs] = useState<Song[]>([{ title: "", artist: "" }]);
 
   const createBingoMutation = api.bingo.create.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       void router.push(`/admin/game/${data.id}`);
     },
   });
@@ -72,6 +76,8 @@ const CreateBingo: NextPage = () => {
         return 16;
       case BingoSize.FIVE_BY_FIVE:
         return 25;
+      default:
+        return 9;
     }
   };
 
@@ -197,10 +203,10 @@ const CreateBingo: NextPage = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={createBingoMutation.isLoading}
+                disabled={createBingoMutation.isPending}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
-                {createBingoMutation.isLoading ? "作成中..." : "ビンゴを作成"}
+                {createBingoMutation.isPending ? "作成中..." : "ビンゴを作成"}
               </button>
             </div>
           </form>

@@ -51,7 +51,7 @@ const SetupBingo: NextPage = () => {
 
       // Initialize with existing assignments if any
       const assignments: { [position: number]: string } = {};
-      participant.participantSongs.forEach((ps) => {
+      participant.participantSongs.forEach((ps: any) => {
         assignments[ps.position] = ps.songId;
       });
       setSelectedSongs(assignments);
@@ -217,10 +217,10 @@ const SetupBingo: NextPage = () => {
               
               <button
                 onClick={handleSubmit}
-                disabled={selectedCount !== totalPositions || assignSongsMutation.isLoading}
+                disabled={selectedCount !== totalPositions || assignSongsMutation.isPending}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
-                {assignSongsMutation.isLoading ? "設定中..." : "ビンゴを開始"}
+                {assignSongsMutation.isPending ? "設定中..." : "ビンゴを開始"}
               </button>
             </div>
           </div>

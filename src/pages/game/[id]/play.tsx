@@ -87,9 +87,9 @@ const PlayBingo: NextPage = () => {
   }
 
   const { participant, grid, gridSize, hasWon } = bingoStatus;
-  const playedSongsCount = grid.filter(cell => cell?.isPlayed).length;
+  const playedSongsCount = grid.filter((cell: any) => cell?.isPlayed).length;
   const totalSongs = participant.bingoGame.songs.length;
-  const playedSongs = participant.bingoGame.songs.filter(s => s.isPlayed);
+  const playedSongs = participant.bingoGame.songs.filter((s: any) => s.isPlayed);
 
   return (
     <>
@@ -135,7 +135,7 @@ const PlayBingo: NextPage = () => {
                   className={`grid gap-2 max-w-md mx-auto`}
                   style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
                 >
-                  {grid.map((cell, index) => (
+                  {grid.map((cell: any, index: number) => (
                     <div
                       key={index}
                       className={`aspect-square border-2 rounded-lg p-2 text-xs transition-all duration-300 ${
@@ -207,9 +207,9 @@ const PlayBingo: NextPage = () => {
                 </h3>
                 <div className="max-h-80 overflow-y-auto space-y-2">
                   {playedSongs
-                    .sort((a, b) => new Date(b.playedAt!).getTime() - new Date(a.playedAt!).getTime())
+                    .sort((a: any, b: any) => new Date(b.playedAt!).getTime() - new Date(a.playedAt!).getTime())
                     .slice(0, 10)
-                    .map((song) => (
+                    .map((song: any) => (
                       <div
                         key={song.id}
                         className="p-3 bg-green-50 border border-green-200 rounded-lg"

@@ -158,7 +158,7 @@ export const participantRouter = createTRPCRouter({
       const gridSize = getGridSize(participant.bingoGame.size);
       const grid = Array(gridSize * gridSize).fill(null);
       
-      participant.participantSongs.forEach((ps) => {
+      participant.participantSongs.forEach((ps: any) => {
         grid[ps.position] = {
           song: ps.song,
           isPlayed: ps.song.isPlayed,
