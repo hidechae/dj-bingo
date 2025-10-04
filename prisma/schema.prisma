@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Account {
+    id                       String  @id @default(cuid())
+    userId                   String
+    type                     String
+    provider                 String
+    providerAccountId        String
+    refresh_token            String? // @db.Text
+    access_token             String? // @db.Text
+    expires_at               Int?
+    token_type               String?
+    scope                    String?
+    id_token                 String? // @db.Text
+    session_state            String?
+    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    refresh_token_expires_in Int?
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+    id            String    @id @default(cuid())
+    name          String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+    bingoGames    BingoGame[]
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+enum BingoSize {
+    THREE_BY_THREE @map("3x3")
+    FOUR_BY_FOUR   @map("4x4")
+    FIVE_BY_FIVE   @map("5x5")
+}
+
+model BingoGame {
+    id          String      @id @default(cuid())
+    title       String
+    size        BingoSize
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    createdBy   String
+    user        User        @relation(fields: [createdBy], references: [id])
+    songs       Song[]
+    participants Participant[]
+    isActive    Boolean     @default(true)
+}
+
+model Song {
+    id          String      @id @default(cuid())
+    title       String
+    artist      String?
+    bingoGameId String
+    bingoGame   BingoGame   @relation(fields: [bingoGameId], references: [id], onDelete: Cascade)
+    isPlayed    Boolean     @default(false)
+    playedAt    DateTime?
+    participantSongs ParticipantSong[]
+}
+
+model Participant {
+    id              String      @id @default(cuid())
+    name            String
+    sessionToken    String      @unique
+    bingoGameId     String
+    bingoGame       BingoGame   @relation(fields: [bingoGameId], references: [id], onDelete: Cascade)
+    createdAt       DateTime    @default(now())
+    isGridComplete  Boolean     @default(false)
+    hasWon          Boolean     @default(false)
+    wonAt           DateTime?
+    participantSongs ParticipantSong[]
+}
+
+model ParticipantSong {
+    id            String      @id @default(cuid())
+    participantId String
+    participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+    songId        String
+    song          Song        @relation(fields: [songId], references: [id], onDelete: Cascade)
+    position      Int         // Position in bingo grid (0-8 for 3x3, 0-15 for 4x4, 0-24 for 5x5)
+    
+    @@unique([participantId, position])
+}
