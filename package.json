@@ -24,7 +24,7 @@
     "@trpc/next": "^11.0.0-rc.502",
     "@trpc/server": "^11.0.0-rc.502",
 
-    "next": "^14.2.13",
+    "next": "^15.5.0",
     "next-auth": "^4.24.8",
     "prisma": "^5.19.1",
     "react": "^18.3.1",
@@ -36,7 +36,7 @@
     "@types/qrcode": "^1.5.5"
   },
   "devDependencies": {
-    "eslint-config-next": "^14.2.13",
+    "eslint-config-next": "^15.5.0",
     "@types/eslint": "^8.56.12",
     "@types/node": "^20.16.10",
     "@types/react": "^18.3.11",
