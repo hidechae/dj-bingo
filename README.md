@@ -59,7 +59,7 @@ cp .env.example .env
 Dockerを使用してローカルのPostgreSQLデータベースを起動：
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 4. データベースマイグレーション
