@@ -23,7 +23,7 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 
 ## 技術スタック
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
 - **Backend**: tRPC, Prisma ORM
 - **Authentication**: NextAuth.js (Google OAuth)
 - **Database**: PostgreSQL (ローカル: Docker, 本番: Neon)
