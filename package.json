@@ -10,7 +10,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
     "start": "next start",
     "type-check": "tsc --noEmit"
   },
@@ -20,36 +20,36 @@
     "@t3-oss/env-nextjs": "^0.13.0",
     "@tanstack/react-query": "^5.56.2",
     "@trpc/client": "^11.0.0-rc.502",
-    "@trpc/react-query": "^11.0.0-rc.502",
     "@trpc/next": "^11.0.0-rc.502",
+    "@trpc/react-query": "^11.0.0-rc.502",
     "@trpc/server": "^11.0.0-rc.502",
-
+    "@types/qrcode": "^1.5.5",
     "next": "^15.5.0",
     "next-auth": "^4.24.8",
     "prisma": "^5.19.1",
+    "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "server-only": "^0.0.1",
     "superjson": "^2.2.1",
-    "zod": "^3.23.8",
-    "qrcode": "^1.5.4",
-    "@types/qrcode": "^1.5.5"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "eslint-config-next": "^15.5.0",
+    "@eslint/eslintrc": "^3.3.1",
     "@types/eslint": "^9.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
+    "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
+    "eslint-config-next": "^15.5.0",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.8",
     "tailwindcss": "^3.4.13",
-    "typescript": "^5.6.2",
-    "autoprefixer": "^10.4.20"
+    "typescript": "^5.6.2"
   },
   "ct3aMetadata": {
     "initVersion": "7.37.0"
