@@ -49,7 +49,14 @@ const ParticipantGame: NextPage = () => {
     // Redirect to setup/play page if already joined
     if (participant && participant.bingoGameId === id) {
       if (!participant.isGridComplete) {
-        void router.push(`/game/${id}/setup`);
+        // If game is PLAYING and grid is incomplete, go directly to play
+        if (participant.bingoGame.status === 'PLAYING') {
+          void router.push(`/game/${id}/play`);
+        } else if (participant.bingoGame.status === 'ENTRY') {
+          // Only allow setup during ENTRY status
+          void router.push(`/game/${id}/setup`);
+        }
+        // For other statuses, stay on join page to show appropriate message
       } else {
         void router.push(`/game/${id}/play`);
       }
@@ -84,6 +91,58 @@ const ParticipantGame: NextPage = () => {
             このビンゴゲームは現在利用できません
           </h1>
           <p className="text-gray-600">管理者にお問い合わせください。</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if game is in ENTRY status  
+  if (bingoGame.status !== 'ENTRY') {
+    // If user is already a participant with incomplete grid and game is PLAYING, show special message
+    if (participant && participant.bingoGameId === id && !participant.isGridComplete && bingoGame.status === 'PLAYING') {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-gray-50">
+          <div className="text-center max-w-md mx-auto px-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              ゲーム開始
+            </h1>
+            <p className="text-gray-600 mb-4">
+              ゲームが開始されました。グリッド設定が完了していませんが、現在の状態でゲームに参加できます。
+            </p>
+            <button
+              onClick={() => router.push(`/game/${id}/play`)}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              ゲームに参加
+            </button>
+            <div className="text-sm text-gray-500 mt-4">
+              <p>⚠️ 空白のマスではビンゴになりません</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    const getStatusMessage = (status: string) => {
+      switch (status) {
+        case 'EDITING': return '現在ゲームの準備中です。しばらくお待ちください。';
+        case 'PLAYING': return 'ゲームが既に開始されています。新規参加はできません。';
+        case 'FINISHED': return 'ゲームは終了しました。'; 
+        default: return 'このゲームには現在参加できません。';
+      }
+    };
+
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            参加できません
+          </h1>
+          <p className="text-gray-600 mb-4">{getStatusMessage(bingoGame.status)}</p>
+          <div className="text-sm text-gray-500">
+            <p>管理者にお問い合わせいただくか、</p>
+            <p>しばらくしてから再度お試しください。</p>
+          </div>
         </div>
       </div>
     );

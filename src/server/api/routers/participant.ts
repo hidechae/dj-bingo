@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { GameStatus, BingoSize, getGridSize } from "~/types";
 
 export const participantRouter = createTRPCRouter({
   join: publicProcedure
@@ -29,6 +30,14 @@ export const participantRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Bingo game not found or inactive",
+        });
+      }
+
+      // Check if game is in ENTRY status (participants can only join during ENTRY)
+      if (bingoGame.status !== GameStatus.ENTRY) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Participants can only join during ENTRY status",
         });
       }
 
@@ -117,6 +126,14 @@ export const participantRouter = createTRPCRouter({
         });
       }
 
+      // Check if game is in ENTRY status (grid can only be edited during ENTRY)
+      if (participant.bingoGame.status !== GameStatus.ENTRY) {
+        throw new TRPCError({
+          code: "FORBIDDEN", 
+          message: "Grid can only be edited during ENTRY status",
+        });
+      }
+
       // Delete existing assignments
       await ctx.db.participantSong.deleteMany({
         where: { participantId: participant.id },
@@ -170,7 +187,7 @@ export const participantRouter = createTRPCRouter({
       }
 
       // Create grid representation
-      const gridSize = getGridSize(participant.bingoGame.size);
+      const gridSize = getGridSize(participant.bingoGame.size as BingoSize);
       const grid = Array(gridSize * gridSize).fill(null);
       
       participant.participantSongs.forEach((ps: any) => {
@@ -190,15 +207,3 @@ export const participantRouter = createTRPCRouter({
     }),
 });
 
-function getGridSize(size: any): number {
-  switch (size) {
-    case "THREE_BY_THREE":
-      return 3;
-    case "FOUR_BY_FOUR":
-      return 4;
-    case "FIVE_BY_FIVE":
-      return 5;
-    default:
-      return 3;
-  }
-}

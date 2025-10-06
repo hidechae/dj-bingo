@@ -1,10 +1,12 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-enum BingoSize {
-  THREE_BY_THREE = "THREE_BY_THREE",
-  FOUR_BY_FOUR = "FOUR_BY_FOUR", 
-  FIVE_BY_FIVE = "FIVE_BY_FIVE"
-}
+import { 
+  BingoSize, 
+  GameStatus, 
+  getGridSize, 
+  getRequiredSongCount,
+  isValidStatusTransition 
+} from "~/types";
 
 export const bingoRouter = createTRPCRouter({
   create: protectedProcedure
@@ -17,7 +19,7 @@ export const bingoRouter = createTRPCRouter({
             title: z.string().min(1),
             artist: z.string().optional(),
           })
-        ).min(1),
+        ).optional().default([]),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -25,10 +27,13 @@ export const bingoRouter = createTRPCRouter({
         data: {
           title: input.title,
           size: input.size,
+          status: GameStatus.EDITING,
           createdBy: ctx.session.user.id,
-          songs: {
-            create: input.songs,
-          },
+          ...(input.songs && input.songs.length > 0 && {
+            songs: {
+              create: input.songs,
+            },
+          }),
         },
         include: {
           songs: true,
@@ -86,6 +91,171 @@ export const bingoRouter = createTRPCRouter({
       return bingoGames;
     }),
 
+  updateSongs: protectedProcedure
+    .input(
+      z.object({
+        gameId: z.string(),
+        songs: z.array(
+          z.object({
+            id: z.string().optional(), // For existing songs
+            title: z.string().min(1),
+            artist: z.string().optional(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if game is in editing status
+      const game = await ctx.db.bingoGame.findUnique({
+        where: { id: input.gameId },
+        include: { songs: true }
+      });
+
+      if (!game) {
+        throw new Error("Game not found");
+      }
+
+      if (game.status !== GameStatus.EDITING) {
+        throw new Error("Songs can only be edited in EDITING status");
+      }
+
+      // Delete all existing songs and create new ones
+      await ctx.db.song.deleteMany({
+        where: { bingoGameId: input.gameId }
+      });
+
+      if (input.songs.length > 0) {
+        await ctx.db.song.createMany({
+          data: input.songs.map(song => ({
+            title: song.title,
+            artist: song.artist,
+            bingoGameId: input.gameId
+          }))
+        });
+      }
+
+      return await ctx.db.bingoGame.findUnique({
+        where: { id: input.gameId },
+        include: { songs: true, participants: true }
+      });
+    }),
+
+  changeStatus: protectedProcedure
+    .input(
+      z.object({
+        gameId: z.string(),
+        newStatus: z.nativeEnum(GameStatus),
+        options: z.object({
+          preservePlayedSongs: z.boolean().optional(),
+          preserveParticipants: z.boolean().optional(),
+        }).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const game = await ctx.db.bingoGame.findUnique({
+        where: { id: input.gameId },
+        include: {
+          songs: true,
+          participants: {
+            include: {
+              participantSongs: true
+            }
+          }
+        }
+      });
+
+      if (!game) {
+        throw new Error("Game not found");
+      }
+
+      const currentStatus = game.status as GameStatus;
+      
+      // Validate status transition is allowed
+      if (!isValidStatusTransition(currentStatus, input.newStatus)) {
+        throw new Error(`Invalid status transition from ${currentStatus} to ${input.newStatus}`);
+      }
+
+      // Validate minimum song requirement when transitioning to ENTRY
+      if (input.newStatus === GameStatus.ENTRY) {
+        const requiredSongs = getRequiredSongCount(game.size as BingoSize);
+        if (game.songs.length < requiredSongs) {
+          throw new Error(`最低${requiredSongs}曲必要です。現在${game.songs.length}曲です。`);
+        }
+      }
+
+      // Validate status transitions and handle data changes
+      const { preservePlayedSongs = true, preserveParticipants = true } = input.options || {};
+      
+      // Handle status-specific logic
+      if (input.newStatus === GameStatus.ENTRY && currentStatus === GameStatus.EDITING) {
+        // Transition from EDITING to ENTRY - optionally clear participants
+        if (!preserveParticipants) {
+          await ctx.db.participant.deleteMany({
+            where: { bingoGameId: input.gameId }
+          });
+        }
+      } else if (input.newStatus === GameStatus.ENTRY && currentStatus === GameStatus.PLAYING) {
+        // Transition from PLAYING to ENTRY - optionally reset played songs
+        if (!preservePlayedSongs) {
+          await ctx.db.song.updateMany({
+            where: { bingoGameId: input.gameId },
+            data: {
+              isPlayed: false,
+              playedAt: null,
+            }
+          });
+          
+          // Reset all participant win states
+          await ctx.db.participant.updateMany({
+            where: { bingoGameId: input.gameId },
+            data: {
+              hasWon: false,
+              wonAt: null,
+            }
+          });
+        }
+      }
+
+      // Update game status
+      const updatedGame = await ctx.db.bingoGame.update({
+        where: { id: input.gameId },
+        data: { status: input.newStatus },
+        include: {
+          songs: true,
+          participants: {
+            include: {
+              participantSongs: {
+                include: {
+                  song: true,
+                },
+              },
+            },
+          },
+          user: true,
+        },
+      });
+
+      return updatedGame;
+    }),
+
+  getIncompleteGridParticipants: protectedProcedure
+    .input(z.object({ gameId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const participants = await ctx.db.participant.findMany({
+        where: { 
+          bingoGameId: input.gameId,
+          isGridComplete: false,
+        },
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+        }
+      });
+
+      return participants;
+    }),
+
   markSongAsPlayed: protectedProcedure
     .input(
       z.object({
@@ -94,7 +264,21 @@ export const bingoRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const song = await ctx.db.song.update({
+      // Check if game is in PLAYING status
+      const song = await ctx.db.song.findUnique({
+        where: { id: input.songId },
+        include: { bingoGame: true }
+      });
+
+      if (!song) {
+        throw new Error("Song not found");
+      }
+
+      if (song.bingoGame.status !== GameStatus.PLAYING) {
+        throw new Error("Songs can only be marked as played in PLAYING status");
+      }
+
+      const updatedSong = await ctx.db.song.update({
         where: { id: input.songId },
         data: {
           isPlayed: input.isPlayed,
@@ -106,9 +290,9 @@ export const bingoRouter = createTRPCRouter({
       });
 
       // Check for winners/losers after marking a song as played or unplayed
-      await checkForWinners(ctx.db, song.bingoGameId);
+      await checkForWinners(ctx.db, updatedSong.bingoGameId);
 
-      return song;
+      return updatedSong;
     }),
 
   getParticipants: protectedProcedure
@@ -183,19 +367,6 @@ async function checkForWinners(db: any, bingoGameId: string) {
         },
       });
     }
-  }
-}
-
-function getGridSize(size: BingoSize): number {
-  switch (size) {
-    case BingoSize.THREE_BY_THREE:
-      return 3;
-    case BingoSize.FOUR_BY_FOUR:
-      return 4;
-    case BingoSize.FIVE_BY_FIVE:
-      return 5;
-    default:
-      return 3;
   }
 }
 

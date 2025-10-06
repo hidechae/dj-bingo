@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
+import { BingoSize, getGridSize } from "~/types";
 
 const SetupBingo: NextPage = () => {
   const router = useRouter();
@@ -40,6 +41,23 @@ const SetupBingo: NextPage = () => {
         return;
       }
 
+      // Check if game allows grid editing (must be in ENTRY status)
+      if (participant.bingoGame.status !== 'ENTRY') {
+        // If game is not in ENTRY status, can't edit grid
+        if (participant.isGridComplete) {
+          void router.push(`/game/${id}/play`);
+        } else {
+          // If game is PLAYING and grid is incomplete, proceed to play with current setup
+          if (participant.bingoGame.status === 'PLAYING') {
+            void router.push(`/game/${id}/play`);
+          } else {
+            // For other statuses, redirect to join page to show appropriate message
+            void router.push(`/game/${id}`);
+          }
+        }
+        return;
+      }
+
       // If grid is already complete, redirect to play
       if (participant.isGridComplete) {
         void router.push(`/game/${id}/play`);
@@ -47,7 +65,7 @@ const SetupBingo: NextPage = () => {
       }
 
       // Set grid size based on bingo game
-      const size = getGridSize(participant.bingoGame.size);
+      const size = getGridSize(participant.bingoGame.size as BingoSize);
       setGridSize(size);
 
       // Initialize with existing assignments if any
@@ -59,18 +77,7 @@ const SetupBingo: NextPage = () => {
     }
   }, [participant, id, router]);
 
-  const getGridSize = (size: any): number => {
-    switch (size) {
-      case "THREE_BY_THREE":
-        return 3;
-      case "FOUR_BY_FOUR":
-        return 4;
-      case "FIVE_BY_FIVE":
-        return 5;
-      default:
-        return 3;
-    }
-  };
+
 
   const handleSongSelect = (position: number, songId: string) => {
     setSelectedSongs(prev => ({ ...prev, [position]: songId }));
@@ -191,8 +198,22 @@ const SetupBingo: NextPage = () => {
                     >
                       {selectedSongs[index] && (
                         <>
-                          <div className="h-full flex items-center justify-center text-center pr-4">
-                            {availableSongs.find((s: any) => s.id === selectedSongs[index])?.title}
+                          <div className="h-full flex flex-col items-center justify-center text-center pr-4">
+                            {(() => {
+                              const song = availableSongs.find((s: any) => s.id === selectedSongs[index]);
+                              return (
+                                <>
+                                  <div className="text-xs font-medium text-gray-900">
+                                    {song?.title}
+                                  </div>
+                                  {song?.artist && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      {song.artist}
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                           <button
                             onClick={(e) => {
