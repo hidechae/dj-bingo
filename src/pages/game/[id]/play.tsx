@@ -8,6 +8,7 @@ const PlayBingo: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [sessionToken, setSessionToken] = useState<string>("");
+  const [continueWithIncompleteGrid, setContinueWithIncompleteGrid] = useState(false);
 
   const { data: bingoStatus, refetch } = api.participant.getBingoStatus.useQuery(
     { sessionToken },
@@ -34,11 +35,12 @@ const PlayBingo: NextPage = () => {
         return;
       }
 
-      // If grid is not complete, only redirect to setup if game is still in ENTRY status
+      // If grid is not complete and game is in ENTRY status, allow choice to continue or setup
       if (!bingoStatus.participant.isGridComplete) {
         if (bingoStatus.participant.bingoGame.status === 'ENTRY') {
-          void router.push(`/game/${id}/setup`);
-          return;
+          // Don't automatically redirect - let participant choose
+          // They can either continue with incomplete grid or go to setup
+          // This prevents infinite loops when transitioning from PLAYING to ENTRY
         }
         // If game is PLAYING/FINISHED, allow playing with incomplete grid
       }
@@ -140,8 +142,30 @@ const PlayBingo: NextPage = () => {
                   <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-3 mx-auto max-w-md">
                     <div className="text-yellow-800 text-sm text-center">
                       <strong>⚠️ グリッド未完成</strong><br />
-                      ゲーム開始時にグリッド設定が完了していませんでした。<br />
-                      空白のマスではビンゴになりません。
+                      {participant.bingoGame.status === 'ENTRY' && !continueWithIncompleteGrid ? (
+                        <>
+                          グリッド設定が未完成です。<br />
+                          <div className="mt-3 flex gap-2 justify-center">
+                            <button
+                              onClick={() => router.push(`/game/${id}/setup`)}
+                              className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
+                            >
+                              設定を完成させる
+                            </button>
+                            <button
+                              onClick={() => setContinueWithIncompleteGrid(true)}
+                              className="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-700"
+                            >
+                              このまま続ける
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          ゲーム開始時にグリッド設定が完了していませんでした。<br />
+                          空白のマスではビンゴになりません。
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
@@ -161,11 +185,11 @@ const PlayBingo: NextPage = () => {
                       <div className="h-full flex flex-col items-center justify-center text-center">
                         {cell ? (
                           <>
-                            <div className={`font-medium ${cell.isPlayed ? 'text-white' : 'text-gray-900'}`}>
+                            <div className={`text-xs font-medium ${cell.isPlayed ? 'text-white' : 'text-gray-900'}`}>
                               {cell.song.title}
                             </div>
                             {cell.song.artist && (
-                              <div className={`text-xs mt-1 ${cell.isPlayed ? 'text-green-100' : 'text-gray-500'}`}>
+                              <div className={`text-xs ${cell.isPlayed ? 'text-green-100' : 'text-gray-600'}`}>
                                 {cell.song.artist}
                               </div>
                             )}
