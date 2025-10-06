@@ -214,10 +214,7 @@ const PlayBingo: NextPage = () => {
                         key={song.id}
                         className="p-3 bg-green-50 border border-green-200 rounded-lg"
                       >
-                        <div className="font-medium text-green-900">{song.title}</div>
-                        {song.artist && (
-                          <div className="text-sm text-green-700">{song.artist}</div>
-                        )}
+                        <div className="font-medium text-green-900">{song.artist ? `${song.artist} - ${song.title}` : song.title}</div>
                         <div className="text-xs text-green-600 mt-1">
                           {new Date(song.playedAt!).toLocaleTimeString()}
                         </div>

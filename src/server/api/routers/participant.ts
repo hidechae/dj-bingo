@@ -16,7 +16,12 @@ export const participantRouter = createTRPCRouter({
       const bingoGame = await ctx.db.bingoGame.findUnique({
         where: { id: input.bingoGameId },
         include: {
-          songs: true,
+          songs: {
+            orderBy: [
+              { artist: "asc" },
+              { title: "asc" }
+            ]
+          },
         },
       });
 
@@ -65,7 +70,12 @@ export const participantRouter = createTRPCRouter({
         include: {
           bingoGame: {
             include: {
-              songs: true,
+              songs: {
+                orderBy: [
+                  { artist: "asc" },
+                  { title: "asc" }
+                ]
+              },
             },
           },
           participantSongs: {
@@ -138,7 +148,12 @@ export const participantRouter = createTRPCRouter({
         include: {
           bingoGame: {
             include: {
-              songs: true,
+              songs: {
+                orderBy: [
+                  { artist: "asc" },
+                  { title: "asc" }
+                ]
+              },
             },
           },
           participantSongs: {
