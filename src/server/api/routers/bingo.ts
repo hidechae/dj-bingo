@@ -45,7 +45,12 @@ export const bingoRouter = createTRPCRouter({
       const bingoGame = await ctx.db.bingoGame.findUnique({
         where: { id: input.id },
         include: {
-          songs: true,
+          songs: {
+            orderBy: [
+              { artist: "asc" },
+              { title: "asc" }
+            ]
+          },
           participants: {
             include: {
               participantSongs: {
@@ -67,7 +72,12 @@ export const bingoRouter = createTRPCRouter({
       const bingoGames = await ctx.db.bingoGame.findMany({
         where: { createdBy: ctx.session.user.id },
         include: {
-          songs: true,
+          songs: {
+            orderBy: [
+              { artist: "asc" },
+              { title: "asc" }
+            ]
+          },
           participants: true,
         },
         orderBy: { createdAt: "desc" },
