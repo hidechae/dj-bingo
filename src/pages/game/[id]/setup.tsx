@@ -10,6 +10,7 @@ const SetupBingo: NextPage = () => {
   const [sessionToken, setSessionToken] = useState<string>("");
   const [selectedSongs, setSelectedSongs] = useState<{ [position: number]: string }>({});
   const [gridSize, setGridSize] = useState(3);
+  const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
 
   const { data: participant } = api.participant.getBySessionToken.useQuery(
     { sessionToken },
@@ -75,6 +76,29 @@ const SetupBingo: NextPage = () => {
     setSelectedSongs(prev => ({ ...prev, [position]: songId }));
   };
 
+  const handlePositionSelect = (position: number) => {
+    setSelectedPosition(position);
+  };
+
+  const handleSongAssign = (songId: string) => {
+    if (selectedPosition !== null && !isSongUsed(songId)) {
+      handleSongSelect(selectedPosition, songId);
+      setSelectedPosition(null); // Clear selection after assignment
+    }
+  };
+
+  const handleClearPosition = (position: number) => {
+    setSelectedSongs(prev => {
+      const newSongs = { ...prev };
+      delete newSongs[position];
+      return newSongs;
+    });
+    // If we cleared the currently selected position, clear the selection
+    if (selectedPosition === position) {
+      setSelectedPosition(null);
+    }
+  };
+
   const handleSubmit = () => {
     if (!participant) return;
 
@@ -137,6 +161,12 @@ const SetupBingo: NextPage = () => {
               <p className="text-sm text-gray-500 mt-2">
                 各マスに楽曲を選択してください ({selectedCount}/{totalPositions})
               </p>
+              <p className="text-xs text-blue-600 mt-1">
+                {selectedPosition !== null 
+                  ? `マス${selectedPosition + 1}が選択されています。楽曲を選んでください。`
+                  : "まずマスを選択してから、楽曲を選んでください。"
+                }
+              </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -150,21 +180,39 @@ const SetupBingo: NextPage = () => {
                   {Array.from({ length: totalPositions }, (_, index) => (
                     <div
                       key={index}
-                      className={`aspect-square border-2 rounded-lg p-2 text-xs ${
-                        selectedSongs[index] 
-                          ? "bg-blue-50 border-blue-300" 
-                          : "bg-gray-50 border-gray-300 border-dashed"
+                      onClick={() => handlePositionSelect(index)}
+                      className={`aspect-square border-2 rounded-lg p-2 text-xs cursor-pointer transition-all relative ${
+                        selectedPosition === index
+                          ? "bg-yellow-100 border-yellow-400 border-solid shadow-md"
+                          : selectedSongs[index] 
+                          ? "bg-blue-50 border-blue-300 hover:bg-blue-100" 
+                          : "bg-gray-50 border-gray-300 border-dashed hover:bg-gray-100"
                       }`}
                     >
                       {selectedSongs[index] && (
-                        <div className="h-full flex items-center justify-center text-center">
-                          {availableSongs.find(s => s.id === selectedSongs[index])?.title}
-                        </div>
+                        <>
+                          <div className="h-full flex items-center justify-center text-center pr-4">
+                            {availableSongs.find(s => s.id === selectedSongs[index])?.title}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClearPosition(index);
+                            }}
+                            className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition-colors"
+                            title="このマスをクリア"
+                          >
+                            ×
+                          </button>
+                        </>
                       )}
                       {!selectedSongs[index] && (
                         <div className="h-full flex items-center justify-center text-gray-400 text-center">
                           マス {index + 1}
                         </div>
+                      )}
+                      {selectedPosition === index && (
+                        <div className="absolute inset-0 border-2 border-yellow-500 rounded-lg pointer-events-none"></div>
                       )}
                     </div>
                   ))}
@@ -174,25 +222,28 @@ const SetupBingo: NextPage = () => {
               {/* Song Selection */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">楽曲一覧</h3>
+                {selectedPosition !== null && (
+                  <p className="text-sm text-green-600 bg-green-50 p-2 rounded">
+                    マス{selectedPosition + 1}に設定する楽曲を選択してください
+                  </p>
+                )}
+                {selectedPosition === null && (
+                  <p className="text-sm text-gray-500 bg-gray-50 p-2 rounded">
+                    先にビンゴグリッドでマスを選択してください
+                  </p>
+                )}
                 <div className="max-h-96 overflow-y-auto space-y-2">
                   {availableSongs.map((song) => (
                     <div
                       key={song.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      className={`p-3 border rounded-lg transition-colors ${
                         isSongUsed(song.id)
-                          ? "bg-gray-100 border-gray-300 text-gray-500"
-                          : "bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-300"
+                          ? "bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed"
+                          : selectedPosition === null
+                          ? "bg-white border-gray-200 cursor-not-allowed opacity-60"
+                          : "bg-white border-gray-200 hover:bg-green-50 hover:border-green-300 cursor-pointer"
                       }`}
-                      onClick={() => {
-                        if (!isSongUsed(song.id)) {
-                          // Find first empty position
-                          const emptyPosition = Array.from({ length: totalPositions }, (_, i) => i)
-                            .find(pos => !selectedSongs[pos]);
-                          if (emptyPosition !== undefined) {
-                            handleSongSelect(emptyPosition, song.id);
-                          }
-                        }
-                      }}
+                      onClick={() => handleSongAssign(song.id)}
                     >
                       <div className="font-medium text-gray-900">{song.title}</div>
                       {song.artist && (
