@@ -134,8 +134,8 @@ const SetupBingo: NextPage = () => {
   const getAvailableSongs = () => {
     if (!participant) return [];
     
-    // Get unique songs by shuffling them for this participant
-    return [...participant.bingoGame.songs].sort(() => Math.random() - 0.5);
+    // Return songs sorted by artist then title (already sorted from backend)
+    return participant.bingoGame.songs;
   };
 
   const isSongUsed = (songId: string) => {
@@ -204,7 +204,7 @@ const SetupBingo: NextPage = () => {
                       {selectedSongs[index] && (
                         <>
                           <div className="h-full flex items-center justify-center text-center pr-4">
-                            {availableSongs.find(s => s.id === selectedSongs[index])?.title}
+                            {availableSongs.find((s: any) => s.id === selectedSongs[index])?.title}
                           </div>
                           <button
                             onClick={(e) => {
@@ -245,7 +245,7 @@ const SetupBingo: NextPage = () => {
                   </p>
                 )}
                 <div className="max-h-96 overflow-y-auto space-y-2">
-                  {availableSongs.map((song) => (
+                  {availableSongs.map((song: any) => (
                     <div
                       key={song.id}
                       className={`p-3 border rounded-lg transition-colors ${
@@ -257,10 +257,7 @@ const SetupBingo: NextPage = () => {
                       }`}
                       onClick={() => handleSongAssign(song.id)}
                     >
-                      <div className="font-medium text-gray-900">{song.title}</div>
-                      {song.artist && (
-                        <div className="text-sm text-gray-500">{song.artist}</div>
-                      )}
+                      <div className="font-medium text-gray-900">{song.artist ? `${song.artist} - ${song.title}` : song.title}</div>
                       {isSongUsed(song.id) && (
                         <div className="text-xs text-gray-400 mt-1">選択済み</div>
                       )}

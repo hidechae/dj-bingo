@@ -7,6 +7,9 @@ import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
 import QRCode from "qrcode";
 
+type ParticipantSortField = "name" | "createdAt" | "isGridComplete" | "hasWon";
+type SortDirection = "asc" | "desc";
+
 enum GameStatus {
   EDITING = "EDITING",
   ENTRY = "ENTRY", 
@@ -28,6 +31,8 @@ const AdminGameManagement: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
+  const [sortField, setSortField] = useState<ParticipantSortField>("createdAt");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState<{
     newStatus: GameStatus;
@@ -181,6 +186,46 @@ const AdminGameManagement: NextPage = () => {
     setEditingSongs(editingSongs.filter((_, i) => i !== index));
   };
 
+  const handleSort = (field: ParticipantSortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortParticipants = (participants: any[]) => {
+    return [...participants].sort((a: any, b: any) => {
+      let aValue, bValue;
+      
+      switch (sortField) {
+        case "name":
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case "createdAt":
+          aValue = new Date(a.createdAt);
+          bValue = new Date(b.createdAt);
+          break;
+        case "isGridComplete":
+          aValue = a.isGridComplete ? 1 : 0;
+          bValue = b.isGridComplete ? 1 : 0;
+          break;
+        case "hasWon":
+          aValue = a.hasWon ? 1 : 0;
+          bValue = b.hasWon ? 1 : 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -224,7 +269,7 @@ const AdminGameManagement: NextPage = () => {
             
             {/* QR Code and Game Info */}
             <div className="space-y-6">
-{(bingoGame.status as GameStatus) === GameStatus.ENTRY && (
+              {(bingoGame.status as GameStatus) === GameStatus.ENTRY && (
                 <div className="bg-white shadow rounded-lg p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">参加用QRコード</h3>
                   {qrCodeDataUrl && (
@@ -337,10 +382,10 @@ const AdminGameManagement: NextPage = () => {
                   )}
                 </div>
                 
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {songEditingMode ? (
-                    // Edit mode
-                    editingSongs.map((song, index) => (
+                {songEditingMode ? (
+                  // Edit mode
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {editingSongs.map((song, index) => (
                       <div key={index} className="flex gap-4 items-center p-3 border border-gray-200 rounded-lg">
                         <input
                           type="text"
@@ -363,53 +408,84 @@ const AdminGameManagement: NextPage = () => {
                           削除
                         </button>
                       </div>
-                    ))
-                  ) : (
-                    // Display mode  
-                    bingoGame.songs.length > 0 ? (
-                      bingoGame.songs.map((song: any) => (
+                    ))}
+                  </div>
+                ) : bingoGame.songs.length > 0 ? (
+                  // Display mode - show improved UI with sections for played/unplayed
+                  <div>
+                
+                {/* Unplayed Songs Section */}
+                <div className="mb-6">
+                  <h4 className="text-md font-medium text-gray-700 mb-3">未演奏 ({bingoGame.songs.filter((s: any) => !s.isPlayed).length}曲)</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {bingoGame.songs
+                      .filter((song: any) => !song.isPlayed)
+                      .map((song: any) => (
                         <div
                           key={song.id}
-                          className={`flex items-center justify-between p-3 rounded-lg border ${
-                            song.isPlayed ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200"
-                          }`}
+                          className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200"
                         >
                           <div className="flex-1">
-                            <p className="font-medium text-gray-900">{song.title}</p>
-                            {song.artist && (
-                              <p className="text-sm text-gray-500">{song.artist}</p>
-                            )}
-                            {song.playedAt && (
-                              <p className="text-xs text-gray-400">
-                                {new Date(song.playedAt).toLocaleString()}
-                              </p>
-                            )}
+                            <p className="font-medium text-gray-900">{song.artist} - {song.title}</p>
                           </div>
                           {(bingoGame.status as GameStatus) === GameStatus.PLAYING && (
                             <button
                               onClick={() => toggleSongPlayed(song.id, song.isPlayed)}
                               disabled={markSongMutation.isPending}
-                              className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
-                                song.isPlayed
-                                  ? "bg-green-600 text-white hover:bg-green-700"
-                                  : "bg-gray-600 text-white hover:bg-gray-700"
-                              } disabled:opacity-50`}
+                              className="px-4 py-2 rounded text-sm font-medium transition-colors bg-gray-600 text-white hover:bg-gray-700 disabled:opacity-50"
                             >
-                              {song.isPlayed ? "演奏済み" : "未演奏"}
+                              演奏済みにする
                             </button>
                           )}
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <p>まだ楽曲が登録されていません</p>
-                        {(bingoGame.status as GameStatus) === GameStatus.EDITING && (
-                          <p className="text-sm">「編集」ボタンから楽曲を追加してください</p>
-                        )}
-                      </div>
-                    )
+                      ))}
+                  </div>
+                  {bingoGame.songs.filter((s: any) => !s.isPlayed).length === 0 && (
+                    <p className="text-gray-500 text-center py-4">すべての楽曲が演奏済みです</p>
                   )}
                 </div>
+
+                {/* Played Songs Section */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-700 mb-3">演奏済み ({bingoGame.songs.filter((s: any) => s.isPlayed).length}曲)</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {bingoGame.songs
+                      .filter((song: any) => song.isPlayed)
+                      .map((song: any) => (
+                        <div
+                          key={song.id}
+                          className="flex items-center justify-between p-3 rounded-lg border bg-green-50 border-green-200"
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{song.artist} - {song.title}</p>
+                            <p className="text-xs text-gray-600">
+                              演奏時間: {new Date(song.playedAt).toLocaleString()}
+                            </p>
+                          </div>
+                          {(bingoGame.status as GameStatus) === GameStatus.PLAYING && (
+                            <button
+                              onClick={() => toggleSongPlayed(song.id, song.isPlayed)}
+                              disabled={markSongMutation.isPending}
+                              className="px-4 py-2 rounded text-sm font-medium transition-colors bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                            >
+                              未演奏に戻す
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                  {bingoGame.songs.filter((s: any) => s.isPlayed).length === 0 && (
+                    <p className="text-gray-500 text-center py-4">まだ演奏された楽曲はありません</p>
+                  )}
+                </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>まだ楽曲が登録されていません</p>
+                    {(bingoGame.status as GameStatus) === GameStatus.EDITING && (
+                      <p className="text-sm">「編集」ボタンから楽曲を追加してください</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -422,22 +498,62 @@ const AdminGameManagement: NextPage = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        名前
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort("name")}
+                      >
+                        <div className="flex items-center">
+                          名前
+                          {sortField === "name" && (
+                            <span className="ml-1">
+                              {sortDirection === "asc" ? "↑" : "↓"}
+                            </span>
+                          )}
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        参加時間
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort("createdAt")}
+                      >
+                        <div className="flex items-center">
+                          参加時間
+                          {sortField === "createdAt" && (
+                            <span className="ml-1">
+                              {sortDirection === "asc" ? "↑" : "↓"}
+                            </span>
+                          )}
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        グリッド状態
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort("isGridComplete")}
+                      >
+                        <div className="flex items-center">
+                          グリッド状態
+                          {sortField === "isGridComplete" && (
+                            <span className="ml-1">
+                              {sortDirection === "asc" ? "↑" : "↓"}
+                            </span>
+                          )}
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        勝利状態
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort("hasWon")}
+                      >
+                        <div className="flex items-center">
+                          勝利状態
+                          {sortField === "hasWon" && (
+                            <span className="ml-1">
+                              {sortDirection === "asc" ? "↑" : "↓"}
+                            </span>
+                          )}
+                        </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {participants.map((participant: any) => (
+                    {sortParticipants(participants).map((participant: any) => (
                       <tr key={participant.id}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {participant.name}
