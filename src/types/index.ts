@@ -52,5 +52,5 @@ export function isValidStatusTransition(currentStatus: GameStatus, newStatus: Ga
     [GameStatus.FINISHED]: [GameStatus.PLAYING],
   };
 
-  return allowedTransitions[currentStatus]?.indexOf(newStatus) !== -1 ?? false;
+  return (allowedTransitions[currentStatus]?.indexOf(newStatus) ?? -1) !== -1;
 }

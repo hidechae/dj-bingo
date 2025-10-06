@@ -47,8 +47,13 @@ const SetupBingo: NextPage = () => {
         if (participant.isGridComplete) {
           void router.push(`/game/${id}/play`);
         } else {
-          // Redirect to join page to show appropriate message
-          void router.push(`/game/${id}`);
+          // If game is PLAYING and grid is incomplete, proceed to play with current setup
+          if (participant.bingoGame.status === 'PLAYING') {
+            void router.push(`/game/${id}/play`);
+          } else {
+            // For other statuses, redirect to join page to show appropriate message
+            void router.push(`/game/${id}`);
+          }
         }
         return;
       }

@@ -34,10 +34,13 @@ const PlayBingo: NextPage = () => {
         return;
       }
 
-      // If grid is not complete, redirect to setup
+      // If grid is not complete, only redirect to setup if game is still in ENTRY status
       if (!bingoStatus.participant.isGridComplete) {
-        void router.push(`/game/${id}/setup`);
-        return;
+        if (bingoStatus.participant.bingoGame.status === 'ENTRY') {
+          void router.push(`/game/${id}/setup`);
+          return;
+        }
+        // If game is PLAYING/FINISHED, allow playing with incomplete grid
       }
     }
   }, [bingoStatus, id, router]);
@@ -131,6 +134,17 @@ const PlayBingo: NextPage = () => {
                 <h3 className="text-lg font-semibold text-gray-900 text-center">
                   ビンゴグリッド
                 </h3>
+                
+                {/* Incomplete Grid Warning */}
+                {!participant.isGridComplete && (
+                  <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-3 mx-auto max-w-md">
+                    <div className="text-yellow-800 text-sm text-center">
+                      <strong>⚠️ グリッド未完成</strong><br />
+                      ゲーム開始時にグリッド設定が完了していませんでした。<br />
+                      空白のマスではビンゴになりません。
+                    </div>
+                  </div>
+                )}
                 <div 
                   className={`grid gap-2 max-w-md mx-auto`}
                   style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
@@ -145,7 +159,7 @@ const PlayBingo: NextPage = () => {
                       }`}
                     >
                       <div className="h-full flex flex-col items-center justify-center text-center">
-                        {cell && (
+                        {cell ? (
                           <>
                             <div className={`font-medium ${cell.isPlayed ? 'text-white' : 'text-gray-900'}`}>
                               {cell.song.title}
@@ -161,6 +175,10 @@ const PlayBingo: NextPage = () => {
                               </div>
                             )}
                           </>
+                        ) : (
+                          <div className="text-gray-400 text-xs">
+                            空白
+                          </div>
                         )}
                       </div>
                     </div>
