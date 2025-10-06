@@ -198,8 +198,22 @@ const SetupBingo: NextPage = () => {
                     >
                       {selectedSongs[index] && (
                         <>
-                          <div className="h-full flex items-center justify-center text-center pr-4">
-                            {availableSongs.find((s: any) => s.id === selectedSongs[index])?.title}
+                          <div className="h-full flex flex-col items-center justify-center text-center pr-4">
+                            {(() => {
+                              const song = availableSongs.find((s: any) => s.id === selectedSongs[index]);
+                              return (
+                                <>
+                                  <div className="text-xs font-medium text-gray-900">
+                                    {song?.title}
+                                  </div>
+                                  {song?.artist && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      {song.artist}
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                           <button
                             onClick={(e) => {
