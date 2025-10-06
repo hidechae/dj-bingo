@@ -54,12 +54,6 @@ const CreateBingo: NextPage = () => {
     e.preventDefault();
     
     const validSongs = songs.filter(song => song.title.trim() !== "");
-    const requiredSongs = getRequiredSongCount(size);
-    
-    if (validSongs.length < requiredSongs) {
-      alert(`${size}のビンゴには最低${requiredSongs}曲必要です`);
-      return;
-    }
 
     createBingoMutation.mutate({
       title,
@@ -154,7 +148,7 @@ const CreateBingo: NextPage = () => {
             <div className="bg-white shadow px-6 py-8 rounded-lg">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-medium text-gray-900">
-                  楽曲リスト (最低{getRequiredSongCount(size)}曲必要)
+                  楽曲リスト (後で追加・編集可能)
                 </h3>
                 <button
                   type="button"

@@ -2,6 +2,13 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 
+enum GameStatus {
+  EDITING = "EDITING",
+  ENTRY = "ENTRY",
+  PLAYING = "PLAYING", 
+  FINISHED = "FINISHED"
+}
+
 export const participantRouter = createTRPCRouter({
   join: publicProcedure
     .input(
@@ -24,6 +31,14 @@ export const participantRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Bingo game not found or inactive",
+        });
+      }
+
+      // Check if game is in ENTRY status (participants can only join during ENTRY)
+      if (bingoGame.status !== GameStatus.ENTRY) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Participants can only join during ENTRY status",
         });
       }
 
@@ -104,6 +119,14 @@ export const participantRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Participant not found",
+        });
+      }
+
+      // Check if game is in ENTRY status (grid can only be edited during ENTRY)
+      if (participant.bingoGame.status !== GameStatus.ENTRY) {
+        throw new TRPCError({
+          code: "FORBIDDEN", 
+          message: "Grid can only be edited during ENTRY status",
         });
       }
 
