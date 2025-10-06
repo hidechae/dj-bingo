@@ -1,18 +1,12 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-
-enum BingoSize {
-  THREE_BY_THREE = "THREE_BY_THREE",
-  FOUR_BY_FOUR = "FOUR_BY_FOUR", 
-  FIVE_BY_FIVE = "FIVE_BY_FIVE"
-}
-
-enum GameStatus {
-  EDITING = "EDITING",
-  ENTRY = "ENTRY",
-  PLAYING = "PLAYING", 
-  FINISHED = "FINISHED"
-}
+import { 
+  BingoSize, 
+  GameStatus, 
+  getGridSize, 
+  getRequiredSongCount,
+  isValidStatusTransition 
+} from "~/types";
 
 export const bingoRouter = createTRPCRouter({
   create: protectedProcedure
@@ -174,18 +168,33 @@ export const bingoRouter = createTRPCRouter({
         throw new Error("Game not found");
       }
 
+      const currentStatus = game.status as GameStatus;
+      
+      // Validate status transition is allowed
+      if (!isValidStatusTransition(currentStatus, input.newStatus)) {
+        throw new Error(`Invalid status transition from ${currentStatus} to ${input.newStatus}`);
+      }
+
+      // Validate minimum song requirement when transitioning to ENTRY
+      if (input.newStatus === GameStatus.ENTRY) {
+        const requiredSongs = getRequiredSongCount(game.size as BingoSize);
+        if (game.songs.length < requiredSongs) {
+          throw new Error(`最低${requiredSongs}曲必要です。現在${game.songs.length}曲です。`);
+        }
+      }
+
       // Validate status transitions and handle data changes
       const { preservePlayedSongs = true, preserveParticipants = true } = input.options || {};
       
       // Handle status-specific logic
-      if (input.newStatus === GameStatus.ENTRY && game.status === GameStatus.EDITING) {
+      if (input.newStatus === GameStatus.ENTRY && currentStatus === GameStatus.EDITING) {
         // Transition from EDITING to ENTRY - optionally clear participants
         if (!preserveParticipants) {
           await ctx.db.participant.deleteMany({
             where: { bingoGameId: input.gameId }
           });
         }
-      } else if (input.newStatus === GameStatus.ENTRY && game.status === GameStatus.PLAYING) {
+      } else if (input.newStatus === GameStatus.ENTRY && currentStatus === GameStatus.PLAYING) {
         // Transition from PLAYING to ENTRY - optionally reset played songs
         if (!preservePlayedSongs) {
           await ctx.db.song.updateMany({
@@ -358,19 +367,6 @@ async function checkForWinners(db: any, bingoGameId: string) {
         },
       });
     }
-  }
-}
-
-function getGridSize(size: BingoSize): number {
-  switch (size) {
-    case BingoSize.THREE_BY_THREE:
-      return 3;
-    case BingoSize.FOUR_BY_FOUR:
-      return 4;
-    case BingoSize.FIVE_BY_FIVE:
-      return 5;
-    default:
-      return 3;
   }
 }
 

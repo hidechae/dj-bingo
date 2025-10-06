@@ -6,25 +6,16 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
 import QRCode from "qrcode";
+import { 
+  GameStatus, 
+  BingoSize, 
+  getStatusDisplay, 
+  isValidStatusTransition,
+  getRequiredSongCount 
+} from "~/types";
 
 type ParticipantSortField = "name" | "createdAt" | "isGridComplete" | "hasWon";
 type SortDirection = "asc" | "desc";
-
-enum GameStatus {
-  EDITING = "EDITING",
-  ENTRY = "ENTRY", 
-  PLAYING = "PLAYING",
-  FINISHED = "FINISHED"
-}
-
-const getStatusDisplay = (status: GameStatus) => {
-  switch (status) {
-    case GameStatus.EDITING: return { text: "編集中", color: "bg-gray-100 text-gray-800" };
-    case GameStatus.ENTRY: return { text: "エントリー中", color: "bg-blue-100 text-blue-800" };
-    case GameStatus.PLAYING: return { text: "ゲーム中", color: "bg-green-100 text-green-800" };
-    case GameStatus.FINISHED: return { text: "終了", color: "bg-red-100 text-red-800" };
-  }
-};
 
 const AdminGameManagement: NextPage = () => {
   const { data: session, status } = useSession();
@@ -102,6 +93,21 @@ const AdminGameManagement: NextPage = () => {
 
   const handleStatusChange = (newStatus: GameStatus) => {
     const currentStatus = bingoGame?.status as GameStatus;
+    
+    // Validate transition is allowed
+    if (!isValidStatusTransition(currentStatus, newStatus)) {
+      alert(`「${getStatusDisplay(currentStatus).text}」から「${getStatusDisplay(newStatus).text}」への変更はできません。`);
+      return;
+    }
+
+    // Check minimum song requirement for ENTRY status
+    if (newStatus === GameStatus.ENTRY && bingoGame) {
+      const requiredSongs = getRequiredSongCount(bingoGame.size as BingoSize);
+      if (bingoGame.songs.length < requiredSongs) {
+        alert(`エントリーを開始するには最低${requiredSongs}曲必要です。現在${bingoGame.songs.length}曲です。`);
+        return;
+      }
+    }
     
     // Check if confirmation is needed
     if (currentStatus === GameStatus.PLAYING && newStatus === GameStatus.ENTRY) {
@@ -315,28 +321,28 @@ const AdminGameManagement: NextPage = () => {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => handleStatusChange(GameStatus.EDITING)}
-                    disabled={(bingoGame.status as GameStatus) === GameStatus.EDITING || changeStatusMutation.isPending}
+                    disabled={(bingoGame.status as GameStatus) === GameStatus.EDITING || changeStatusMutation.isPending || !isValidStatusTransition(bingoGame.status as GameStatus, GameStatus.EDITING)}
                     className="px-3 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     編集中
                   </button>
                   <button
                     onClick={() => handleStatusChange(GameStatus.ENTRY)}
-                    disabled={(bingoGame.status as GameStatus) === GameStatus.ENTRY || changeStatusMutation.isPending}
+                    disabled={(bingoGame.status as GameStatus) === GameStatus.ENTRY || changeStatusMutation.isPending || !isValidStatusTransition(bingoGame.status as GameStatus, GameStatus.ENTRY)}
                     className="px-3 py-2 text-sm rounded-md border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     エントリー中
                   </button>
                   <button
                     onClick={() => handleStatusChange(GameStatus.PLAYING)}
-                    disabled={(bingoGame.status as GameStatus) === GameStatus.PLAYING || changeStatusMutation.isPending}
+                    disabled={(bingoGame.status as GameStatus) === GameStatus.PLAYING || changeStatusMutation.isPending || !isValidStatusTransition(bingoGame.status as GameStatus, GameStatus.PLAYING)}
                     className="px-3 py-2 text-sm rounded-md border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     ゲーム中
                   </button>
                   <button
                     onClick={() => handleStatusChange(GameStatus.FINISHED)}
-                    disabled={(bingoGame.status as GameStatus) === GameStatus.FINISHED || changeStatusMutation.isPending}
+                    disabled={(bingoGame.status as GameStatus) === GameStatus.FINISHED || changeStatusMutation.isPending || !isValidStatusTransition(bingoGame.status as GameStatus, GameStatus.FINISHED)}
                     className="px-3 py-2 text-sm rounded-md border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     終了

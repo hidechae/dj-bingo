@@ -1,13 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-
-enum GameStatus {
-  EDITING = "EDITING",
-  ENTRY = "ENTRY",
-  PLAYING = "PLAYING", 
-  FINISHED = "FINISHED"
-}
+import { GameStatus, BingoSize, getGridSize } from "~/types";
 
 export const participantRouter = createTRPCRouter({
   join: publicProcedure
@@ -193,7 +187,7 @@ export const participantRouter = createTRPCRouter({
       }
 
       // Create grid representation
-      const gridSize = getGridSize(participant.bingoGame.size);
+      const gridSize = getGridSize(participant.bingoGame.size as BingoSize);
       const grid = Array(gridSize * gridSize).fill(null);
       
       participant.participantSongs.forEach((ps: any) => {
@@ -213,15 +207,3 @@ export const participantRouter = createTRPCRouter({
     }),
 });
 
-function getGridSize(size: any): number {
-  switch (size) {
-    case "THREE_BY_THREE":
-      return 3;
-    case "FOUR_BY_FOUR":
-      return 4;
-    case "FIVE_BY_FIVE":
-      return 5;
-    default:
-      return 3;
-  }
-}

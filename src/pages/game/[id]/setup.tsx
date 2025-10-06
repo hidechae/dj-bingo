@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
+import { BingoSize, getGridSize } from "~/types";
 
 const SetupBingo: NextPage = () => {
   const router = useRouter();
@@ -59,7 +60,7 @@ const SetupBingo: NextPage = () => {
       }
 
       // Set grid size based on bingo game
-      const size = getGridSize(participant.bingoGame.size);
+      const size = getGridSize(participant.bingoGame.size as BingoSize);
       setGridSize(size);
 
       // Initialize with existing assignments if any
@@ -71,18 +72,7 @@ const SetupBingo: NextPage = () => {
     }
   }, [participant, id, router]);
 
-  const getGridSize = (size: any): number => {
-    switch (size) {
-      case "THREE_BY_THREE":
-        return 3;
-      case "FOUR_BY_FOUR":
-        return 4;
-      case "FIVE_BY_FIVE":
-        return 5;
-      default:
-        return 3;
-    }
-  };
+
 
   const handleSongSelect = (position: number, songId: string) => {
     setSelectedSongs(prev => ({ ...prev, [position]: songId }));

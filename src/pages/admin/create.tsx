@@ -4,11 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
-enum BingoSize {
-  THREE_BY_THREE = "THREE_BY_THREE",
-  FOUR_BY_FOUR = "FOUR_BY_FOUR", 
-  FIVE_BY_FIVE = "FIVE_BY_FIVE"
-}
+import { BingoSize, getRequiredSongCount } from "~/types";
 
 interface Song {
   title: string;
@@ -62,18 +58,7 @@ const CreateBingo: NextPage = () => {
     });
   };
 
-  const getRequiredSongCount = (size: BingoSize): number => {
-    switch (size) {
-      case BingoSize.THREE_BY_THREE:
-        return 9;
-      case BingoSize.FOUR_BY_FOUR:
-        return 16;
-      case BingoSize.FIVE_BY_FIVE:
-        return 25;
-      default:
-        return 9;
-    }
-  };
+
 
   if (status === "loading") {
     return (
