@@ -478,6 +478,7 @@ const AdminGameManagement: NextPage = () => {
                     <p className="text-gray-500 text-center py-4">まだ演奏された楽曲はありません</p>
                   )}
                 </div>
+                  </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <p>まだ楽曲が登録されていません</p>
