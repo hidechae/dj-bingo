@@ -12,10 +12,10 @@ datasource db {
 
 model Account {
     id                       String  @id @default(cuid())
-    userId                   String
+    userId                   String  @map("user_id")
     type                     String
     provider                 String
-    providerAccountId        String
+    providerAccountId        String  @map("provider_account_id")
     refresh_token            String? // @db.Text
     access_token             String? // @db.Text
     expires_at               Int?
@@ -27,25 +27,30 @@ model Account {
     refresh_token_expires_in Int?
 
     @@unique([provider, providerAccountId])
+    @@map("accounts")
 }
 
 model Session {
     id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
+    sessionToken String   @unique @map("session_token")
+    userId       String   @map("user_id")
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("sessions")
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String      @id @default(cuid())
     name          String?
-    email         String?   @unique
-    emailVerified DateTime?
+    email         String?     @unique
+    emailVerified DateTime?   @map("email_verified")
     image         String?
     accounts      Account[]
     sessions      Session[]
     bingoGames    BingoGame[]
+
+    @@map("users")
 }
 
 model VerificationToken {
@@ -54,6 +59,7 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+    @@map("verification_tokens")
 }
 
 enum BingoSize {
@@ -63,57 +69,64 @@ enum BingoSize {
 }
 
 enum GameStatus {
-    EDITING    @map("editing")    // 編集中
-    ENTRY      @map("entry")      // エントリー中  
-    PLAYING    @map("playing")    // ゲーム中
-    FINISHED   @map("finished")   // 終了
+    EDITING  @map("editing")  // 編集中
+    ENTRY    @map("entry")    // エントリー中
+    PLAYING  @map("playing")  // ゲーム中
+    FINISHED @map("finished") // 終了
 }
 
 model BingoGame {
-    id          String      @id @default(cuid())
-    title       String
-    size        BingoSize
-    status      GameStatus  @default(EDITING)
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    createdBy   String
-    user        User        @relation(fields: [createdBy], references: [id])
-    songs       Song[]
+    id           String        @id @default(cuid())
+    title        String
+    size         BingoSize
+    status       GameStatus    @default(EDITING)
+    createdAt    DateTime      @default(now()) @map("created_at")
+    updatedAt    DateTime      @updatedAt @map("updated_at")
+    createdBy    String        @map("created_by")
+    user         User          @relation(fields: [createdBy], references: [id])
+    songs        Song[]
     participants Participant[]
-    isActive    Boolean     @default(true)
+    isActive     Boolean       @default(true) @map("is_active")
+
+    @@map("bingo_games")
 }
 
 model Song {
-    id          String      @id @default(cuid())
-    title       String
-    artist      String?
-    bingoGameId String
-    bingoGame   BingoGame   @relation(fields: [bingoGameId], references: [id], onDelete: Cascade)
-    isPlayed    Boolean     @default(false)
-    playedAt    DateTime?
+    id               String            @id @default(cuid())
+    title            String
+    artist           String?
+    bingoGameId      String            @map("bingo_game_id")
+    bingoGame        BingoGame         @relation(fields: [bingoGameId], references: [id], onDelete: Cascade)
+    isPlayed         Boolean           @default(false) @map("is_played")
+    playedAt         DateTime?         @map("played_at")
     participantSongs ParticipantSong[]
+
+    @@map("songs")
 }
 
 model Participant {
-    id              String      @id @default(cuid())
-    name            String
-    sessionToken    String      @unique
-    bingoGameId     String
-    bingoGame       BingoGame   @relation(fields: [bingoGameId], references: [id], onDelete: Cascade)
-    createdAt       DateTime    @default(now())
-    isGridComplete  Boolean     @default(false)
-    hasWon          Boolean     @default(false)
-    wonAt           DateTime?
+    id               String            @id @default(cuid())
+    name             String
+    sessionToken     String            @unique @map("session_token")
+    bingoGameId      String            @map("bingo_game_id")
+    bingoGame        BingoGame         @relation(fields: [bingoGameId], references: [id], onDelete: Cascade)
+    createdAt        DateTime          @default(now()) @map("created_at")
+    isGridComplete   Boolean           @default(false) @map("is_grid_complete")
+    hasWon           Boolean           @default(false) @map("has_won")
+    wonAt            DateTime?         @map("won_at")
     participantSongs ParticipantSong[]
+
+    @@map("participants")
 }
 
 model ParticipantSong {
     id            String      @id @default(cuid())
-    participantId String
+    participantId String      @map("participant_id")
     participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
-    songId        String
+    songId        String      @map("song_id")
     song          Song        @relation(fields: [songId], references: [id], onDelete: Cascade)
-    position      Int         // Position in bingo grid (0-8 for 3x3, 0-15 for 4x4, 0-24 for 5x5)
-    
+    position      Int // Position in bingo grid (0-8 for 3x3, 0-15 for 4x4, 0-24 for 5x5)
+
     @@unique([participantId, position])
+    @@map("participant_songs")
 }
