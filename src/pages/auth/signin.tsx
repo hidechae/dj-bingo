@@ -8,6 +8,9 @@ interface SignInProps {
 }
 
 const SignIn: NextPage<SignInProps> = ({ providers }) => {
+  // デバッグ用：コンソールに出力
+  console.log('Providers:', providers);
+
   return (
     <>
       <Head>
@@ -19,19 +22,26 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-[3rem]">
             管理者ログイン
           </h1>
-          
-          <div className="flex flex-col gap-4">
-            {Object.values(providers).map((provider: any) => (
-              <button
-                key={provider.name}
-                onClick={() => signIn(provider.id, { callbackUrl: "/admin" })}
-                className="rounded-lg bg-white px-8 py-4 text-lg font-semibold text-gray-900 hover:bg-gray-100 transition-colors"
-              >
-                {provider.name}でサインイン
-              </button>
-            ))}
-          </div>
-          
+
+          {!providers || Object.keys(providers).length === 0 ? (
+            <div className="text-white text-center">
+              <p className="text-xl mb-2">認証プロバイダーが設定されていません</p>
+              <p className="text-sm text-white/70">環境変数を確認してください</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {Object.values(providers).map((provider: any) => (
+                <button
+                  key={provider.name}
+                  onClick={() => signIn(provider.id, { callbackUrl: "/admin" })}
+                  className="rounded-lg bg-white px-8 py-4 text-lg font-semibold text-gray-900 hover:bg-gray-100 transition-colors"
+                >
+                  {provider.name}でサインイン
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="text-center text-white/70">
             <p>管理者のみがビンゴゲームを作成・管理できます</p>
           </div>
