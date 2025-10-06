@@ -28,8 +28,8 @@ export const GameInfoSidebar = ({
     <div className="space-y-6">
       {/* QR Code */}
       {currentStatus === GameStatus.ENTRY && (
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h3 className="mb-4 text-lg font-medium text-gray-900">
             参加用QRコード
           </h3>
           {qrCodeDataUrl && (
@@ -44,20 +44,20 @@ export const GameInfoSidebar = ({
               <p className="text-sm text-gray-600">
                 参加者はこのQRコードをスキャンして参加
               </p>
-              <p className="text-xs text-gray-500 mt-2 break-all">{gameUrl}</p>
+              <p className="mt-2 break-all text-xs text-gray-500">{gameUrl}</p>
             </div>
           )}
         </div>
       )}
 
       {/* Game Info */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">ゲーム情報</h3>
+      <div className="rounded-lg bg-white p-6 shadow">
+        <h3 className="mb-4 text-lg font-medium text-gray-900">ゲーム情報</h3>
         <div className="space-y-3 text-sm">
           <div>
             <span className="font-medium">状態:</span>{" "}
             <span
-              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+              className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                 getStatusDisplay(currentStatus).color
               }`}
             >
@@ -68,7 +68,8 @@ export const GameInfoSidebar = ({
             <span className="font-medium">サイズ:</span> {bingoGame.size}
           </p>
           <p>
-            <span className="font-medium">楽曲数:</span> {bingoGame.songs.length}
+            <span className="font-medium">楽曲数:</span>{" "}
+            {bingoGame.songs.length}
           </p>
           <p>
             <span className="font-medium">参加者数:</span>{" "}
@@ -85,8 +86,8 @@ export const GameInfoSidebar = ({
       </div>
 
       {/* Status Controls */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">
+      <div className="rounded-lg bg-white p-6 shadow">
+        <h3 className="mb-4 text-lg font-medium text-gray-900">
           ステータス変更
         </h3>
         <div className="grid grid-cols-2 gap-2">
@@ -97,7 +98,7 @@ export const GameInfoSidebar = ({
               isChangingStatus ||
               !isValidStatusTransition(currentStatus, GameStatus.EDITING)
             }
-            className="px-3 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             編集中
           </button>
@@ -108,7 +109,7 @@ export const GameInfoSidebar = ({
               isChangingStatus ||
               !isValidStatusTransition(currentStatus, GameStatus.ENTRY)
             }
-            className="px-3 py-2 text-sm rounded-md border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md border border-blue-300 px-3 py-2 text-sm text-blue-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             エントリー中
           </button>
@@ -119,7 +120,7 @@ export const GameInfoSidebar = ({
               isChangingStatus ||
               !isValidStatusTransition(currentStatus, GameStatus.PLAYING)
             }
-            className="px-3 py-2 text-sm rounded-md border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md border border-green-300 px-3 py-2 text-sm text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             ゲーム中
           </button>
@@ -130,7 +131,7 @@ export const GameInfoSidebar = ({
               isChangingStatus ||
               !isValidStatusTransition(currentStatus, GameStatus.FINISHED)
             }
-            className="px-3 py-2 text-sm rounded-md border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md border border-red-300 px-3 py-2 text-sm text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             終了
           </button>

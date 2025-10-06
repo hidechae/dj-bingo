@@ -7,7 +7,11 @@
 import { useState } from "react";
 
 /** ソート可能なフィールド */
-export type ParticipantSortField = "name" | "createdAt" | "isGridComplete" | "hasWon";
+export type ParticipantSortField =
+  | "name"
+  | "createdAt"
+  | "isGridComplete"
+  | "hasWon";
 
 /** ソート方向 */
 export type SortDirection = "asc" | "desc";

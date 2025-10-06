@@ -22,6 +22,7 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 ### 主要な機能
 
 **管理者側:**
+
 - Google OAuthによる認証
 - ビンゴゲームの作成・管理
 - 楽曲リストの設定
@@ -30,6 +31,7 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 - QRコード生成
 
 **参加者側:**
+
 - 認証不要の簡易参加
 - ビンゴグリッドへの楽曲配置
 - リアルタイムでの演奏状況確認
@@ -40,31 +42,31 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 
 ### フロントエンド
 
-| 技術 | バージョン | 用途 |
-|-----|----------|------|
-| **Next.js** | 15.5.0 | Reactフレームワーク、ルーティング、SSR |
-| **React** | 18.3.1 | UIコンポーネント構築 |
-| **TypeScript** | 5.6.2 | 型安全性の確保 |
-| **Tailwind CSS** | 3.4.13 | スタイリング |
-| **TanStack Query** | 5.56.2 | データフェッチ、キャッシュ管理 |
+| 技術               | バージョン | 用途                                   |
+| ------------------ | ---------- | -------------------------------------- |
+| **Next.js**        | 15.5.0     | Reactフレームワーク、ルーティング、SSR |
+| **React**          | 18.3.1     | UIコンポーネント構築                   |
+| **TypeScript**     | 5.6.2      | 型安全性の確保                         |
+| **Tailwind CSS**   | 3.4.13     | スタイリング                           |
+| **TanStack Query** | 5.56.2     | データフェッチ、キャッシュ管理         |
 
 ### バックエンド
 
-| 技術 | バージョン | 用途 |
-|-----|----------|------|
-| **tRPC** | 11.0.0-rc | 型安全なAPI通信 |
-| **Prisma** | 5.19.1 | ORM、データベース管理 |
-| **NextAuth.js** | 4.24.8 | 認証（Google OAuth） |
-| **PostgreSQL** | 15 | データベース |
-| **Zod** | 3.23.8 | スキーマバリデーション |
-| **SuperJSON** | 2.2.1 | シリアライゼーション |
+| 技術            | バージョン | 用途                   |
+| --------------- | ---------- | ---------------------- |
+| **tRPC**        | 11.0.0-rc  | 型安全なAPI通信        |
+| **Prisma**      | 5.19.1     | ORM、データベース管理  |
+| **NextAuth.js** | 4.24.8     | 認証（Google OAuth）   |
+| **PostgreSQL**  | 15         | データベース           |
+| **Zod**         | 3.23.8     | スキーマバリデーション |
+| **SuperJSON**   | 2.2.1      | シリアライゼーション   |
 
 ### インフラ
 
-| 環境 | 技術 |
-|-----|------|
-| **ローカル** | Docker Compose（PostgreSQL） |
-| **本番** | Neon（PostgreSQL）、Vercel推奨 |
+| 環境         | 技術                           |
+| ------------ | ------------------------------ |
+| **ローカル** | Docker Compose（PostgreSQL）   |
+| **本番**     | Neon（PostgreSQL）、Vercel推奨 |
 
 ## アーキテクチャ図
 
@@ -196,12 +198,14 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 **場所:** `src/pages/`
 
 **責務:**
+
 - UIの表示
 - ユーザー入力の受付
 - ルーティング
 - クライアントサイドの状態管理
 
 **主要コンポーネント:**
+
 - ページコンポーネント (`index.tsx`, `admin/*.tsx`, `game/*.tsx`)
 - NextAuthのセッション管理
 - TanStack Queryのキャッシュ管理
@@ -211,12 +215,14 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 **場所:** `src/server/api/routers/`
 
 **責務:**
+
 - APIエンドポイントの定義
 - 入力バリデーション（Zod）
 - ビジネスロジックの実行
 - レスポンスの整形
 
 **主要モジュール:**
+
 - `bingoRouter`: 管理者用API
 - `participantRouter`: 参加者用API
 
@@ -225,6 +231,7 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 **場所:** API層に統合（`src/server/api/routers/`内）
 
 **責務:**
+
 - ビンゴ判定アルゴリズム
 - 権限チェック
 - データ整合性の保証
@@ -235,11 +242,13 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 **場所:** Prisma経由でアクセス
 
 **責務:**
+
 - データベースCRUD操作
 - リレーションの解決
 - トランザクション管理
 
 **主要モジュール:**
+
 - `src/server/db.ts`: Prismaクライアント
 - `prisma/schema.prisma`: スキーマ定義
 
@@ -248,6 +257,7 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 **場所:** `src/server/auth.ts`, `src/server/api/trpc.ts`
 
 **責務:**
+
 - 管理者認証（Google OAuth）
 - セッション管理
 - 参加者識別（sessionToken）
@@ -401,12 +411,14 @@ dj-bingo/
 **技術:** NextAuth.js + Google OAuth
 
 **フロー:**
+
 1. ユーザーが `/auth/signin` にアクセス
 2. Google OAuthにリダイレクト
 3. 認証成功後、NextAuth.jsがセッションをDBに保存
 4. `useSession()` で認証状態を取得
 
 **実装箇所:**
+
 - 設定: `src/server/auth.ts`
 - エンドポイント: `src/pages/api/auth/[...nextauth].ts`
 - クライアント: `useSession()` from `next-auth/react`
@@ -428,17 +440,20 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 **技術:** localStorage + sessionToken
 
 **フロー:**
+
 1. 初回アクセス時に`sessionToken`を生成
 2. `localStorage`に保存
 3. APIリクエストに含めて送信
 4. DBの`Participant.sessionToken`で識別
 
 **メリット:**
+
 - 認証不要（参加の障壁が低い）
 - リロードしても状態が保持される
 - QRコードだけで参加可能
 
 **セキュリティ考慮:**
+
 - 参加者は自分のデータのみアクセス可能
 - sessionTokenは推測困難
 - ゲームごとに1回のみ参加可能
@@ -463,6 +478,7 @@ const mutation = api.bingo.create.useMutation({
 ```
 
 **特徴:**
+
 - 自動キャッシュ管理
 - 重複リクエストの削減
 - バックグラウンド更新
@@ -485,17 +501,19 @@ const mutation = api.bingo.create.useMutation({
 const { data: participant } = api.participant.getBySessionToken.useQuery(
   { sessionToken },
   {
-    refetchInterval: 3000,  // 3秒ごと
+    refetchInterval: 3000, // 3秒ごと
     enabled: !!sessionToken,
   }
 );
 ```
 
 **メリット:**
+
 - 実装がシンプル
 - 追加のインフラ不要
 
 **デメリット:**
+
 - 遅延がある（最大3秒）
 - サーバー負荷が高い
 
@@ -575,6 +593,7 @@ return <GameDetails game={data} />;
 DJ Bingoは、モダンなフルスタックアーキテクチャの実例です。
 
 **主要な設計原則:**
+
 - **型安全性**: TypeScript + tRPCで実現
 - **シンプルさ**: 最小限の技術スタックで最大の効果
 - **開発効率**: T3 Stackによる高いDX

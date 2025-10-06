@@ -39,28 +39,28 @@ const PlayBingo: NextPage = () => {
         <meta name="description" content="ビンゴゲームプレイ中" />
       </Head>
       <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] py-4">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="mx-auto max-w-4xl px-4">
           <WinnerBanner hasWon={hasWon} />
 
-          <div className="bg-white rounded-lg shadow-xl p-6">
+          <div className="rounded-lg bg-white p-6 shadow-xl">
             {/* Header */}
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <div className="mb-6 text-center">
+              <h1 className="mb-2 text-2xl font-bold text-gray-900">
                 {participant.bingoGame.title}
               </h1>
-              <h2 className="text-lg text-gray-700 mb-1">
+              <h2 className="mb-1 text-lg text-gray-700">
                 {participant.name}さんのビンゴ
               </h2>
               <p className="text-sm text-gray-500">
-                演奏済み楽曲: {playedSongs.length} / {totalSongs} | あなたのマス:{" "}
-                {playedSongsCount} / {grid.length}
+                演奏済み楽曲: {playedSongs.length} / {totalSongs} |
+                あなたのマス: {playedSongsCount} / {grid.length}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               {/* Bingo Grid */}
-              <div className="lg:col-span-2 space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 text-center">
+              <div className="space-y-4 lg:col-span-2">
+                <h3 className="text-center text-lg font-semibold text-gray-900">
                   ビンゴグリッド
                 </h3>
 
@@ -76,7 +76,7 @@ const PlayBingo: NextPage = () => {
                 <BingoGrid grid={grid} gridSize={gridSize} />
 
                 {/* Win Status */}
-                <div className="text-center mt-6">
+                <div className="mt-6 text-center">
                   <WinStatus
                     hasWon={hasWon}
                     wonAt={participant.wonAt}
@@ -93,7 +93,7 @@ const PlayBingo: NextPage = () => {
             <div className="mt-8 text-center">
               <button
                 onClick={() => refetch()}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
               >
                 状態を更新
               </button>

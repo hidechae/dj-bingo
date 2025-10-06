@@ -6,19 +6,19 @@ type BingoGridProps = {
 export const BingoGrid = ({ grid, gridSize }: BingoGridProps) => {
   return (
     <div
-      className="grid gap-2 max-w-md mx-auto"
+      className="mx-auto grid max-w-md gap-2"
       style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
     >
       {grid.map((cell: any, index: number) => (
         <div
           key={index}
-          className={`aspect-square border-2 rounded-lg p-2 text-xs transition-all duration-300 ${
+          className={`aspect-square rounded-lg border-2 p-2 text-xs transition-all duration-300 ${
             cell?.isPlayed
-              ? "bg-green-500 text-white border-green-600 shadow-lg transform scale-105"
-              : "bg-white border-gray-300"
+              ? "scale-105 transform border-green-600 bg-green-500 text-white shadow-lg"
+              : "border-gray-300 bg-white"
           }`}
         >
-          <div className="h-full flex flex-col items-center justify-center text-center">
+          <div className="flex h-full flex-col items-center justify-center text-center">
             {cell ? (
               <>
                 <div
@@ -38,13 +38,13 @@ export const BingoGrid = ({ grid, gridSize }: BingoGridProps) => {
                   </div>
                 )}
                 {cell.isPlayed && (
-                  <div className="text-xs mt-1 font-bold text-green-100">
+                  <div className="mt-1 text-xs font-bold text-green-100">
                     ✓ 演奏済み
                   </div>
                 )}
               </>
             ) : (
-              <div className="text-gray-400 text-xs">空白</div>
+              <div className="text-xs text-gray-400">空白</div>
             )}
           </div>
         </div>

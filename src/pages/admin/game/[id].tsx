@@ -26,7 +26,8 @@ const AdminGameManagement: NextPage = () => {
 
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingStatusChange, setPendingStatusChange] = useState<GameStatus | null>(null);
+  const [pendingStatusChange, setPendingStatusChange] =
+    useState<GameStatus | null>(null);
 
   const {
     bingoGame,
@@ -90,8 +91,10 @@ const AdminGameManagement: NextPage = () => {
     }
 
     const needsConfirmation =
-      (currentStatus === GameStatus.PLAYING && newStatus === GameStatus.ENTRY) ||
-      (currentStatus === GameStatus.ENTRY && newStatus === GameStatus.EDITING) ||
+      (currentStatus === GameStatus.PLAYING &&
+        newStatus === GameStatus.ENTRY) ||
+      (currentStatus === GameStatus.ENTRY &&
+        newStatus === GameStatus.EDITING) ||
       (currentStatus === GameStatus.ENTRY &&
         newStatus === GameStatus.PLAYING &&
         incompleteParticipants &&
@@ -109,7 +112,10 @@ const AdminGameManagement: NextPage = () => {
   };
 
   const confirmStatusChange = (
-    options: { preservePlayedSongs?: boolean; preserveParticipants?: boolean } = {}
+    options: {
+      preservePlayedSongs?: boolean;
+      preserveParticipants?: boolean;
+    } = {}
   ) => {
     if (pendingStatusChange) {
       changeStatusMutation.mutate(
@@ -158,9 +164,7 @@ const AdminGameManagement: NextPage = () => {
     return null;
   }
 
-  const sortedParticipants = participants
-    ? sortParticipants(participants)
-    : [];
+  const sortedParticipants = participants ? sortParticipants(participants) : [];
 
   return (
     <>
@@ -171,7 +175,7 @@ const AdminGameManagement: NextPage = () => {
       <main className="min-h-screen bg-gray-50">
         <div className="bg-white shadow">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 justify-between items-center">
+            <div className="flex h-16 items-center justify-between">
               <h1 className="text-xl font-semibold text-gray-900">
                 {bingoGame.title} - 管理画面
               </h1>
@@ -185,8 +189,8 @@ const AdminGameManagement: NextPage = () => {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <GameInfoSidebar
               bingoGame={bingoGame}
               participants={participants || []}

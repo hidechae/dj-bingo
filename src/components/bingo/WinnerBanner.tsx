@@ -8,7 +8,7 @@ export const WinnerBanner = ({ hasWon }: WinnerBannerProps) => {
   }
 
   return (
-    <div className="bg-yellow-500 text-black p-4 rounded-lg mb-6 text-center animate-bounce">
+    <div className="mb-6 animate-bounce rounded-lg bg-yellow-500 p-4 text-center text-black">
       <h2 className="text-2xl font-bold">
         🎉 ビンゴ！おめでとうございます！ 🎉
       </h2>

@@ -65,18 +65,21 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    <SessionProvider session={session}>  {/* 認証状態の管理 */}
+    <SessionProvider session={session}>
+      {" "}
+      {/* 認証状態の管理 */}
       <div className="font-sans">
-        <Component {...pageProps} />      {/* 各ページコンポーネント */}
+        <Component {...pageProps} /> {/* 各ページコンポーネント */}
       </div>
     </SessionProvider>
   );
 };
 
-export default api.withTRPC(MyApp);  // tRPCクライアントをアプリ全体で使用可能にする
+export default api.withTRPC(MyApp); // tRPCクライアントをアプリ全体で使用可能にする
 ```
 
 **ポイント:**
+
 - `SessionProvider`: NextAuth.jsの認証状態を全ページで共有
 - `api.withTRPC()`: tRPCのHookを全ページで使えるようにする
 
@@ -101,6 +104,7 @@ const Home: NextPage = () => {
 ```
 
 **ポイント:**
+
 - `useSession()`: NextAuth.jsのHook、現在のログイン状態を取得
 - 条件分岐で表示を切り替え
 
@@ -115,19 +119,22 @@ export const api = createTRPCNext<AppRouter>({
   config() {
     return {
       links: [
-        loggerLink({ /* ... */ }),
+        loggerLink({
+          /* ... */
+        }),
         httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,  // APIエンドポイント
-          transformer: superjson,            // 型変換
+          url: `${getBaseUrl()}/api/trpc`, // APIエンドポイント
+          transformer: superjson, // 型変換
         }),
       ],
     };
   },
-  ssr: false,  // SSRを無効化（クライアントサイドのみ）
+  ssr: false, // SSRを無効化（クライアントサイドのみ）
 });
 ```
 
 **ポイント:**
+
 - `AppRouter`: バックエンドのルーター型が自動的にインポートされる
 - `httpBatchLink`: 複数のAPIリクエストをバッチ処理
 - `superjson`: Date、Map、Setなどの複雑な型をシリアライズ
@@ -138,14 +145,15 @@ export const api = createTRPCNext<AppRouter>({
 
 ```tsx
 export const appRouter = createTRPCRouter({
-  bingo: bingoRouter,           // 管理者用API
+  bingo: bingoRouter, // 管理者用API
   participant: participantRouter, // 参加者用API
 });
 
-export type AppRouter = typeof appRouter;  // 型をエクスポート
+export type AppRouter = typeof appRouter; // 型をエクスポート
 ```
 
 **ポイント:**
+
 - `appRouter`: すべてのAPIエンドポイントの集合
 - 型定義がフロントエンドに自動的に共有される
 
@@ -160,8 +168,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const session = await getServerAuthSession({ req, res });
 
   return {
-    session,  // 認証情報
-    db,       // Prismaクライアント
+    session, // 認証情報
+    db, // Prismaクライアント
   };
 };
 
@@ -182,6 +190,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 ```
 
 **ポイント:**
+
 - `createTRPCContext`: すべてのAPIで`ctx.session`と`ctx.db`が使える
 - `protectedProcedure`: 管理者専用API（未ログインだとエラー）
 - `publicProcedure`: 参加者も使えるAPI
@@ -192,20 +201,20 @@ Pages Routerでは、`src/pages/`配下のファイル構造がそのままURL�
 
 ### 基本的なルーティング
 
-| ファイルパス | URL |
-|------------|-----|
-| `pages/index.tsx` | `/` |
-| `pages/admin/index.tsx` | `/admin` |
+| ファイルパス             | URL             |
+| ------------------------ | --------------- |
+| `pages/index.tsx`        | `/`             |
+| `pages/admin/index.tsx`  | `/admin`        |
 | `pages/admin/create.tsx` | `/admin/create` |
-| `pages/auth/signin.tsx` | `/auth/signin` |
+| `pages/auth/signin.tsx`  | `/auth/signin`  |
 
 ### 動的ルーティング
 
 `[]`で囲まれたファイル名は、動的なパラメータを表します。
 
-| ファイルパス | URL | パラメータ |
-|------------|-----|----------|
-| `pages/game/[id].tsx` | `/game/abc123` | `id: "abc123"` |
+| ファイルパス                | URL                  | パラメータ     |
+| --------------------------- | -------------------- | -------------- |
+| `pages/game/[id].tsx`       | `/game/abc123`       | `id: "abc123"` |
 | `pages/admin/game/[id].tsx` | `/admin/game/xyz789` | `id: "xyz789"` |
 
 **コード例:**
@@ -214,22 +223,22 @@ Pages Routerでは、`src/pages/`配下のファイル構造がそのままURL�
 // src/pages/game/[id].tsx
 const ParticipantGame: NextPage = () => {
   const router = useRouter();
-  const { id } = router.query;  // URLパラメータを取得
+  const { id } = router.query; // URLパラメータを取得
 
   // id を使ってAPIを呼び出す
   const { data: bingoGame } = api.bingo.getById.useQuery(
     { id: id as string },
-    { enabled: !!id }  // idが存在する時だけクエリを実行
+    { enabled: !!id } // idが存在する時だけクエリを実行
   );
 };
 ```
 
 ### ネストした動的ルーティング
 
-| ファイルパス | URL |
-|------------|-----|
+| ファイルパス                | URL                  |
+| --------------------------- | -------------------- |
 | `pages/game/[id]/setup.tsx` | `/game/abc123/setup` |
-| `pages/game/[id]/play.tsx` | `/game/abc123/play` |
+| `pages/game/[id]/play.tsx`  | `/game/abc123/play`  |
 
 ## データフローの理解 (tRPC)
 
@@ -246,10 +255,14 @@ export const bingoRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         size: z.nativeEnum(BingoSize),
-        songs: z.array(z.object({
-          title: z.string().min(1),
-          artist: z.string().optional(),
-        })).min(1),
+        songs: z
+          .array(
+            z.object({
+              title: z.string().min(1),
+              artist: z.string().optional(),
+            })
+          )
+          .min(1),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -280,6 +293,7 @@ export const bingoRouter = createTRPCRouter({
 ```
 
 **ポイント:**
+
 - `.input()`: Zodでバリデーション（型安全）
 - `.mutation()`: データを変更するAPI（POST相当）
 - `.query()`: データを取得するAPI（GET相当）
@@ -291,8 +305,8 @@ export const bingoRouter = createTRPCRouter({
 const AdminDashboard: NextPage = () => {
   // ユーザーのビンゴゲーム一覧を取得
   const { data: bingoGames, isLoading } = api.bingo.getAllByUser.useQuery(
-    undefined,           // 入力パラメータなし
-    { enabled: !!session }  // sessionが存在する時のみ実行
+    undefined, // 入力パラメータなし
+    { enabled: !!session } // sessionが存在する時のみ実行
   );
 
   // ゲーム作成
@@ -313,6 +327,7 @@ const AdminDashboard: NextPage = () => {
 ```
 
 **ポイント:**
+
 - `useQuery`: データ取得、自動キャッシュ、再取得
 - `useMutation`: データ変更、成功/失敗のコールバック
 - 型が自動推論される（`data`の型はバックエンドから自動）
@@ -337,11 +352,11 @@ export const authOptions: NextAuthOptions = {
       ...session,
       user: {
         ...session.user,
-        id: user.id,  // セッションにユーザーIDを追加
+        id: user.id, // セッションにユーザーIDを追加
       },
     }),
   },
-  adapter: PrismaAdapter(db),  // セッションをDBに保存
+  adapter: PrismaAdapter(db), // セッションをDBに保存
   providers: [
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
@@ -349,7 +364,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/auth/signin",  // カスタムログインページ
+    signIn: "/auth/signin", // カスタムログインページ
   },
 };
 ```
@@ -363,7 +378,7 @@ const AdminDashboard: NextPage = () => {
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
-      void router.push("/auth/signin");  // 未ログインならログインページへ
+      void router.push("/auth/signin"); // 未ログインならログインページへ
     }
   }, [session, status, router]);
 
@@ -440,6 +455,7 @@ join: publicProcedure
 ```
 
 **ポイント:**
+
 - 参加者はGoogleアカウント不要
 - `sessionToken`でセッション維持
 - ページをリロードしても状態が保持される
@@ -593,6 +609,7 @@ model ParticipantSong {
 **「参加者が参加してビンゴをプレイするまで」**を読むのがおすすめです。
 
 #### ステップ1: エントリーポイント
+
 `src/pages/game/[id].tsx`を開く
 
 - `useRouter()`でURLパラメータ取得
@@ -600,6 +617,7 @@ model ParticipantSong {
 - `useEffect`でリダイレクトロジック
 
 #### ステップ2: API呼び出し
+
 `src/server/api/routers/participant.ts`の`join`メソッドを読む
 
 - Zodバリデーション
@@ -607,6 +625,7 @@ model ParticipantSong {
 - エラーハンドリング
 
 #### ステップ3: グリッド設定
+
 `src/pages/game/[id]/setup.tsx`を読む
 
 - 楽曲リストの表示
@@ -614,6 +633,7 @@ model ParticipantSong {
 - `setupGrid` mutation
 
 #### ステップ4: プレイ画面
+
 `src/pages/game/[id]/play.tsx`を読む
 
 - ポーリングによるリアルタイム更新

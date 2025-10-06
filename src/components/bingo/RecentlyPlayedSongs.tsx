@@ -25,16 +25,16 @@ export const RecentlyPlayedSongs = ({
       <h3 className="text-lg font-semibold text-gray-900">
         最近演奏された楽曲
       </h3>
-      <div className="max-h-80 overflow-y-auto space-y-2">
+      <div className="max-h-80 space-y-2 overflow-y-auto">
         {sortedSongs.map((song) => (
           <div
             key={song.id}
-            className="p-3 bg-green-50 border border-green-200 rounded-lg"
+            className="rounded-lg border border-green-200 bg-green-50 p-3"
           >
             <div className="font-medium text-green-900">
               {song.artist ? `${song.artist} - ${song.title}` : song.title}
             </div>
-            <div className="text-xs text-green-600 mt-1">
+            <div className="mt-1 text-xs text-green-600">
               {new Date(song.playedAt!).toLocaleTimeString()}
             </div>
           </div>
@@ -42,9 +42,9 @@ export const RecentlyPlayedSongs = ({
       </div>
 
       {playedSongs.length === 0 && (
-        <div className="text-center text-gray-500 py-8">
+        <div className="py-8 text-center text-gray-500">
           <p>まだ楽曲が演奏されていません</p>
-          <p className="text-sm mt-2">DJの選曲をお待ちください</p>
+          <p className="mt-2 text-sm">DJの選曲をお待ちください</p>
         </div>
       )}
     </div>

@@ -48,12 +48,12 @@ NextAuth.jsがセッション作成
 
 #### 関連ファイル
 
-| ファイルパス | 役割 |
-|------------|------|
-| `src/pages/index.tsx` | トップページ、ログイン状態に応じて表示切り替え |
-| `src/pages/auth/signin.tsx` | カスタムログインページ |
-| `src/server/auth.ts` | NextAuth.js設定、Google Providerの設定 |
-| `src/pages/api/auth/[...nextauth].ts` | NextAuth.jsのAPIエンドポイント |
+| ファイルパス                          | 役割                                           |
+| ------------------------------------- | ---------------------------------------------- |
+| `src/pages/index.tsx`                 | トップページ、ログイン状態に応じて表示切り替え |
+| `src/pages/auth/signin.tsx`           | カスタムログインページ                         |
+| `src/server/auth.ts`                  | NextAuth.js設定、Google Providerの設定         |
+| `src/pages/api/auth/[...nextauth].ts` | NextAuth.jsのAPIエンドポイント                 |
 
 #### 重要なコード
 
@@ -79,7 +79,7 @@ const Home: NextPage = () => {
 
 ```tsx
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db),  // セッションをDBに保存
+  adapter: PrismaAdapter(db), // セッションをDBに保存
   providers: [
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
@@ -87,18 +87,18 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/auth/signin",  // カスタムログインページ
+    signIn: "/auth/signin", // カスタムログインページ
   },
 };
 ```
 
 #### 状態遷移
 
-| 状態 | 説明 |
-|-----|------|
-| `status === "loading"` | 認証状態を確認中 |
-| `status === "unauthenticated"` | 未ログイン |
-| `status === "authenticated"` | ログイン済み |
+| 状態                           | 説明             |
+| ------------------------------ | ---------------- |
+| `status === "loading"`         | 認証状態を確認中 |
+| `status === "unauthenticated"` | 未ログイン       |
+| `status === "authenticated"`   | ログイン済み     |
 
 ---
 
@@ -124,9 +124,9 @@ api.bingo.getAllByUser.useQuery() 実行
 
 #### 関連ファイル
 
-| ファイルパス | 役割 |
-|------------|------|
-| `src/pages/admin/index.tsx` | 管理者ダッシュボード |
+| ファイルパス                      | 役割                     |
+| --------------------------------- | ------------------------ |
+| `src/pages/admin/index.tsx`       | 管理者ダッシュボード     |
 | `src/server/api/routers/bingo.ts` | `getAllByUser` APIの実装 |
 
 #### 重要なコード
@@ -215,9 +215,9 @@ DBにBingoGame + Songレコード作成
 
 #### 関連ファイル
 
-| ファイルパス | 役割 |
-|------------|------|
-| `src/pages/admin/create.tsx` | ゲーム作成フォーム |
+| ファイルパス                      | 役割               |
+| --------------------------------- | ------------------ |
+| `src/pages/admin/create.tsx`      | ゲーム作成フォーム |
 | `src/server/api/routers/bingo.ts` | `create` APIの実装 |
 
 #### 重要なコード
@@ -317,9 +317,9 @@ DBのSong.isPlayedをtrueに更新
 
 #### 関連ファイル
 
-| ファイルパス | 役割 |
-|------------|------|
-| `src/pages/admin/game/[id].tsx` | ゲーム管理画面 |
+| ファイルパス                      | 役割                              |
+| --------------------------------- | --------------------------------- |
+| `src/pages/admin/game/[id].tsx`   | ゲーム管理画面                    |
 | `src/server/api/routers/bingo.ts` | `getById`, `markSongAsPlayed` API |
 
 #### 重要なコード
@@ -421,9 +421,9 @@ DBにParticipantレコード作成
 
 #### 関連ファイル
 
-| ファイルパス | 役割 |
-|------------|------|
-| `src/pages/game/[id].tsx` | 参加ページ |
+| ファイルパス                            | 役割                            |
+| --------------------------------------- | ------------------------------- |
+| `src/pages/game/[id].tsx`               | 参加ページ                      |
 | `src/server/api/routers/participant.ts` | `join`, `getBySessionToken` API |
 
 #### 重要なコード
@@ -568,10 +568,10 @@ isGridComplete = true に更新
 
 #### 関連ファイル
 
-| ファイルパス | 役割 |
-|------------|------|
-| `src/pages/game/[id]/setup.tsx` | グリッド設定画面 |
-| `src/server/api/routers/participant.ts` | `setupGrid` API |
+| ファイルパス                            | 役割             |
+| --------------------------------------- | ---------------- |
+| `src/pages/game/[id]/setup.tsx`         | グリッド設定画面 |
+| `src/server/api/routers/participant.ts` | `setupGrid` API  |
 
 #### 重要なコード
 
@@ -589,7 +589,7 @@ const SetupGrid: NextPage = () => {
   // グリッドサイズに応じて初期化
   useEffect(() => {
     if (game) {
-      const gridSize = getGridSize(game.size);  // 9, 16, 25
+      const gridSize = getGridSize(game.size); // 9, 16, 25
       setSelectedSongs(new Array(gridSize).fill(null));
     }
   }, [game]);
@@ -711,9 +711,9 @@ api.participant.getBySessionToken.useQuery()
 
 #### 関連ファイル
 
-| ファイルパス | 役割 |
-|------------|------|
-| `src/pages/game/[id]/play.tsx` | プレイ画面 |
+| ファイルパス                            | 役割                                |
+| --------------------------------------- | ----------------------------------- |
+| `src/pages/game/[id]/play.tsx`          | プレイ画面                          |
 | `src/server/api/routers/participant.ts` | `getBySessionToken`, `checkWin` API |
 
 #### 重要なコード
@@ -729,7 +729,7 @@ const PlayGame: NextPage = () => {
     { sessionToken },
     {
       enabled: !!sessionToken,
-      refetchInterval: 3000,  // 3秒ごと
+      refetchInterval: 3000, // 3秒ごと
     }
   );
 
@@ -840,10 +840,14 @@ const { data } = api.participant.getBySessionToken.useQuery(
 );
 
 // 高頻度更新が必要な場合: 1秒
-{ refetchInterval: 1000 }
+{
+  refetchInterval: 1000;
+}
 
 // サーバー負荷を抑える場合: 5秒
-{ refetchInterval: 5000 }
+{
+  refetchInterval: 5000;
+}
 ```
 
 ---
@@ -852,19 +856,19 @@ const { data } = api.participant.getBySessionToken.useQuery(
 
 ### 管理者側のエラー
 
-| エラー | 原因 | 対処 |
-|-------|------|------|
-| `UNAUTHORIZED` | 未ログイン状態でAPIを呼び出し | `/auth/signin`へリダイレクト |
-| `NOT_FOUND` | 存在しないゲームIDを指定 | エラーメッセージ表示 |
-| バリデーションエラー | 楽曲数が不足、など | フォームエラー表示 |
+| エラー               | 原因                          | 対処                         |
+| -------------------- | ----------------------------- | ---------------------------- |
+| `UNAUTHORIZED`       | 未ログイン状態でAPIを呼び出し | `/auth/signin`へリダイレクト |
+| `NOT_FOUND`          | 存在しないゲームIDを指定      | エラーメッセージ表示         |
+| バリデーションエラー | 楽曲数が不足、など            | フォームエラー表示           |
 
 ### 参加者側のエラー
 
-| エラー | 原因 | 対処 |
-|-------|------|------|
-| `NOT_FOUND` | 無効なゲームID | 「ゲームが見つかりません」表示 |
-| `CONFLICT` | 既に参加済み | 自動的に適切なページへリダイレクト |
-| ゲームが非アクティブ | `isActive = false` | 「ゲームは終了しました」表示 |
+| エラー               | 原因               | 対処                               |
+| -------------------- | ------------------ | ---------------------------------- |
+| `NOT_FOUND`          | 無効なゲームID     | 「ゲームが見つかりません」表示     |
+| `CONFLICT`           | 既に参加済み       | 自動的に適切なページへリダイレクト |
+| ゲームが非アクティブ | `isActive = false` | 「ゲームは終了しました」表示       |
 
 ### エラーハンドリングの実装例
 

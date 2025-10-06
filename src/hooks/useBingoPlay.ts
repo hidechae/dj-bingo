@@ -19,13 +19,14 @@ export const useBingoPlay = (gameId: string | string[] | undefined) => {
   const [sessionToken, setSessionToken] = useState<string>("");
 
   // ビンゴ状態を5秒ごとにポーリング
-  const { data: bingoStatus, refetch } = api.participant.getBingoStatus.useQuery(
-    { sessionToken },
-    {
-      enabled: !!sessionToken,
-      refetchInterval: 5000, // Poll every 5 seconds for updates
-    }
-  );
+  const { data: bingoStatus, refetch } =
+    api.participant.getBingoStatus.useQuery(
+      { sessionToken },
+      {
+        enabled: !!sessionToken,
+        refetchInterval: 5000, // Poll every 5 seconds for updates
+      }
+    );
 
   // セッショントークンの取得と認証チェック
   useEffect(() => {

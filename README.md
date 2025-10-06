@@ -5,6 +5,7 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 ## 機能概要
 
 ### 管理者機能
+
 - Google OAuth認証によるログイン
 - ビンゴゲームの作成（3x3、4x4、5x5のグリッドサイズ対応）
 - 楽曲リストの設定
@@ -14,6 +15,7 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 - 管理ダッシュボード
 
 ### 参加者機能
+
 - QRコードスキャンによる簡単参加
 - 名前入力のみ（認証不要）
 - ビンゴグリッドへの楽曲配置
@@ -48,6 +50,7 @@ cp .env.example .env
 ```
 
 必要な環境変数：
+
 - `DATABASE_URL`: PostgreSQLの接続URL
 - `NEXTAUTH_SECRET`: NextAuth.jsのシークレット
 - `NEXTAUTH_URL`: アプリケーションのURL
@@ -127,11 +130,13 @@ npm run db:studio
 ### マイグレーション
 
 開発環境での新しいマイグレーション：
+
 ```bash
 npm run db:migrate
 ```
 
 本番環境でのスキーマプッシュ：
+
 ```bash
 npm run db:push
 ```
@@ -139,6 +144,7 @@ npm run db:push
 ## 本番環境
 
 本番環境では以下を推奨：
+
 - **Database**: Neon (PostgreSQL as a Service)
 - **Hosting**: Vercel, Railway, または任意のNode.js対応ホスティング
 - **Environment**: 本番用の環境変数設定
