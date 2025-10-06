@@ -89,6 +89,33 @@ const ParticipantGame: NextPage = () => {
     );
   }
 
+  // Check if game is in ENTRY status  
+  if (bingoGame.status !== 'ENTRY') {
+    const getStatusMessage = (status: string) => {
+      switch (status) {
+        case 'EDITING': return '現在ゲームの準備中です。しばらくお待ちください。';
+        case 'PLAYING': return 'ゲームが既に開始されています。新規参加はできません。';
+        case 'FINISHED': return 'ゲームは終了しました。'; 
+        default: return 'このゲームには現在参加できません。';
+      }
+    };
+
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            参加できません
+          </h1>
+          <p className="text-gray-600 mb-4">{getStatusMessage(bingoGame.status)}</p>
+          <div className="text-sm text-gray-500">
+            <p>管理者にお問い合わせいただくか、</p>
+            <p>しばらくしてから再度お試しください。</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Head>

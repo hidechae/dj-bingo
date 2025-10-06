@@ -40,6 +40,18 @@ const SetupBingo: NextPage = () => {
         return;
       }
 
+      // Check if game allows grid editing (must be in ENTRY status)
+      if (participant.bingoGame.status !== 'ENTRY') {
+        // If game is not in ENTRY status, can't edit grid
+        if (participant.isGridComplete) {
+          void router.push(`/game/${id}/play`);
+        } else {
+          // Redirect to join page to show appropriate message
+          void router.push(`/game/${id}`);
+        }
+        return;
+      }
+
       // If grid is already complete, redirect to play
       if (participant.isGridComplete) {
         void router.push(`/game/${id}/play`);
