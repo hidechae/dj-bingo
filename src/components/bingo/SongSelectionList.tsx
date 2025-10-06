@@ -15,15 +15,15 @@ export const SongSelectionList = ({
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-900">楽曲一覧</h3>
       {selectedPosition !== null ? (
-        <p className="text-sm text-green-600 bg-green-50 p-2 rounded">
+        <p className="rounded bg-green-50 p-2 text-sm text-green-600">
           マス{selectedPosition + 1}に設定する楽曲を選択してください
         </p>
       ) : (
-        <p className="text-sm text-gray-500 bg-gray-50 p-2 rounded">
+        <p className="rounded bg-gray-50 p-2 text-sm text-gray-500">
           先にビンゴグリッドでマスを選択してください
         </p>
       )}
-      <div className="max-h-96 overflow-y-auto space-y-2">
+      <div className="max-h-96 space-y-2 overflow-y-auto">
         {songs.map((song: any) => {
           const isUsed = isSongUsed(song.id);
           const isDisabled = isUsed || selectedPosition === null;
@@ -31,12 +31,12 @@ export const SongSelectionList = ({
           return (
             <div
               key={song.id}
-              className={`p-3 border rounded-lg transition-colors ${
+              className={`rounded-lg border p-3 transition-colors ${
                 isUsed
-                  ? "bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed"
+                  ? "cursor-not-allowed border-gray-300 bg-gray-100 text-gray-500"
                   : selectedPosition === null
-                    ? "bg-white border-gray-200 cursor-not-allowed opacity-60"
-                    : "bg-white border-gray-200 hover:bg-green-50 hover:border-green-300 cursor-pointer"
+                    ? "cursor-not-allowed border-gray-200 bg-white opacity-60"
+                    : "cursor-pointer border-gray-200 bg-white hover:border-green-300 hover:bg-green-50"
               }`}
               onClick={() => !isDisabled && onSongAssign(song.id)}
             >
@@ -44,7 +44,7 @@ export const SongSelectionList = ({
                 {song.artist ? `${song.artist} - ${song.title}` : song.title}
               </div>
               {isUsed && (
-                <div className="text-xs text-gray-400 mt-1">選択済み</div>
+                <div className="mt-1 text-xs text-gray-400">選択済み</div>
               )}
             </div>
           );

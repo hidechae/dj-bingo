@@ -18,10 +18,7 @@ export const participantRouter = createTRPCRouter({
         where: { id: input.bingoGameId },
         include: {
           songs: {
-            orderBy: [
-              { artist: "asc" },
-              { title: "asc" }
-            ]
+            orderBy: [{ artist: "asc" }, { title: "asc" }],
           },
         },
       });
@@ -80,10 +77,7 @@ export const participantRouter = createTRPCRouter({
           bingoGame: {
             include: {
               songs: {
-                orderBy: [
-                  { artist: "asc" },
-                  { title: "asc" }
-                ]
+                orderBy: [{ artist: "asc" }, { title: "asc" }],
               },
             },
           },
@@ -129,7 +123,7 @@ export const participantRouter = createTRPCRouter({
       // Check if game is in ENTRY status (grid can only be edited during ENTRY)
       if (participant.bingoGame.status !== GameStatus.ENTRY) {
         throw new TRPCError({
-          code: "FORBIDDEN", 
+          code: "FORBIDDEN",
           message: "Grid can only be edited during ENTRY status",
         });
       }
@@ -166,10 +160,7 @@ export const participantRouter = createTRPCRouter({
           bingoGame: {
             include: {
               songs: {
-                orderBy: [
-                  { artist: "asc" },
-                  { title: "asc" }
-                ]
+                orderBy: [{ artist: "asc" }, { title: "asc" }],
               },
             },
           },
@@ -189,7 +180,7 @@ export const participantRouter = createTRPCRouter({
       // Create grid representation
       const gridSize = getGridSize(participant.bingoGame.size as BingoSize);
       const grid = Array(gridSize * gridSize).fill(null);
-      
+
       participant.participantSongs.forEach((ps: any) => {
         grid[ps.position] = {
           song: ps.song,
@@ -206,4 +197,3 @@ export const participantRouter = createTRPCRouter({
       };
     }),
 });
-

@@ -1,11 +1,15 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { 
-  BingoSize, 
-  GameStatus, 
-  getGridSize, 
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
+import {
+  BingoSize,
+  GameStatus,
+  getGridSize,
   getRequiredSongCount,
-  isValidStatusTransition 
+  isValidStatusTransition,
 } from "~/types";
 
 export const bingoRouter = createTRPCRouter({
@@ -14,12 +18,15 @@ export const bingoRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         size: z.nativeEnum(BingoSize),
-        songs: z.array(
-          z.object({
-            title: z.string().min(1),
-            artist: z.string().optional(),
-          })
-        ).optional().default([]),
+        songs: z
+          .array(
+            z.object({
+              title: z.string().min(1),
+              artist: z.string().optional(),
+            })
+          )
+          .optional()
+          .default([]),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -29,11 +36,12 @@ export const bingoRouter = createTRPCRouter({
           size: input.size,
           status: GameStatus.EDITING,
           createdBy: ctx.session.user.id,
-          ...(input.songs && input.songs.length > 0 && {
-            songs: {
-              create: input.songs,
-            },
-          }),
+          ...(input.songs &&
+            input.songs.length > 0 && {
+              songs: {
+                create: input.songs,
+              },
+            }),
         },
         include: {
           songs: true,
@@ -51,10 +59,7 @@ export const bingoRouter = createTRPCRouter({
         where: { id: input.id },
         include: {
           songs: {
-            orderBy: [
-              { artist: "asc" },
-              { title: "asc" }
-            ]
+            orderBy: [{ artist: "asc" }, { title: "asc" }],
           },
           participants: {
             include: {
@@ -72,24 +77,20 @@ export const bingoRouter = createTRPCRouter({
       return bingoGame;
     }),
 
-  getAllByUser: protectedProcedure
-    .query(async ({ ctx }) => {
-      const bingoGames = await ctx.db.bingoGame.findMany({
-        where: { createdBy: ctx.session.user.id },
-        include: {
-          songs: {
-            orderBy: [
-              { artist: "asc" },
-              { title: "asc" }
-            ]
-          },
-          participants: true,
+  getAllByUser: protectedProcedure.query(async ({ ctx }) => {
+    const bingoGames = await ctx.db.bingoGame.findMany({
+      where: { createdBy: ctx.session.user.id },
+      include: {
+        songs: {
+          orderBy: [{ artist: "asc" }, { title: "asc" }],
         },
-        orderBy: { createdAt: "desc" },
-      });
+        participants: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
-      return bingoGames;
-    }),
+    return bingoGames;
+  }),
 
   updateSongs: protectedProcedure
     .input(
@@ -108,7 +109,7 @@ export const bingoRouter = createTRPCRouter({
       // Check if game is in editing status
       const game = await ctx.db.bingoGame.findUnique({
         where: { id: input.gameId },
-        include: { songs: true }
+        include: { songs: true },
       });
 
       if (!game) {
@@ -121,22 +122,22 @@ export const bingoRouter = createTRPCRouter({
 
       // Delete all existing songs and create new ones
       await ctx.db.song.deleteMany({
-        where: { bingoGameId: input.gameId }
+        where: { bingoGameId: input.gameId },
       });
 
       if (input.songs.length > 0) {
         await ctx.db.song.createMany({
-          data: input.songs.map(song => ({
+          data: input.songs.map((song) => ({
             title: song.title,
             artist: song.artist,
-            bingoGameId: input.gameId
-          }))
+            bingoGameId: input.gameId,
+          })),
         });
       }
 
       return await ctx.db.bingoGame.findUnique({
         where: { id: input.gameId },
-        include: { songs: true, participants: true }
+        include: { songs: true, participants: true },
       });
     }),
 
@@ -145,10 +146,12 @@ export const bingoRouter = createTRPCRouter({
       z.object({
         gameId: z.string(),
         newStatus: z.nativeEnum(GameStatus),
-        options: z.object({
-          preservePlayedSongs: z.boolean().optional(),
-          preserveParticipants: z.boolean().optional(),
-        }).optional(),
+        options: z
+          .object({
+            preservePlayedSongs: z.boolean().optional(),
+            preserveParticipants: z.boolean().optional(),
+          })
+          .optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -158,10 +161,10 @@ export const bingoRouter = createTRPCRouter({
           songs: true,
           participants: {
             include: {
-              participantSongs: true
-            }
-          }
-        }
+              participantSongs: true,
+            },
+          },
+        },
       });
 
       if (!game) {
@@ -169,32 +172,43 @@ export const bingoRouter = createTRPCRouter({
       }
 
       const currentStatus = game.status as GameStatus;
-      
+
       // Validate status transition is allowed
       if (!isValidStatusTransition(currentStatus, input.newStatus)) {
-        throw new Error(`Invalid status transition from ${currentStatus} to ${input.newStatus}`);
+        throw new Error(
+          `Invalid status transition from ${currentStatus} to ${input.newStatus}`
+        );
       }
 
       // Validate minimum song requirement when transitioning to ENTRY
       if (input.newStatus === GameStatus.ENTRY) {
         const requiredSongs = getRequiredSongCount(game.size as BingoSize);
         if (game.songs.length < requiredSongs) {
-          throw new Error(`最低${requiredSongs}曲必要です。現在${game.songs.length}曲です。`);
+          throw new Error(
+            `最低${requiredSongs}曲必要です。現在${game.songs.length}曲です。`
+          );
         }
       }
 
       // Validate status transitions and handle data changes
-      const { preservePlayedSongs = true, preserveParticipants = true } = input.options || {};
-      
+      const { preservePlayedSongs = true, preserveParticipants = true } =
+        input.options || {};
+
       // Handle status-specific logic
-      if (input.newStatus === GameStatus.ENTRY && currentStatus === GameStatus.EDITING) {
+      if (
+        input.newStatus === GameStatus.ENTRY &&
+        currentStatus === GameStatus.EDITING
+      ) {
         // Transition from EDITING to ENTRY - optionally clear participants
         if (!preserveParticipants) {
           await ctx.db.participant.deleteMany({
-            where: { bingoGameId: input.gameId }
+            where: { bingoGameId: input.gameId },
           });
         }
-      } else if (input.newStatus === GameStatus.ENTRY && currentStatus === GameStatus.PLAYING) {
+      } else if (
+        input.newStatus === GameStatus.ENTRY &&
+        currentStatus === GameStatus.PLAYING
+      ) {
         // Transition from PLAYING to ENTRY - optionally reset played songs
         if (!preservePlayedSongs) {
           await ctx.db.song.updateMany({
@@ -202,16 +216,16 @@ export const bingoRouter = createTRPCRouter({
             data: {
               isPlayed: false,
               playedAt: null,
-            }
+            },
           });
-          
+
           // Reset all participant win states
           await ctx.db.participant.updateMany({
             where: { bingoGameId: input.gameId },
             data: {
               hasWon: false,
               wonAt: null,
-            }
+            },
           });
         }
       }
@@ -242,7 +256,7 @@ export const bingoRouter = createTRPCRouter({
     .input(z.object({ gameId: z.string() }))
     .query(async ({ ctx, input }) => {
       const participants = await ctx.db.participant.findMany({
-        where: { 
+        where: {
           bingoGameId: input.gameId,
           isGridComplete: false,
         },
@@ -250,7 +264,7 @@ export const bingoRouter = createTRPCRouter({
           id: true,
           name: true,
           createdAt: true,
-        }
+        },
       });
 
       return participants;
@@ -267,7 +281,7 @@ export const bingoRouter = createTRPCRouter({
       // Check if game is in PLAYING status
       const song = await ctx.db.song.findUnique({
         where: { id: input.songId },
-        include: { bingoGame: true }
+        include: { bingoGame: true },
       });
 
       if (!song) {
@@ -334,19 +348,19 @@ async function checkForWinners(db: any, bingoGameId: string) {
   if (!bingoGame) return;
 
   const gridSize = getGridSize(bingoGame.size);
-  
+
   for (const participant of bingoGame.participants) {
     if (!participant.isGridComplete) continue;
 
     const grid = Array(gridSize * gridSize).fill(null);
-    
+
     // Fill the grid with played status
     participant.participantSongs.forEach((ps: any) => {
       grid[ps.position] = ps.song.isPlayed;
     });
 
     const currentlyHasWon = hasWon(grid, gridSize);
-    
+
     // Update win status if it has changed
     if (currentlyHasWon && !participant.hasWon) {
       // Participant just won
@@ -402,6 +416,6 @@ function hasWon(grid: boolean[], size: number): boolean {
     if (!grid[i * size + i]) diagWin1 = false;
     if (!grid[i * size + (size - 1 - i)]) diagWin2 = false;
   }
-  
+
   return diagWin1 || diagWin2;
 }

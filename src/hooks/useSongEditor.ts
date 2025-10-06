@@ -62,7 +62,11 @@ export const useSongEditor = () => {
    * @param field - 更新するフィールド（title または artist）
    * @param value - 新しい値
    */
-  const updateSong = (index: number, field: "title" | "artist", value: string) => {
+  const updateSong = (
+    index: number,
+    field: "title" | "artist",
+    value: string
+  ) => {
     const updated = [...editingSongs];
     if (updated[index]) {
       updated[index] = { ...updated[index], [field]: value };

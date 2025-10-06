@@ -15,13 +15,12 @@ export const WinStatus = ({
 }: WinStatusProps) => {
   if (hasWon) {
     return (
-      <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-4">
-        <div className="text-yellow-800 font-bold text-lg">
+      <div className="rounded-lg border border-yellow-400 bg-yellow-100 p-4">
+        <div className="text-lg font-bold text-yellow-800">
           🏆 ビンゴ達成！ 🏆
         </div>
-        <div className="text-yellow-700 text-sm mt-1">
-          勝利時刻:{" "}
-          {wonAt ? new Date(wonAt).toLocaleString() : ""}
+        <div className="mt-1 text-sm text-yellow-700">
+          勝利時刻: {wonAt ? new Date(wonAt).toLocaleString() : ""}
         </div>
       </div>
     );
@@ -29,11 +28,11 @@ export const WinStatus = ({
 
   if (checkWinCondition(grid, gridSize)) {
     return (
-      <div className="bg-green-100 border border-green-400 rounded-lg p-4">
-        <div className="text-green-800 font-bold">
+      <div className="rounded-lg border border-green-400 bg-green-100 p-4">
+        <div className="font-bold text-green-800">
           ビンゴ達成の可能性があります！
         </div>
-        <div className="text-green-700 text-sm mt-1">
+        <div className="mt-1 text-sm text-green-700">
           システムが確認中です...
         </div>
       </div>
@@ -41,9 +40,9 @@ export const WinStatus = ({
   }
 
   return (
-    <div className="bg-blue-100 border border-blue-400 rounded-lg p-4">
-      <div className="text-blue-800 font-bold">ゲーム進行中</div>
-      <div className="text-blue-700 text-sm mt-1">DJの選曲をお待ちください</div>
+    <div className="rounded-lg border border-blue-400 bg-blue-100 p-4">
+      <div className="font-bold text-blue-800">ゲーム進行中</div>
+      <div className="mt-1 text-sm text-blue-700">DJの選曲をお待ちください</div>
     </div>
   );
 };

@@ -42,7 +42,7 @@ const AdminDashboard: NextPage = () => {
       <main className="min-h-screen bg-gray-50">
         <div className="bg-white shadow">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 justify-between items-center">
+            <div className="flex h-16 items-center justify-between">
               <h1 className="text-xl font-semibold text-gray-900">
                 DJ Bingo 管理画面
               </h1>
@@ -61,12 +61,14 @@ const AdminDashboard: NextPage = () => {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8 flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900">ビンゴゲーム一覧</h2>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-8 flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">
+              ビンゴゲーム一覧
+            </h2>
             <Link
               href="/admin/create"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
             >
               新しいビンゴを作成
             </Link>
@@ -77,28 +79,30 @@ const AdminDashboard: NextPage = () => {
               {bingoGames.map((game: any) => (
                 <div
                   key={game.id}
-                  className="bg-white overflow-hidden shadow rounded-lg"
+                  className="overflow-hidden rounded-lg bg-white shadow"
                 >
                   <div className="p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <h3 className="mb-2 text-lg font-medium text-gray-900">
                       {game.title}
                     </h3>
-                    <div className="text-sm text-gray-500 space-y-1">
+                    <div className="space-y-1 text-sm text-gray-500">
                       <p>サイズ: {game.size}</p>
                       <p>楽曲数: {game.songs.length}</p>
                       <p>参加者数: {game.participants.length}</p>
-                      <p>作成日: {new Date(game.createdAt).toLocaleDateString()}</p>
+                      <p>
+                        作成日: {new Date(game.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                     <div className="mt-4 flex gap-2">
                       <Link
                         href={`/admin/game/${game.id}`}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        className="text-sm font-medium text-blue-600 hover:text-blue-800"
                       >
                         管理
                       </Link>
                       <Link
                         href={`/game/${game.id}`}
-                        className="text-green-600 hover:text-green-800 text-sm font-medium"
+                        className="text-sm font-medium text-green-600 hover:text-green-800"
                       >
                         参加用URL
                       </Link>
@@ -108,13 +112,13 @@ const AdminDashboard: NextPage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">
+            <div className="py-12 text-center">
+              <p className="text-lg text-gray-500">
                 まだビンゴゲームがありません
               </p>
               <Link
                 href="/admin/create"
-                className="mt-4 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                className="mt-4 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
               >
                 最初のビンゴを作成する
               </Link>

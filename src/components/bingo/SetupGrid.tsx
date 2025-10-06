@@ -57,29 +57,27 @@ const GridCell = ({
   onSelect,
   onClear,
 }: GridCellProps) => {
-  const song = songId
-    ? availableSongs.find((s: any) => s.id === songId)
-    : null;
+  const song = songId ? availableSongs.find((s: any) => s.id === songId) : null;
 
   return (
     <div
       onClick={() => onSelect(position)}
-      className={`aspect-square border-2 rounded-lg p-2 text-xs cursor-pointer transition-all relative ${
+      className={`relative aspect-square cursor-pointer rounded-lg border-2 p-2 text-xs transition-all ${
         isSelected
-          ? "bg-yellow-100 border-yellow-400 border-solid shadow-md"
+          ? "border-solid border-yellow-400 bg-yellow-100 shadow-md"
           : songId
-            ? "bg-blue-50 border-blue-300 hover:bg-blue-100"
-            : "bg-gray-50 border-gray-300 border-dashed hover:bg-gray-100"
+            ? "border-blue-300 bg-blue-50 hover:bg-blue-100"
+            : "border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100"
       }`}
     >
       {song ? (
         <>
-          <div className="h-full flex flex-col items-center justify-center text-center pr-4">
+          <div className="flex h-full flex-col items-center justify-center pr-4 text-center">
             <div className="text-xs font-medium text-gray-900">
               {song.title}
             </div>
             {song.artist && (
-              <div className="text-xs text-gray-600 mt-1">{song.artist}</div>
+              <div className="mt-1 text-xs text-gray-600">{song.artist}</div>
             )}
           </div>
           <button
@@ -87,19 +85,19 @@ const GridCell = ({
               e.stopPropagation();
               onClear(position);
             }}
-            className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition-colors"
+            className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white transition-colors hover:bg-red-600"
             title="このマスをクリア"
           >
             ×
           </button>
         </>
       ) : (
-        <div className="h-full flex items-center justify-center text-gray-400 text-center">
+        <div className="flex h-full items-center justify-center text-center text-gray-400">
           マス {position + 1}
         </div>
       )}
       {isSelected && (
-        <div className="absolute inset-0 border-2 border-yellow-500 rounded-lg pointer-events-none"></div>
+        <div className="pointer-events-none absolute inset-0 rounded-lg border-2 border-yellow-500"></div>
       )}
     </div>
   );

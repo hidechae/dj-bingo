@@ -7,7 +7,11 @@ type SongListProps = {
   editingSongs: EditingSong[];
   onSongEdit: () => void;
   onAddSong: () => void;
-  onUpdateSong: (index: number, field: "title" | "artist", value: string) => void;
+  onUpdateSong: (
+    index: number,
+    field: "title" | "artist",
+    value: string
+  ) => void;
   onRemoveSong: (index: number) => void;
   onCancelEdit: () => void;
   onToggleSongPlayed: (songId: string, isPlayed: boolean) => void;
@@ -31,15 +35,15 @@ export const SongList = ({
   const currentStatus = bingoGame.status as GameStatus;
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="rounded-lg bg-white p-6 shadow">
+      <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-900">楽曲リスト</h3>
         {currentStatus === GameStatus.EDITING && (
           <div className="flex gap-2">
             {songEditingMode && (
               <button
                 onClick={onAddSong}
-                className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
               >
                 曲を追加
               </button>
@@ -47,14 +51,14 @@ export const SongList = ({
             <button
               onClick={onSongEdit}
               disabled={isSaving}
-              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+              className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {songEditingMode ? "保存" : "編集"}
             </button>
             {songEditingMode && (
               <button
                 onClick={onCancelEdit}
-                className="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700"
+                className="rounded bg-gray-600 px-3 py-1 text-sm text-white hover:bg-gray-700"
               >
                 キャンセル
               </button>
@@ -89,32 +93,36 @@ const SongEditMode = ({
   onRemoveSong,
 }: {
   editingSongs: EditingSong[];
-  onUpdateSong: (index: number, field: "title" | "artist", value: string) => void;
+  onUpdateSong: (
+    index: number,
+    field: "title" | "artist",
+    value: string
+  ) => void;
   onRemoveSong: (index: number) => void;
 }) => (
-  <div className="space-y-2 max-h-96 overflow-y-auto">
+  <div className="max-h-96 space-y-2 overflow-y-auto">
     {editingSongs.map((song, index) => (
       <div
         key={index}
-        className="flex gap-4 items-center p-3 border border-gray-200 rounded-lg"
+        className="flex items-center gap-4 rounded-lg border border-gray-200 p-3"
       >
         <input
           type="text"
           value={song.title}
           onChange={(e) => onUpdateSong(index, "title", e.target.value)}
           placeholder="曲名"
-          className="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 px-3 py-2 border"
+          className="flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
         <input
           type="text"
           value={song.artist}
           onChange={(e) => onUpdateSong(index, "artist", e.target.value)}
           placeholder="アーティスト名"
-          className="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 px-3 py-2 border"
+          className="flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
         <button
           onClick={() => onRemoveSong(index)}
-          className="text-red-600 hover:text-red-800 px-2"
+          className="px-2 text-red-600 hover:text-red-800"
         >
           削除
         </button>
@@ -141,14 +149,14 @@ const SongDisplayMode = ({
     <div>
       {/* Unplayed Songs Section */}
       <div className="mb-6">
-        <h4 className="text-md font-medium text-gray-700 mb-3">
+        <h4 className="text-md mb-3 font-medium text-gray-700">
           未演奏 ({unplayedSongs.length}曲)
         </h4>
-        <div className="space-y-2 max-h-48 overflow-y-auto">
+        <div className="max-h-48 space-y-2 overflow-y-auto">
           {unplayedSongs.map((song: any) => (
             <div
               key={song.id}
-              className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200"
+              className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3"
             >
               <div className="flex-1">
                 <p className="font-medium text-gray-900">
@@ -159,7 +167,7 @@ const SongDisplayMode = ({
                 <button
                   onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
                   disabled={isMarkingPlayed}
-                  className="px-4 py-2 rounded text-sm font-medium transition-colors bg-gray-600 text-white hover:bg-gray-700 disabled:opacity-50"
+                  className="rounded bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
                 >
                   演奏済みにする
                 </button>
@@ -168,7 +176,7 @@ const SongDisplayMode = ({
           ))}
         </div>
         {unplayedSongs.length === 0 && (
-          <p className="text-gray-500 text-center py-4">
+          <p className="py-4 text-center text-gray-500">
             すべての楽曲が演奏済みです
           </p>
         )}
@@ -176,14 +184,14 @@ const SongDisplayMode = ({
 
       {/* Played Songs Section */}
       <div>
-        <h4 className="text-md font-medium text-gray-700 mb-3">
+        <h4 className="text-md mb-3 font-medium text-gray-700">
           演奏済み ({playedSongs.length}曲)
         </h4>
-        <div className="space-y-2 max-h-48 overflow-y-auto">
+        <div className="max-h-48 space-y-2 overflow-y-auto">
           {playedSongs.map((song: any) => (
             <div
               key={song.id}
-              className="flex items-center justify-between p-3 rounded-lg border bg-green-50 border-green-200"
+              className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3"
             >
               <div className="flex-1">
                 <p className="font-medium text-gray-900">
@@ -197,7 +205,7 @@ const SongDisplayMode = ({
                 <button
                   onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
                   disabled={isMarkingPlayed}
-                  className="px-4 py-2 rounded text-sm font-medium transition-colors bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                  className="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
                 >
                   未演奏に戻す
                 </button>
@@ -206,7 +214,7 @@ const SongDisplayMode = ({
           ))}
         </div>
         {playedSongs.length === 0 && (
-          <p className="text-gray-500 text-center py-4">
+          <p className="py-4 text-center text-gray-500">
             まだ演奏された楽曲はありません
           </p>
         )}
@@ -216,7 +224,7 @@ const SongDisplayMode = ({
 };
 
 const EmptyState = ({ currentStatus }: { currentStatus: GameStatus }) => (
-  <div className="text-center py-8 text-gray-500">
+  <div className="py-8 text-center text-gray-500">
     <p>まだ楽曲が登録されていません</p>
     {currentStatus === GameStatus.EDITING && (
       <p className="text-sm">「編集」ボタンから楽曲を追加してください</p>

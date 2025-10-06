@@ -43,8 +43,8 @@ const SetupBingo: NextPage = () => {
         <meta name="description" content="ビンゴの楽曲を設定" />
       </Head>
       <main className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="rounded-lg bg-white p-6 shadow-lg">
             <SetupHeader
               gameTitle={participant.bingoGame.title}
               selectedCount={selectedCount}
@@ -52,7 +52,7 @@ const SetupBingo: NextPage = () => {
               selectedPosition={selectedPosition}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               <SetupGrid
                 gridSize={gridSize}
                 selectedSongs={selectedSongs}
@@ -70,10 +70,10 @@ const SetupBingo: NextPage = () => {
               />
             </div>
 
-            <div className="mt-8 flex justify-between items-center">
+            <div className="mt-8 flex items-center justify-between">
               <button
                 onClick={handleClearAll}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
               >
                 すべてクリア
               </button>
@@ -84,7 +84,7 @@ const SetupBingo: NextPage = () => {
                   selectedCount !== totalPositions ||
                   assignSongsMutation.isPending
                 }
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {assignSongsMutation.isPending ? "設定中..." : "ビンゴを開始"}
               </button>

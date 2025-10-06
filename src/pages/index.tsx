@@ -18,7 +18,7 @@ const Home: NextPage = () => {
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             DJ <span className="text-[hsl(280,100%,70%)]">Bingo</span>
           </h1>
-          
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
             {session ? (
               <Link
@@ -41,7 +41,7 @@ const Home: NextPage = () => {
                 </div>
               </Link>
             )}
-            
+
             <div className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white">
               <h3 className="text-2xl font-bold">参加者の方</h3>
               <div className="text-lg">
