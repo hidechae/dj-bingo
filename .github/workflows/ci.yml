@@ -13,6 +13,15 @@ jobs:
     name: Run Quality Checks
     runs-on: ubuntu-latest
 
+    env:
+      # Dummy values for build-time environment variables
+      DATABASE_URL: postgresql://user:password@localhost:5432/db
+      NEXTAUTH_SECRET: dummy-secret-for-ci-build-only
+      NEXTAUTH_URL: http://localhost:3000
+      GOOGLE_CLIENT_ID: dummy-client-id
+      GOOGLE_CLIENT_SECRET: dummy-client-secret
+      SKIP_ENV_VALIDATION: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,11 +46,3 @@ jobs:
 
       - name: Build application
         run: npm run build
-        env:
-          # Dummy values for build-time environment variables
-          DATABASE_URL: postgresql://user:password@localhost:5432/db
-          NEXTAUTH_SECRET: dummy-secret-for-ci-build-only
-          NEXTAUTH_URL: http://localhost:3000
-          GOOGLE_CLIENT_ID: dummy-client-id
-          GOOGLE_CLIENT_SECRET: dummy-client-secret
-          SKIP_ENV_VALIDATION: true
