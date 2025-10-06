@@ -95,10 +95,8 @@ export const bingoRouter = createTRPCRouter({
         },
       });
 
-      // Check for winners after marking a song as played
-      if (input.isPlayed) {
-        await checkForWinners(ctx.db, song.bingoGameId);
-      }
+      // Check for winners/losers after marking a song as played or unplayed
+      await checkForWinners(ctx.db, song.bingoGameId);
 
       return song;
     }),
@@ -144,7 +142,7 @@ async function checkForWinners(db: any, bingoGameId: string) {
   const gridSize = getGridSize(bingoGame.size);
   
   for (const participant of bingoGame.participants) {
-    if (participant.hasWon || !participant.isGridComplete) continue;
+    if (!participant.isGridComplete) continue;
 
     const grid = Array(gridSize * gridSize).fill(null);
     
@@ -153,12 +151,25 @@ async function checkForWinners(db: any, bingoGameId: string) {
       grid[ps.position] = ps.song.isPlayed;
     });
 
-    if (hasWon(grid, gridSize)) {
+    const currentlyHasWon = hasWon(grid, gridSize);
+    
+    // Update win status if it has changed
+    if (currentlyHasWon && !participant.hasWon) {
+      // Participant just won
       await db.participant.update({
         where: { id: participant.id },
         data: {
           hasWon: true,
           wonAt: new Date(),
+        },
+      });
+    } else if (!currentlyHasWon && participant.hasWon) {
+      // Participant lost their win (song was unmarked)
+      await db.participant.update({
+        where: { id: participant.id },
+        data: {
+          hasWon: false,
+          wonAt: null,
         },
       });
     }
