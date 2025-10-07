@@ -17,7 +17,7 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
         <title>ログイン - DJ Bingo</title>
         <meta name="description" content="DJ Bingo 管理者ログイン" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-[3rem]">
             管理者ログイン

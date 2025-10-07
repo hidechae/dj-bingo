@@ -28,7 +28,7 @@ export const GameInfoSidebar = ({
     <div className="space-y-6">
       {/* QR Code */}
       {currentStatus === GameStatus.ENTRY && (
-        <div className="rounded-lg bg-white p-6 shadow">
+        <div className="rounded-lg bg-white p-6 shadow-sm">
           <h3 className="mb-4 text-lg font-medium text-gray-900">
             参加用QRコード
           </h3>
@@ -51,7 +51,7 @@ export const GameInfoSidebar = ({
       )}
 
       {/* Game Info */}
-      <div className="rounded-lg bg-white p-6 shadow">
+      <div className="rounded-lg bg-white p-6 shadow-sm">
         <h3 className="mb-4 text-lg font-medium text-gray-900">ゲーム情報</h3>
         <div className="space-y-3 text-sm">
           <div>
@@ -86,7 +86,7 @@ export const GameInfoSidebar = ({
       </div>
 
       {/* Status Controls */}
-      <div className="rounded-lg bg-white p-6 shadow">
+      <div className="rounded-lg bg-white p-6 shadow-sm">
         <h3 className="mb-4 text-lg font-medium text-gray-900">
           ステータス変更
         </h3>

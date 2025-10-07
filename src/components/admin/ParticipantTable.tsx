@@ -21,7 +21,7 @@ export const ParticipantTable = ({
   }
 
   return (
-    <div className="mt-8 rounded-lg bg-white p-6 shadow">
+    <div className="mt-8 rounded-lg bg-white p-6 shadow-sm">
       <h3 className="mb-4 text-lg font-medium text-gray-900">参加者一覧</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
