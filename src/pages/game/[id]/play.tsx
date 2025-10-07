@@ -38,7 +38,7 @@ const PlayBingo: NextPage = () => {
         <title>ビンゴプレイ - {participant.bingoGame.title}</title>
         <meta name="description" content="ビンゴゲームプレイ中" />
       </Head>
-      <main className="min-h-screen bg-gradient-to-b from-[#2e026d] to-[#15162c] py-4">
+      <main className="min-h-screen bg-linear-to-b from-[#2e026d] to-[#15162c] py-4">
         <div className="mx-auto max-w-4xl px-4">
           <WinnerBanner hasWon={hasWon} />
 

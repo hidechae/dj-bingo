@@ -21,7 +21,7 @@ export const ParticipantTable = ({
   }
 
   return (
-    <div className="mt-8 rounded-lg bg-white p-6 shadow">
+    <div className="mt-8 rounded-lg bg-white p-6 shadow-sm">
       <h3 className="mb-4 text-lg font-medium text-gray-900">参加者一覧</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
@@ -60,13 +60,13 @@ export const ParticipantTable = ({
           <tbody className="divide-y divide-gray-200 bg-white">
             {participants.map((participant: any) => (
               <tr key={participant.id}>
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
                   {participant.name}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
                   {new Date(participant.createdAt).toLocaleString()}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                       participant.isGridComplete
@@ -77,7 +77,7 @@ export const ParticipantTable = ({
                     {participant.isGridComplete ? "完成" : "設定中"}
                   </span>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4">
+                <td className="px-6 py-4 whitespace-nowrap">
                   {participant.hasWon ? (
                     <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">
                       勝利！
@@ -109,7 +109,7 @@ const SortableHeader = ({
   onSort: (field: ParticipantSortField) => void;
 }) => (
   <th
-    className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 hover:bg-gray-100"
+    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
     onClick={() => onSort(field)}
   >
     <div className="flex items-center">

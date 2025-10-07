@@ -40,7 +40,7 @@ const AdminDashboard: NextPage = () => {
         <meta name="description" content="DJ Bingo 管理者ダッシュボード" />
       </Head>
       <main className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow">
+        <div className="bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <h1 className="text-xl font-semibold text-gray-900">
@@ -79,7 +79,7 @@ const AdminDashboard: NextPage = () => {
               {bingoGames.map((game: any) => (
                 <div
                   key={game.id}
-                  className="overflow-hidden rounded-lg bg-white shadow"
+                  className="overflow-hidden rounded-lg bg-white shadow-sm"
                 >
                   <div className="p-6">
                     <h3 className="mb-2 text-lg font-medium text-gray-900">

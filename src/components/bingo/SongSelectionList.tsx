@@ -15,11 +15,11 @@ export const SongSelectionList = ({
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-900">楽曲一覧</h3>
       {selectedPosition !== null ? (
-        <p className="rounded bg-green-50 p-2 text-sm text-green-600">
+        <p className="rounded-sm bg-green-50 p-2 text-sm text-green-600">
           マス{selectedPosition + 1}に設定する楽曲を選択してください
         </p>
       ) : (
-        <p className="rounded bg-gray-50 p-2 text-sm text-gray-500">
+        <p className="rounded-sm bg-gray-50 p-2 text-sm text-gray-500">
           先にビンゴグリッドでマスを選択してください
         </p>
       )}

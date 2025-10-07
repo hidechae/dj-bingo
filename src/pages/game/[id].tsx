@@ -165,7 +165,7 @@ const ParticipantGame: NextPage = () => {
         <title>{bingoGame.title} - DJ Bingo参加</title>
         <meta name="description" content="DJ Bingoゲームに参加" />
       </Head>
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex min-h-screen items-center justify-center bg-linear-to-b from-[#2e026d] to-[#15162c]">
         <div className="mx-4 w-full max-w-md">
           <div className="rounded-lg bg-white p-8 shadow-xl">
             <div className="mb-8 text-center">
@@ -190,7 +190,7 @@ const ParticipantGame: NextPage = () => {
                   value={participantName}
                   onChange={(e) => setParticipantName(e.target.value)}
                   required
-                  className="w-full rounded-md border border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 px-4 py-3 shadow-xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                   placeholder="例: 田中太郎"
                   disabled={isJoining}
                 />

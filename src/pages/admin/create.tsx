@@ -77,7 +77,7 @@ const CreateBingo: NextPage = () => {
         <meta name="description" content="新しいビンゴゲームを作成" />
       </Head>
       <main className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow">
+        <div className="bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <h1 className="text-xl font-semibold text-gray-900">
@@ -95,7 +95,7 @@ const CreateBingo: NextPage = () => {
 
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="rounded-lg bg-white px-6 py-8 shadow">
+            <div className="rounded-lg bg-white px-6 py-8 shadow-sm">
               <div className="grid grid-cols-1 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -106,7 +106,7 @@ const CreateBingo: NextPage = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-xs focus:border-blue-500 focus:ring-blue-500"
                     placeholder="例: 2025年ヒット曲ビンゴ"
                   />
                 </div>
@@ -118,7 +118,7 @@ const CreateBingo: NextPage = () => {
                   <select
                     value={size}
                     onChange={(e) => setSize(e.target.value as BingoSize)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-xs focus:border-blue-500 focus:ring-blue-500"
                   >
                     <option value={BingoSize.THREE_BY_THREE}>3x3 (9曲)</option>
                     <option value={BingoSize.FOUR_BY_FOUR}>4x4 (16曲)</option>
@@ -128,7 +128,7 @@ const CreateBingo: NextPage = () => {
               </div>
             </div>
 
-            <div className="rounded-lg bg-white px-6 py-8 shadow">
+            <div className="rounded-lg bg-white px-6 py-8 shadow-sm">
               <div className="mb-6 flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
                   楽曲リスト (後で追加・編集可能)
@@ -153,7 +153,7 @@ const CreateBingo: NextPage = () => {
                           updateSong(index, "title", e.target.value)
                         }
                         placeholder="曲名"
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-xs focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                     <div className="flex-1">
@@ -164,7 +164,7 @@ const CreateBingo: NextPage = () => {
                           updateSong(index, "artist", e.target.value)
                         }
                         placeholder="アーティスト名"
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-xs focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                     {songs.length > 1 && (

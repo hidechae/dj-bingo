@@ -25,7 +25,7 @@ export const StatusChangeModal = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600 bg-opacity-50">
+    <div className="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
       <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
         <div className="mt-3 text-center">
           <h3 className="text-lg font-medium text-gray-900">
@@ -53,7 +53,7 @@ export const StatusChangeModal = ({
           <div className="mt-4 flex justify-center gap-2">
             <button
               onClick={onCancel}
-              className="rounded bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400"
+              className="rounded-sm bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400"
             >
               キャンセル
             </button>
@@ -75,13 +75,13 @@ const PlayingToEntryConfirmation = ({
     <div className="flex justify-center gap-2">
       <button
         onClick={() => onConfirm({ preservePlayedSongs: true })}
-        className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+        className="rounded-sm bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
       >
         維持する
       </button>
       <button
         onClick={() => onConfirm({ preservePlayedSongs: false })}
-        className="rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+        className="rounded-sm bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
       >
         リセットする
       </button>
@@ -100,13 +100,13 @@ const EntryToEditingConfirmation = ({
     <div className="flex justify-center gap-2">
       <button
         onClick={() => onConfirm({ preserveParticipants: true })}
-        className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+        className="rounded-sm bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
       >
         維持する
       </button>
       <button
         onClick={() => onConfirm({ preserveParticipants: false })}
-        className="rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+        className="rounded-sm bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
       >
         削除する
       </button>
@@ -143,7 +143,7 @@ const EntryToPlayingConfirmation = ({
     <div className="flex justify-center gap-2">
       <button
         onClick={() => onConfirm()}
-        className="rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
+        className="rounded-sm bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
       >
         変更する
       </button>
