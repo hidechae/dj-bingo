@@ -44,7 +44,7 @@ export const GameInfoSidebar = ({
               <p className="text-sm text-gray-600">
                 参加者はこのQRコードをスキャンして参加
               </p>
-              <p className="mt-2 break-all text-xs text-gray-500">{gameUrl}</p>
+              <p className="mt-2 text-xs break-all text-gray-500">{gameUrl}</p>
             </div>
           )}
         </div>
