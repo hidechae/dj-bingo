@@ -6,7 +6,10 @@ import { type LiteralUnion, type ClientSafeProvider } from "next-auth/react";
 import { type BuiltInProviderType } from "next-auth/providers/index";
 
 interface SignInProps {
-  providers: Record<LiteralUnion<BuiltInProviderType>, ClientSafeProvider> | null;
+  providers: Record<
+    LiteralUnion<BuiltInProviderType>,
+    ClientSafeProvider
+  > | null;
 }
 
 const SignIn: NextPage<SignInProps> = ({ providers }) => {
