@@ -1,5 +1,26 @@
 // Shared types and enums for the DJ Bingo application
 
+import { type RouterOutputs } from "~/utils/api";
+
+// Common tRPC output types
+export type BingoGame = NonNullable<RouterOutputs["bingo"]["getById"]>;
+export type Song = BingoGame["songs"][number];
+export type Participant = BingoGame["participants"][number];
+export type ParticipantSong = Participant["participantSongs"][number];
+
+// Grid cell type used in play screen
+export type GridCell = {
+  song: Song;
+  isPlayed: boolean;
+};
+
+// Simplified participant type for incomplete grid warnings
+export type IncompleteParticipant = {
+  id: string;
+  name: string;
+  createdAt: Date;
+};
+
 export enum BingoSize {
   THREE_BY_THREE = "THREE_BY_THREE",
   FOUR_BY_FOUR = "FOUR_BY_FOUR",

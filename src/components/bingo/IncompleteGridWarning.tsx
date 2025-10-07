@@ -1,7 +1,6 @@
 type IncompleteGridWarningProps = {
   isGridComplete: boolean;
   gameStatus: string;
-  gameId: string | string[] | undefined;
   continueWithIncompleteGrid: boolean;
   onContinue: () => void;
   onGoToSetup: () => void;
@@ -10,7 +9,6 @@ type IncompleteGridWarningProps = {
 export const IncompleteGridWarning = ({
   isGridComplete,
   gameStatus,
-  gameId,
   continueWithIncompleteGrid,
   onContinue,
   onGoToSetup,

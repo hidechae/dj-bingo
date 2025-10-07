@@ -1,9 +1,10 @@
 import { checkWinCondition } from "~/utils/bingoWinChecker";
+import { type GridCell } from "~/types";
 
 type WinStatusProps = {
   hasWon: boolean;
   wonAt?: Date | null;
-  grid: any[];
+  grid: (GridCell | null)[];
   gridSize: number;
 };
 

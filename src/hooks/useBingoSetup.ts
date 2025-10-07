@@ -91,7 +91,7 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
 
       // 既存の楽曲割り当てがあれば初期化
       const assignments: { [position: number]: string } = {};
-      participant.participantSongs.forEach((ps: any) => {
+      participant.participantSongs.forEach((ps) => {
         assignments[ps.position] = ps.songId;
       });
       setSelectedSongs(assignments);

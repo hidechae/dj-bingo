@@ -25,7 +25,7 @@ const ParticipantGame: NextPage = () => {
     onSuccess: () => {
       // Participant successfully joined, will redirect to setup
     },
-    onError: (error: any) => {
+    onError: (error) => {
       if (error.message === "Already joined this game") {
         // Already joined, continue to game
       } else {

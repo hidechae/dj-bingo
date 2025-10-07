@@ -3,8 +3,8 @@ import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { api } from "~/utils/api";
-import { BingoSize, getRequiredSongCount } from "~/types";
+import { api, type RouterOutputs } from "~/utils/api";
+import { BingoSize } from "~/types";
 
 interface Song {
   title: string;
@@ -19,7 +19,7 @@ const CreateBingo: NextPage = () => {
   const [songs, setSongs] = useState<Song[]>([{ title: "", artist: "" }]);
 
   const createBingoMutation = api.bingo.create.useMutation({
-    onSuccess: (data: any) => {
+    onSuccess: (data: RouterOutputs["bingo"]["create"]) => {
       void router.push(`/admin/game/${data.id}`);
     },
   });

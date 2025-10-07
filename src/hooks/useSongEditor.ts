@@ -5,6 +5,7 @@
  * 状態管理と操作関数を提供します。
  */
 import { useState } from "react";
+import { type Song } from "~/types";
 
 /** 編集中の楽曲の型定義 */
 export type EditingSong = {
@@ -28,9 +29,9 @@ export const useSongEditor = () => {
    *
    * @param songs - 編集対象の楽曲配列
    */
-  const startEditing = (songs: any[]) => {
+  const startEditing = (songs: Song[]) => {
     setEditingSongs(
-      songs.map((song: any) => ({
+      songs.map((song) => ({
         id: song.id,
         title: song.title,
         artist: song.artist || "",

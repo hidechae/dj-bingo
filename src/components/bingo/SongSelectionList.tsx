@@ -1,5 +1,7 @@
+import { type Song } from "~/types";
+
 type SongSelectionListProps = {
-  songs: any[];
+  songs: Song[];
   selectedPosition: number | null;
   isSongUsed: (songId: string) => boolean;
   onSongAssign: (songId: string) => void;
@@ -24,7 +26,7 @@ export const SongSelectionList = ({
         </p>
       )}
       <div className="max-h-96 space-y-2 overflow-y-auto">
-        {songs.map((song: any) => {
+        {songs.map((song) => {
           const isUsed = isSongUsed(song.id);
           const isDisabled = isUsed || selectedPosition === null;
 

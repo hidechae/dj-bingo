@@ -1,5 +1,7 @@
+import { type GridCell } from "~/types";
+
 type BingoGridProps = {
-  grid: any[];
+  grid: (GridCell | null)[];
   gridSize: number;
 };
 
@@ -9,7 +11,7 @@ export const BingoGrid = ({ grid, gridSize }: BingoGridProps) => {
       className="mx-auto grid max-w-md gap-2"
       style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
     >
-      {grid.map((cell: any, index: number) => (
+      {grid.map((cell, index: number) => (
         <div
           key={index}
           className={`aspect-square rounded-lg border-2 p-2 text-xs transition-all duration-300 ${

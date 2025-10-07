@@ -6,6 +6,7 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
+import { type GetServerSidePropsContext } from "next";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -40,6 +41,9 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-export const getServerAuthSession = (ctx?: { req: any; res: any }) => {
-  return getServerSession(ctx?.req, ctx?.res, authOptions);
+export const getServerAuthSession = (ctx: {
+  req: GetServerSidePropsContext["req"];
+  res: GetServerSidePropsContext["res"];
+}) => {
+  return getServerSession(ctx.req, ctx.res, authOptions);
 };
