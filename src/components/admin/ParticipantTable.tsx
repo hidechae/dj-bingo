@@ -2,9 +2,10 @@ import {
   type ParticipantSortField,
   type SortDirection,
 } from "~/hooks/useParticipantSort";
+import { type Participant } from "~/types";
 
 type ParticipantTableProps = {
-  participants: any[];
+  participants: Participant[];
   sortField: ParticipantSortField;
   sortDirection: SortDirection;
   onSort: (field: ParticipantSortField) => void;
@@ -58,7 +59,7 @@ export const ParticipantTable = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {participants.map((participant: any) => (
+            {participants.map((participant) => (
               <tr key={participant.id}>
                 <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
                   {participant.name}

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type PrismaClient } from "@prisma/client";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -329,7 +330,7 @@ export const bingoRouter = createTRPCRouter({
     }),
 });
 
-async function checkForWinners(db: any, bingoGameId: string) {
+async function checkForWinners(db: PrismaClient, bingoGameId: string) {
   const bingoGame = await db.bingoGame.findUnique({
     where: { id: bingoGameId },
     include: {
@@ -347,7 +348,7 @@ async function checkForWinners(db: any, bingoGameId: string) {
 
   if (!bingoGame) return;
 
-  const gridSize = getGridSize(bingoGame.size);
+  const gridSize = getGridSize(bingoGame.size as BingoSize);
 
   for (const participant of bingoGame.participants) {
     if (!participant.isGridComplete) continue;
@@ -355,7 +356,7 @@ async function checkForWinners(db: any, bingoGameId: string) {
     const grid = Array(gridSize * gridSize).fill(null);
 
     // Fill the grid with played status
-    participant.participantSongs.forEach((ps: any) => {
+    participant.participantSongs.forEach((ps) => {
       grid[ps.position] = ps.song.isPlayed;
     });
 

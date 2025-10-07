@@ -5,6 +5,7 @@
  * ソート機能を実装するために使用します。
  */
 import { useState } from "react";
+import { type Participant } from "~/types";
 
 /** ソート可能なフィールド */
 export type ParticipantSortField =
@@ -49,8 +50,8 @@ export const useParticipantSort = () => {
    * @param participants - ソート対象の参加者配列
    * @returns ソートされた参加者配列
    */
-  const sortParticipants = (participants: any[]) => {
-    return [...participants].sort((a: any, b: any) => {
+  const sortParticipants = (participants: Participant[]) => {
+    return [...participants].sort((a, b) => {
       let aValue, bValue;
 
       // フィールドごとに比較値を取得

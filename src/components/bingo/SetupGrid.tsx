@@ -1,8 +1,10 @@
+import { type Song } from "~/types";
+
 type SetupGridProps = {
   gridSize: number;
   selectedSongs: { [position: number]: string };
   selectedPosition: number | null;
-  availableSongs: any[];
+  availableSongs: Song[];
   onPositionSelect: (position: number) => void;
   onClearPosition: (position: number) => void;
 };
@@ -44,7 +46,7 @@ type GridCellProps = {
   position: number;
   isSelected: boolean;
   songId?: string;
-  availableSongs: any[];
+  availableSongs: Song[];
   onSelect: (position: number) => void;
   onClear: (position: number) => void;
 };
@@ -57,7 +59,7 @@ const GridCell = ({
   onSelect,
   onClear,
 }: GridCellProps) => {
-  const song = songId ? availableSongs.find((s: any) => s.id === songId) : null;
+  const song = songId ? availableSongs.find((s) => s.id === songId) : null;
 
   return (
     <div

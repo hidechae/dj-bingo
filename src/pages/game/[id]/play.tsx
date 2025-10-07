@@ -26,10 +26,10 @@ const PlayBingo: NextPage = () => {
   }
 
   const { participant, grid, gridSize, hasWon } = bingoStatus;
-  const playedSongsCount = grid.filter((cell: any) => cell?.isPlayed).length;
+  const playedSongsCount = grid.filter((cell) => cell?.isPlayed).length;
   const totalSongs = participant.bingoGame.songs.length;
   const playedSongs = participant.bingoGame.songs.filter(
-    (s: any) => s.isPlayed
+    (s) => s.isPlayed
   );
 
   return (
@@ -67,7 +67,6 @@ const PlayBingo: NextPage = () => {
                 <IncompleteGridWarning
                   isGridComplete={participant.isGridComplete}
                   gameStatus={participant.bingoGame.status}
-                  gameId={id}
                   continueWithIncompleteGrid={continueWithIncompleteGrid}
                   onContinue={() => setContinueWithIncompleteGrid(true)}
                   onGoToSetup={() => router.push(`/game/${id}/setup`)}

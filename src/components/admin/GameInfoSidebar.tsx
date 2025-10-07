@@ -1,9 +1,15 @@
 import Image from "next/image";
-import { GameStatus, getStatusDisplay, isValidStatusTransition } from "~/types";
+import {
+  GameStatus,
+  getStatusDisplay,
+  isValidStatusTransition,
+  type BingoGame,
+  type Participant,
+} from "~/types";
 
 type GameInfoSidebarProps = {
-  bingoGame: any;
-  participants: any[];
+  bingoGame: BingoGame;
+  participants: Participant[];
   qrCodeDataUrl: string;
   gameUrl: string;
   onStatusChange: (newStatus: GameStatus) => void;
@@ -18,9 +24,9 @@ export const GameInfoSidebar = ({
   onStatusChange,
   isChangingStatus,
 }: GameInfoSidebarProps) => {
-  const winnersCount = participants?.filter((p: any) => p.hasWon).length ?? 0;
+  const winnersCount = participants?.filter((p) => p.hasWon).length ?? 0;
   const completedGridsCount =
-    participants?.filter((p: any) => p.isGridComplete).length ?? 0;
+    participants?.filter((p) => p.isGridComplete).length ?? 0;
 
   const currentStatus = bingoGame.status as GameStatus;
 

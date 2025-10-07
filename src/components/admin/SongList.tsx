@@ -1,8 +1,8 @@
-import { GameStatus } from "~/types";
+import { GameStatus, type BingoGame, type Song } from "~/types";
 import { type EditingSong } from "~/hooks/useSongEditor";
 
 type SongListProps = {
-  bingoGame: any;
+  bingoGame: BingoGame;
   songEditingMode: boolean;
   editingSongs: EditingSong[];
   onSongEdit: () => void;
@@ -137,13 +137,13 @@ const SongDisplayMode = ({
   onToggleSongPlayed,
   isMarkingPlayed,
 }: {
-  songs: any[];
+  songs: Song[];
   currentStatus: GameStatus;
   onToggleSongPlayed: (songId: string, isPlayed: boolean) => void;
   isMarkingPlayed: boolean;
 }) => {
-  const unplayedSongs = songs.filter((s: any) => !s.isPlayed);
-  const playedSongs = songs.filter((s: any) => s.isPlayed);
+  const unplayedSongs = songs.filter((s) => !s.isPlayed);
+  const playedSongs = songs.filter((s) => s.isPlayed);
 
   return (
     <div>
@@ -153,7 +153,7 @@ const SongDisplayMode = ({
           未演奏 ({unplayedSongs.length}曲)
         </h4>
         <div className="max-h-48 space-y-2 overflow-y-auto">
-          {unplayedSongs.map((song: any) => (
+          {unplayedSongs.map((song) => (
             <div
               key={song.id}
               className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3"
@@ -188,7 +188,7 @@ const SongDisplayMode = ({
           演奏済み ({playedSongs.length}曲)
         </h4>
         <div className="max-h-48 space-y-2 overflow-y-auto">
-          {playedSongs.map((song: any) => (
+          {playedSongs.map((song) => (
             <div
               key={song.id}
               className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3"
@@ -197,9 +197,11 @@ const SongDisplayMode = ({
                 <p className="font-medium text-gray-900">
                   {song.artist} - {song.title}
                 </p>
-                <p className="text-xs text-gray-600">
-                  演奏時間: {new Date(song.playedAt).toLocaleString()}
-                </p>
+                {song.playedAt && (
+                  <p className="text-xs text-gray-600">
+                    演奏時間: {new Date(song.playedAt).toLocaleString()}
+                  </p>
+                )}
               </div>
               {currentStatus === GameStatus.PLAYING && (
                 <button

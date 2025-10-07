@@ -2,9 +2,11 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, getProviders } from "next-auth/react";
 import { type GetServerSideProps } from "next";
+import { type LiteralUnion, type ClientSafeProvider } from "next-auth/react";
+import { type BuiltInProviderType } from "next-auth/providers/index";
 
 interface SignInProps {
-  providers: any;
+  providers: Record<LiteralUnion<BuiltInProviderType>, ClientSafeProvider> | null;
 }
 
 const SignIn: NextPage<SignInProps> = ({ providers }) => {
@@ -34,7 +36,7 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {Object.values(providers).map((provider: any) => (
+              {Object.values(providers).map((provider) => (
                 <button
                   key={provider.name}
                   onClick={() => signIn(provider.id, { callbackUrl: "/admin" })}

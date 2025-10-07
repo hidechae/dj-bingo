@@ -1,10 +1,10 @@
-import { GameStatus } from "~/types";
+import { GameStatus, type IncompleteParticipant } from "~/types";
 
 type StatusChangeModalProps = {
   isOpen: boolean;
   currentStatus: GameStatus;
   pendingStatus: GameStatus;
-  incompleteParticipants?: any[];
+  incompleteParticipants?: IncompleteParticipant[];
   onConfirm: (options?: {
     preservePlayedSongs?: boolean;
     preserveParticipants?: boolean;
@@ -118,7 +118,7 @@ const EntryToPlayingConfirmation = ({
   incompleteParticipants,
   onConfirm,
 }: {
-  incompleteParticipants?: any[];
+  incompleteParticipants?: IncompleteParticipant[];
   onConfirm: (options?: Record<string, never>) => void;
 }) => (
   <div className="space-y-3 text-sm text-gray-500">
@@ -131,7 +131,7 @@ const EntryToPlayingConfirmation = ({
           人の参加者がまだグリッドを完成させていません：
         </p>
         <ul className="mt-1 list-inside list-disc text-xs text-yellow-700">
-          {incompleteParticipants.map((p: any) => (
+          {incompleteParticipants.map((p) => (
             <li key={p.id}>{p.name}</li>
           ))}
         </ul>

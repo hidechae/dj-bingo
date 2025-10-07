@@ -76,7 +76,7 @@ const AdminDashboard: NextPage = () => {
 
           {bingoGames && bingoGames.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {bingoGames.map((game: any) => (
+              {bingoGames.map((game) => (
                 <div
                   key={game.id}
                   className="overflow-hidden rounded-lg bg-white shadow-sm"
