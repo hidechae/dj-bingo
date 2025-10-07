@@ -49,6 +49,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     bingoGames    BingoGame[]
+    gameAdmins    GameAdmin[]
 
     @@map("users")
 }
@@ -87,6 +88,7 @@ model BingoGame {
     songs        Song[]
     participants Participant[]
     isActive     Boolean       @default(true) @map("is_active")
+    gameAdmins   GameAdmin[]
 
     @@map("bingo_games")
 }
@@ -129,4 +131,17 @@ model ParticipantSong {
 
     @@unique([participantId, position])
     @@map("participant_songs")
+}
+
+model GameAdmin {
+    id          String    @id @default(cuid())
+    bingoGameId String    @map("bingo_game_id")
+    bingoGame   BingoGame @relation(fields: [bingoGameId], references: [id], onDelete: Cascade)
+    userId      String    @map("user_id")
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    addedBy     String    @map("added_by") // ID of the user who added this admin
+    addedAt     DateTime  @default(now()) @map("added_at")
+
+    @@unique([bingoGameId, userId])
+    @@map("game_admins")
 }

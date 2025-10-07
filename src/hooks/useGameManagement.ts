@@ -22,7 +22,7 @@ export const useGameManagement = (gameId: string) => {
   // 参加者一覧の取得
   const { data: participants, refetch: refetchParticipants } =
     api.bingo.getParticipants.useQuery(
-      { bingoGameId: gameId },
+      { gameId: gameId },
       { enabled: !!gameId }
     );
 

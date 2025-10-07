@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrismaClient } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -12,6 +13,56 @@ import {
   getRequiredSongCount,
   isValidStatusTransition,
 } from "~/types";
+
+// Helper function to check if user is admin for a game
+async function checkGameAdminPermission(
+  db: PrismaClient,
+  gameId: string,
+  userId: string
+): Promise<boolean> {
+  const game = await db.bingoGame.findUnique({
+    where: { id: gameId },
+    include: {
+      gameAdmins: {
+        where: { userId: userId },
+      },
+    },
+  });
+
+  if (!game) return false;
+  
+  // User is admin if they're the creator or explicitly added as admin
+  return game.createdBy === userId || game.gameAdmins.length > 0;
+}
+
+// Helper function to validate Google email
+function isGoogleEmail(email: string): boolean {
+  // We'll accept any valid email since Google Workspace can use any domain
+  // The real validation happens when they try to sign in with Google OAuth
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Procedure that requires admin permission for specific game
+const gameAdminProcedure = protectedProcedure
+  .input(z.object({ gameId: z.string() }))
+  .use(async ({ ctx, next, input }) => {
+    const hasPermission = await checkGameAdminPermission(
+      ctx.db,
+      input.gameId,
+      ctx.session.user.id
+    );
+
+    if (!hasPermission) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "You don't have admin permission for this game",
+      });
+    }
+
+    return next({
+      ctx,
+    });
+  });
 
 export const bingoRouter = createTRPCRouter({
   create: protectedProcedure
@@ -53,6 +104,184 @@ export const bingoRouter = createTRPCRouter({
       return bingoGame;
     }),
 
+  // Admin management procedures
+  addAdmin: protectedProcedure
+    .input(
+      z.object({
+        gameId: z.string(),
+        email: z.string().email(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if current user has admin permission
+      const hasPermission = await checkGameAdminPermission(
+        ctx.db,
+        input.gameId,
+        ctx.session.user.id
+      );
+
+      if (!hasPermission) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to add admins to this game",
+        });
+      }
+
+      // Validate email format
+      if (!isGoogleEmail(input.email)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "有効なメールアドレスを入力してください",
+        });
+      }
+
+      // Find user by email
+      const targetUser = await ctx.db.user.findUnique({
+        where: { email: input.email },
+      });
+
+      if (!targetUser) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User with this email address has not signed up yet. They need to sign in with Google first.",
+        });
+      }
+
+      // Check if user is already an admin
+      const game = await ctx.db.bingoGame.findUnique({
+        where: { id: input.gameId },
+        include: {
+          gameAdmins: {
+            where: { userId: targetUser.id },
+          },
+        },
+      });
+
+      if (!game) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Game not found",
+        });
+      }
+
+      // Check if user is already the creator
+      if (game.createdBy === targetUser.id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This user is already the creator of this game",
+        });
+      }
+
+      // Check if user is already an admin
+      if (game.gameAdmins.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This user is already an admin of this game",
+        });
+      }
+
+      // Add user as admin
+      const gameAdmin = await ctx.db.gameAdmin.create({
+        data: {
+          bingoGameId: input.gameId,
+          userId: targetUser.id,
+          addedBy: ctx.session.user.id,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      return gameAdmin;
+    }),
+
+  removeAdmin: protectedProcedure
+    .input(
+      z.object({
+        gameId: z.string(),
+        adminId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if current user has admin permission
+      const hasPermission = await checkGameAdminPermission(
+        ctx.db,
+        input.gameId,
+        ctx.session.user.id
+      );
+
+      if (!hasPermission) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to remove admins from this game",
+        });
+      }
+
+      // Find and delete the admin record
+      const gameAdmin = await ctx.db.gameAdmin.findUnique({
+        where: { id: input.adminId },
+        include: {
+          bingoGame: true,
+        },
+      });
+
+      if (!gameAdmin || gameAdmin.bingoGameId !== input.gameId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Admin record not found",
+        });
+      }
+
+      await ctx.db.gameAdmin.delete({
+        where: { id: input.adminId },
+      });
+
+      return { success: true };
+    }),
+
+  getGameAdmins: protectedProcedure
+    .input(z.object({ gameId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      // Check if current user has admin permission
+      const hasPermission = await checkGameAdminPermission(
+        ctx.db,
+        input.gameId,
+        ctx.session.user.id
+      );
+
+      if (!hasPermission) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to view admins for this game",
+        });
+      }
+
+      const game = await ctx.db.bingoGame.findUnique({
+        where: { id: input.gameId },
+        include: {
+          user: true, // Creator
+          gameAdmins: {
+            include: {
+              user: true,
+            },
+            orderBy: { addedAt: "asc" },
+          },
+        },
+      });
+
+      if (!game) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Game not found",
+        });
+      }
+
+      return {
+        creator: game.user,
+        admins: game.gameAdmins,
+      };
+    }),
+
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -80,12 +309,27 @@ export const bingoRouter = createTRPCRouter({
 
   getAllByUser: protectedProcedure.query(async ({ ctx }) => {
     const bingoGames = await ctx.db.bingoGame.findMany({
-      where: { createdBy: ctx.session.user.id },
+      where: {
+        OR: [
+          { createdBy: ctx.session.user.id },
+          {
+            gameAdmins: {
+              some: { userId: ctx.session.user.id },
+            },
+          },
+        ],
+      },
       include: {
         songs: {
           orderBy: [{ artist: "asc" }, { title: "asc" }],
         },
         participants: true,
+        user: true, // Include creator info
+        gameAdmins: {
+          include: {
+            user: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -93,7 +337,7 @@ export const bingoRouter = createTRPCRouter({
     return bingoGames;
   }),
 
-  updateSongs: protectedProcedure
+  updateSongs: gameAdminProcedure
     .input(
       z.object({
         gameId: z.string(),
@@ -114,11 +358,17 @@ export const bingoRouter = createTRPCRouter({
       });
 
       if (!game) {
-        throw new Error("Game not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Game not found",
+        });
       }
 
       if (game.status !== GameStatus.EDITING) {
-        throw new Error("Songs can only be edited in EDITING status");
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Songs can only be edited in EDITING status",
+        });
       }
 
       // Delete all existing songs and create new ones
@@ -142,7 +392,7 @@ export const bingoRouter = createTRPCRouter({
       });
     }),
 
-  changeStatus: protectedProcedure
+  changeStatus: gameAdminProcedure
     .input(
       z.object({
         gameId: z.string(),
@@ -169,7 +419,10 @@ export const bingoRouter = createTRPCRouter({
       });
 
       if (!game) {
-        throw new Error("Game not found");
+        throw new TRPCError({
+          code: "NOT_FOUND", 
+          message: "Game not found",
+        });
       }
 
       const currentStatus = game.status as GameStatus;
@@ -253,7 +506,7 @@ export const bingoRouter = createTRPCRouter({
       return updatedGame;
     }),
 
-  getIncompleteGridParticipants: protectedProcedure
+  getIncompleteGridParticipants: gameAdminProcedure
     .input(z.object({ gameId: z.string() }))
     .query(async ({ ctx, input }) => {
       const participants = await ctx.db.participant.findMany({
@@ -286,11 +539,31 @@ export const bingoRouter = createTRPCRouter({
       });
 
       if (!song) {
-        throw new Error("Song not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Song not found",
+        });
+      }
+
+      // Check if user has admin permission for this game
+      const hasPermission = await checkGameAdminPermission(
+        ctx.db,
+        song.bingoGame.id,
+        ctx.session.user.id
+      );
+
+      if (!hasPermission) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to modify this game",
+        });
       }
 
       if (song.bingoGame.status !== GameStatus.PLAYING) {
-        throw new Error("Songs can only be marked as played in PLAYING status");
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Songs can only be marked as played in PLAYING status",
+        });
       }
 
       const updatedSong = await ctx.db.song.update({
@@ -310,11 +583,11 @@ export const bingoRouter = createTRPCRouter({
       return updatedSong;
     }),
 
-  getParticipants: protectedProcedure
-    .input(z.object({ bingoGameId: z.string() }))
+  getParticipants: gameAdminProcedure
+    .input(z.object({ gameId: z.string() }))
     .query(async ({ ctx, input }) => {
       const participants = await ctx.db.participant.findMany({
-        where: { bingoGameId: input.bingoGameId },
+        where: { bingoGameId: input.gameId },
         include: {
           participantSongs: {
             include: {
