@@ -28,9 +28,7 @@ const PlayBingo: NextPage = () => {
   const { participant, grid, gridSize, hasWon } = bingoStatus;
   const playedSongsCount = grid.filter((cell) => cell?.isPlayed).length;
   const totalSongs = participant.bingoGame.songs.length;
-  const playedSongs = participant.bingoGame.songs.filter(
-    (s) => s.isPlayed
-  );
+  const playedSongs = participant.bingoGame.songs.filter((s) => s.isPlayed);
 
   return (
     <>

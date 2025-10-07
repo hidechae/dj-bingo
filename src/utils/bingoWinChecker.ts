@@ -1,6 +1,9 @@
 import { type GridCell } from "~/types";
 
-export const checkWinCondition = (grid: (GridCell | null)[], gridSize: number): boolean => {
+export const checkWinCondition = (
+  grid: (GridCell | null)[],
+  gridSize: number
+): boolean => {
   // Check rows
   for (let i = 0; i < gridSize; i++) {
     let rowWin = true;
