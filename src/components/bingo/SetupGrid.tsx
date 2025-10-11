@@ -24,9 +24,9 @@ export const SetupGrid = ({
       <h3 className="text-lg font-semibold text-gray-900">ビンゴグリッド</h3>
       <div
         className="mx-auto grid gap-2 sm:gap-3 md:gap-4"
-        style={{ 
+        style={{
           gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-          maxWidth: `${gridSize * 120}px` 
+          maxWidth: `${gridSize * 120}px`,
         }}
       >
         {Array.from({ length: totalPositions }, (_, index) => (
@@ -67,7 +67,7 @@ const GridCell = ({
   return (
     <div
       onClick={() => onSelect(position)}
-      className={`relative aspect-square cursor-pointer rounded-lg border-2 p-2 text-xs sm:p-3 sm:text-sm md:p-4 md:text-base transition-all ${
+      className={`relative aspect-square cursor-pointer rounded-lg border-2 p-2 text-xs transition-all sm:p-3 sm:text-sm md:p-4 md:text-base ${
         isSelected
           ? "border-solid border-yellow-400 bg-yellow-100 shadow-md"
           : songId
@@ -82,7 +82,9 @@ const GridCell = ({
               {song.title}
             </div>
             {song.artist && (
-              <div className="mt-1 text-xs text-gray-600 sm:text-sm">{song.artist}</div>
+              <div className="mt-1 text-xs text-gray-600 sm:text-sm">
+                {song.artist}
+              </div>
             )}
           </div>
           <button
