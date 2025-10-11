@@ -29,11 +29,11 @@ export const api = createTRPCNext<AppRouter>({
       queryClientConfig: {
         defaultOptions: {
           queries: {
-            retry: false,
+            retry: process.env.NODE_ENV === "production",
             refetchOnWindowFocus: false,
           },
           mutations: {
-            retry: false,
+            retry: process.env.NODE_ENV === "production",
             // Suppress error throwing to prevent Next.js error overlays
             useErrorBoundary: false,
           },
