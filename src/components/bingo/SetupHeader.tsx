@@ -9,7 +9,6 @@ export const SetupHeader = ({
   gameTitle,
   selectedCount,
   totalPositions,
-  selectedPosition,
 }: SetupHeaderProps) => {
   return (
     <div className="mb-8 text-center">
@@ -19,9 +18,7 @@ export const SetupHeader = ({
         各マスに楽曲を選択してください ({selectedCount}/{totalPositions})
       </p>
       <p className="mt-1 text-xs text-blue-600">
-        {selectedPosition !== null
-          ? `マス${selectedPosition + 1}が選択されています。楽曲を選んでください。`
-          : "まずマスを選択してから、楽曲を選んでください。"}
+        マスをクリックすると楽曲選択モーダルが開きます
       </p>
     </div>
   );
