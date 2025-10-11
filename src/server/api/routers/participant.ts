@@ -135,6 +135,7 @@ export const participantRouter = createTRPCRouter({
     .input(
       z.object({
         sessionToken: z.string(),
+        bingoGameId: z.string().optional(),
         songAssignments: z.array(
           z.object({
             songId: z.string(),
@@ -144,13 +145,26 @@ export const participantRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const participant = await ctx.db.participant.findFirst({
-        where: { sessionToken: input.sessionToken },
-        include: {
-          bingoGame: true,
-        },
-        orderBy: { createdAt: "desc" }, // Get most recent participation
-      });
+      // If bingoGameId is provided, find participant for specific game
+      const participant = input.bingoGameId
+        ? await ctx.db.participant.findUnique({
+            where: { 
+              sessionToken_bingoGameId: {
+                sessionToken: input.sessionToken,
+                bingoGameId: input.bingoGameId,
+              }
+            },
+            include: {
+              bingoGame: true,
+            },
+          })
+        : await ctx.db.participant.findFirst({
+            where: { sessionToken: input.sessionToken },
+            include: {
+              bingoGame: true,
+            },
+            orderBy: { createdAt: "desc" }, // Get most recent participation
+          });
 
       if (!participant) {
         throw new TRPCError({
@@ -191,27 +205,55 @@ export const participantRouter = createTRPCRouter({
     }),
 
   getBingoStatus: publicProcedure
-    .input(z.object({ sessionToken: z.string() }))
+    .input(z.object({ 
+      sessionToken: z.string(),
+      bingoGameId: z.string().optional(),
+    }))
     .query(async ({ ctx, input }) => {
-      const participant = await ctx.db.participant.findFirst({
-        where: { sessionToken: input.sessionToken },
-        orderBy: { createdAt: "desc" }, // Get most recent participation
-        include: {
-          bingoGame: {
+      // If bingoGameId is provided, find participant for specific game
+      const participant = input.bingoGameId
+        ? await ctx.db.participant.findUnique({
+            where: { 
+              sessionToken_bingoGameId: {
+                sessionToken: input.sessionToken,
+                bingoGameId: input.bingoGameId,
+              }
+            },
             include: {
-              songs: {
-                orderBy: [{ artist: "asc" }, { title: "asc" }],
+              bingoGame: {
+                include: {
+                  songs: {
+                    orderBy: [{ artist: "asc" }, { title: "asc" }],
+                  },
+                },
+              },
+              participantSongs: {
+                include: {
+                  song: true,
+                },
+                orderBy: { position: "asc" },
               },
             },
-          },
-          participantSongs: {
+          })
+        : await ctx.db.participant.findFirst({
+            where: { sessionToken: input.sessionToken },
+            orderBy: { createdAt: "desc" }, // Get most recent participation
             include: {
-              song: true,
+              bingoGame: {
+                include: {
+                  songs: {
+                    orderBy: [{ artist: "asc" }, { title: "asc" }],
+                  },
+                },
+              },
+              participantSongs: {
+                include: {
+                  song: true,
+                },
+                orderBy: { position: "asc" },
+              },
             },
-            orderBy: { position: "asc" },
-          },
-        },
-      });
+          });
 
       if (!participant) {
         return null;

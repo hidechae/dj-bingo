@@ -176,6 +176,7 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
 
     assignSongsMutation.mutate({
       sessionToken,
+      bingoGameId: gameId as string,
       songAssignments: assignments,
     });
   };
