@@ -8,7 +8,9 @@ import {
 } from "~/server/api/trpc";
 import {
   BingoSize,
+  BingoSizeValues,
   GameStatus,
+  GameStatusValues,
   getGridSize,
   getRequiredSongCount,
   isValidStatusTransition,
@@ -33,13 +35,6 @@ async function checkGameAdminPermission(
   
   // User is admin if they're the creator or explicitly added as admin
   return game.createdBy === userId || game.gameAdmins.length > 0;
-}
-
-// Helper function to validate Google email
-function isGoogleEmail(email: string): boolean {
-  // We'll accept any valid email since Google Workspace can use any domain
-  // The real validation happens when they try to sign in with Google OAuth
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 // Procedure that requires admin permission for specific game
@@ -69,7 +64,7 @@ export const bingoRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string().min(1),
-        size: z.nativeEnum(BingoSize),
+        size: z.enum(BingoSizeValues),
         songs: z
           .array(
             z.object({
@@ -77,7 +72,6 @@ export const bingoRouter = createTRPCRouter({
               artist: z.string().optional(),
             })
           )
-          .optional()
           .default([]),
       })
     )
@@ -109,7 +103,7 @@ export const bingoRouter = createTRPCRouter({
     .input(
       z.object({
         gameId: z.string(),
-        email: z.string().email(),
+        email: z.email(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -124,14 +118,6 @@ export const bingoRouter = createTRPCRouter({
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "このゲームに管理者を追加する権限がありません",
-        });
-      }
-
-      // Validate email format
-      if (!isGoogleEmail(input.email)) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "有効なメールアドレスを入力してください",
         });
       }
 
@@ -396,7 +382,7 @@ export const bingoRouter = createTRPCRouter({
     .input(
       z.object({
         gameId: z.string(),
-        newStatus: z.nativeEnum(GameStatus),
+        newStatus: z.enum(GameStatusValues),
         options: z
           .object({
             preservePlayedSongs: z.boolean().optional(),
