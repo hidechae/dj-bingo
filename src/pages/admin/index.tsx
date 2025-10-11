@@ -148,7 +148,6 @@ const AdminDashboard: NextPage = () => {
                       >
                         {duplicatingId === game.id ? "複製中..." : "複製"}
                       </button>
-
                     </div>
                   </div>
                 </div>
