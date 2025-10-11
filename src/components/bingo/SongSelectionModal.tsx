@@ -73,28 +73,19 @@ export const SongSelectionModal = ({
         </div>
 
         <div className="max-h-96 space-y-2 overflow-y-auto">
-          {songs.map((song) => {
-            const isUsed = isSongUsed(song.id);
-
-            return (
+          {songs
+            .filter((song) => !isSongUsed(song.id))
+            .map((song) => (
               <div
                 key={song.id}
-                className={`rounded-lg border p-3 transition-colors ${
-                  isUsed
-                    ? "cursor-not-allowed border-gray-300 bg-gray-100 text-gray-500"
-                    : "cursor-pointer border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50"
-                }`}
+                className="cursor-pointer rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:border-blue-300 hover:bg-blue-50"
                 onClick={() => handleSongClick(song.id)}
               >
                 <div className="font-medium text-gray-900">
                   {song.artist ? `${song.artist} - ${song.title}` : song.title}
                 </div>
-                {isUsed && (
-                  <div className="mt-1 text-xs text-gray-400">選択済み</div>
-                )}
               </div>
-            );
-          })}
+            ))}
         </div>
 
         <div className="mt-6 flex justify-end">
