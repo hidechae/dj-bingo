@@ -98,6 +98,66 @@ export const bingoRouter = createTRPCRouter({
       return bingoGame;
     }),
 
+  duplicate: protectedProcedure
+    .input(z.object({ gameId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Check if user has admin permission for the source game
+      const hasPermission = await checkGameAdminPermission(
+        ctx.db,
+        input.gameId,
+        ctx.session.user.id
+      );
+
+      if (!hasPermission) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to duplicate this game",
+        });
+      }
+
+      // Get the original game with songs only
+      const originalGame = await ctx.db.bingoGame.findUnique({
+        where: { id: input.gameId },
+        include: {
+          songs: {
+            select: {
+              title: true,
+              artist: true,
+            },
+          },
+        },
+      });
+
+      if (!originalGame) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Original game not found",
+        });
+      }
+
+      // Create new game with copied songs only
+      const duplicatedGame = await ctx.db.bingoGame.create({
+        data: {
+          title: `${originalGame.title} (コピー)`,
+          size: originalGame.size,
+          status: GameStatus.EDITING,
+          createdBy: ctx.session.user.id,
+          songs: {
+            create: originalGame.songs.map((song) => ({
+              title: song.title,
+              artist: song.artist,
+            })),
+          },
+        },
+        include: {
+          songs: true,
+          participants: true,
+        },
+      });
+
+      return duplicatedGame;
+    }),
+
   // Admin management procedures
   addAdmin: protectedProcedure
     .input(

@@ -117,6 +117,12 @@ const AdminDashboard: NextPage = () => {
                       >
                         参加用URL
                       </Link>
+                      <Link
+                        href={`/admin/duplicate/${game.id}`}
+                        className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                      >
+                        複製
+                      </Link>
                     </div>
                   </div>
                 </div>
