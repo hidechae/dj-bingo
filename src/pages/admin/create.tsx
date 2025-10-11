@@ -86,7 +86,7 @@ const CreateBingo: NextPage = () => {
               </h1>
               <button
                 onClick={() => router.back()}
-                className="text-gray-500 hover:text-gray-700"
+                className="cursor-pointer text-gray-500 hover:text-gray-700"
               >
                 戻る
               </button>
@@ -146,7 +146,7 @@ const CreateBingo: NextPage = () => {
               <button
                 type="submit"
                 disabled={createBingoMutation.isPending}
-                className="rounded-lg bg-blue-600 px-8 py-3 text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                className="cursor-pointer rounded-lg bg-blue-600 px-8 py-3 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {createBingoMutation.isPending ? "作成中..." : "ビンゴを作成"}
               </button>

@@ -44,7 +44,7 @@ export const SongEditMode = ({
             <button
               type="button"
               onClick={() => onRemoveSong(index)}
-              className="self-end px-2 text-red-600 hover:text-red-800 sm:self-auto"
+              className="cursor-pointer self-end px-2 text-red-600 hover:text-red-800 sm:self-auto"
             >
               削除
             </button>
@@ -57,7 +57,7 @@ export const SongEditMode = ({
         <button
           type="button"
           onClick={onAddSong}
-          className="rounded-md bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
+          className="cursor-pointer rounded-md bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
         >
           曲を追加
         </button>

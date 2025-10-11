@@ -191,7 +191,7 @@ const StatusButton = ({
     <button
       onClick={() => onStatusChange(status)}
       disabled={isDisabled}
-      className={`relative rounded-md border px-3 py-2 text-sm transition-colors ${getButtonStyles()}`}
+      className={`relative cursor-pointer rounded-md border px-3 py-2 text-sm transition-colors disabled:cursor-not-allowed ${getButtonStyles()}`}
       aria-label={isCurrent ? `${label} (現在のステータス)` : label}
     >
       {isCurrent && (

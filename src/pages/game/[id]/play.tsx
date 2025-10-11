@@ -90,7 +90,7 @@ const PlayBingo: NextPage = () => {
             <div className="mt-8 text-center">
               <button
                 onClick={() => refetch()}
-                className="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
+                className="cursor-pointer rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
               >
                 状態を更新
               </button>

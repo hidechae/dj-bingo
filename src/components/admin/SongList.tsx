@@ -44,14 +44,14 @@ export const SongList = ({
             <button
               onClick={onSongEdit}
               disabled={isSaving}
-              className="rounded-sm bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+              className="cursor-pointer rounded-sm bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {songEditingMode ? "保存" : "編集"}
             </button>
             {songEditingMode && (
               <button
                 onClick={onCancelEdit}
-                className="rounded-sm bg-gray-600 px-3 py-1 text-sm text-white hover:bg-gray-700"
+                className="cursor-pointer rounded-sm bg-gray-600 px-3 py-1 text-sm text-white hover:bg-gray-700"
               >
                 キャンセル
               </button>
@@ -117,7 +117,7 @@ const SongDisplayMode = ({
                 <button
                   onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
                   disabled={isMarkingPlayed}
-                  className="rounded-sm bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
+                  className="cursor-pointer rounded-sm bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   演奏済みにする
                 </button>
@@ -157,7 +157,7 @@ const SongDisplayMode = ({
                 <button
                   onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
                   disabled={isMarkingPlayed}
-                  className="rounded-sm bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                  className="cursor-pointer rounded-sm bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   未演奏に戻す
                 </button>

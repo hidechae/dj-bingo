@@ -43,7 +43,7 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
                 <button
                   key={provider.name}
                   onClick={() => signIn(provider.id, { callbackUrl: "/admin" })}
-                  className="rounded-lg bg-white px-8 py-4 text-lg font-semibold text-gray-900 transition-colors hover:bg-gray-100"
+                  className="cursor-pointer rounded-lg bg-white px-8 py-4 text-lg font-semibold text-gray-900 transition-colors hover:bg-gray-100"
                 >
                   {provider.name}でサインイン
                 </button>

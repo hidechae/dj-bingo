@@ -29,13 +29,13 @@ export const IncompleteGridWarning = ({
             <div className="mt-3 flex justify-center gap-2">
               <button
                 onClick={onGoToSetup}
-                className="rounded-sm bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700"
+                className="cursor-pointer rounded-sm bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700"
               >
                 設定を完成させる
               </button>
               <button
                 onClick={onContinue}
-                className="rounded-sm bg-gray-600 px-3 py-1 text-xs text-white hover:bg-gray-700"
+                className="cursor-pointer rounded-sm bg-gray-600 px-3 py-1 text-xs text-white hover:bg-gray-700"
               >
                 このまま続ける
               </button>
