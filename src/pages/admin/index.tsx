@@ -27,7 +27,7 @@ const AdminDashboard: NextPage = () => {
   });
 
   const handleQuickDuplicate = (gameId: string) => {
-    if (duplicatingId) return; // Prevent multiple duplications
+    if (duplicatingId || duplicateMutation.isLoading) return; // Prevent multiple duplications
     setDuplicatingId(gameId);
     duplicateMutation.mutate({ gameId });
   };
@@ -137,7 +137,7 @@ const AdminDashboard: NextPage = () => {
                       </Link>
                       <button
                         onClick={() => handleQuickDuplicate(game.id)}
-                        disabled={duplicatingId === game.id}
+                        disabled={duplicatingId === game.id || duplicateMutation.isLoading}
                         className="text-sm font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50"
                       >
                         {duplicatingId === game.id ? "複製中..." : "クイック複製"}
