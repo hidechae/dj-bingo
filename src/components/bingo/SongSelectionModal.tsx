@@ -24,7 +24,7 @@ export const SongSelectionModal = ({
   const handleSongClick = (songId: string) => {
     if (!isSongUsed(songId)) {
       onSongSelect(songId);
-      onClose();
+      // Don't call onClose() here - let the parent handle modal state
     }
   };
 
@@ -47,9 +47,12 @@ export const SongSelectionModal = ({
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-            aria-label="閉じる"
+            aria-label="モーダルを閉じる"
+            title="閉じる"
           >
-            ×
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
         
