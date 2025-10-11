@@ -439,6 +439,36 @@ export const bingoRouter = createTRPCRouter({
       });
     }),
 
+  updateTitle: gameAdminProcedure
+    .input(
+      z.object({
+        gameId: z.string(),
+        title: z.string().min(1, "Title cannot be empty"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Update the game title
+      const updatedGame = await ctx.db.bingoGame.update({
+        where: { id: input.gameId },
+        data: { title: input.title },
+        include: {
+          songs: true,
+          participants: {
+            include: {
+              participantSongs: {
+                include: {
+                  song: true,
+                },
+              },
+            },
+          },
+          user: true,
+        },
+      });
+
+      return updatedGame;
+    }),
+
   changeStatus: gameAdminProcedure
     .input(
       z.object({
