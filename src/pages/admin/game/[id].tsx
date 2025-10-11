@@ -18,6 +18,7 @@ import { GameInfoSidebar } from "~/components/admin/GameInfoSidebar";
 import { SongList } from "~/components/admin/SongList";
 import { ParticipantTable } from "~/components/admin/ParticipantTable";
 import { StatusChangeModal } from "~/components/admin/StatusChangeModal";
+import { AdminManagement } from "~/components/admin/AdminManagement";
 
 const AdminGameManagement: NextPage = () => {
   const { data: session, status } = useSession();
@@ -28,6 +29,7 @@ const AdminGameManagement: NextPage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] =
     useState<GameStatus | null>(null);
+  const [showAdminManagement, setShowAdminManagement] = useState(false);
 
   const {
     bingoGame,
@@ -179,12 +181,20 @@ const AdminGameManagement: NextPage = () => {
               <h1 className="text-xl font-semibold text-gray-900">
                 {bingoGame.title} - 管理画面
               </h1>
-              <button
-                onClick={() => router.push("/admin")}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ダッシュボードに戻る
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setShowAdminManagement(true)}
+                  className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
+                >
+                  管理者の管理
+                </button>
+                <button
+                  onClick={() => router.push("/admin")}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ダッシュボードに戻る
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -237,6 +247,13 @@ const AdminGameManagement: NextPage = () => {
           setPendingStatusChange(null);
         }}
       />
+
+      {showAdminManagement && (
+        <AdminManagement
+          gameId={id as string}
+          onClose={() => setShowAdminManagement(false)}
+        />
+      )}
     </>
   );
 };

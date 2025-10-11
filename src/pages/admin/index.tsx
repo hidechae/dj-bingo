@@ -92,6 +92,17 @@ const AdminDashboard: NextPage = () => {
                       <p>
                         作成日: {new Date(game.createdAt).toLocaleDateString()}
                       </p>
+                      <div className="mt-2">
+                        {game.createdBy === session.user.id ? (
+                          <span className="inline-flex items-center rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                            作成者
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                            管理者
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="mt-4 flex gap-2">
                       <Link

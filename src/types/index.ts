@@ -21,18 +21,33 @@ export type IncompleteParticipant = {
   createdAt: Date;
 };
 
-export enum BingoSize {
-  THREE_BY_THREE = "THREE_BY_THREE",
-  FOUR_BY_FOUR = "FOUR_BY_FOUR",
-  FIVE_BY_FIVE = "FIVE_BY_FIVE",
-}
+export const BingoSizeValues = [
+  "THREE_BY_THREE",
+  "FOUR_BY_FOUR",
+  "FIVE_BY_FIVE",
+] as const;
+export type BingoSize = (typeof BingoSizeValues)[number];
 
-export enum GameStatus {
-  EDITING = "EDITING",
-  ENTRY = "ENTRY",
-  PLAYING = "PLAYING",
-  FINISHED = "FINISHED",
-}
+export const BingoSize = {
+  THREE_BY_THREE: "THREE_BY_THREE",
+  FOUR_BY_FOUR: "FOUR_BY_FOUR",
+  FIVE_BY_FIVE: "FIVE_BY_FIVE",
+} as const;
+
+export const GameStatusValues = [
+  "EDITING",
+  "ENTRY",
+  "PLAYING",
+  "FINISHED",
+] as const;
+export type GameStatus = (typeof GameStatusValues)[number];
+
+export const GameStatus = {
+  EDITING: "EDITING",
+  ENTRY: "ENTRY",
+  PLAYING: "PLAYING",
+  FINISHED: "FINISHED",
+} as const;
 
 // Helper functions for bingo game logic
 
