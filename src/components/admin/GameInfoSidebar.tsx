@@ -146,7 +146,9 @@ const StatusButton = ({
 }) => {
   const isCurrent = currentStatus === status;
   const isDisabled =
-    isCurrent || isChangingStatus || !isValidStatusTransition(currentStatus, status);
+    isCurrent ||
+    isChangingStatus ||
+    !isValidStatusTransition(currentStatus, status);
 
   const getButtonStyles = () => {
     if (isCurrent) {
@@ -193,12 +195,12 @@ const StatusButton = ({
       aria-label={isCurrent ? `${label} (現在のステータス)` : label}
     >
       {isCurrent && (
-        <span 
+        <span
           className="absolute -top-1 -right-1 flex h-3 w-3"
           aria-hidden="true"
         >
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-white"></span>
         </span>
       )}
       {label}
