@@ -32,7 +32,7 @@ async function checkGameAdminPermission(
   });
 
   if (!game) return false;
-  
+
   // User is admin if they're the creator or explicitly added as admin
   return game.createdBy === userId || game.gameAdmins.length > 0;
 }
@@ -129,7 +129,8 @@ export const bingoRouter = createTRPCRouter({
       if (!targetUser) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "このメールアドレスのユーザーはまだDJ Bingoにサインアップしていません。先にGoogle認証でサインインしてもらう必要があります。",
+          message:
+            "このメールアドレスのユーザーはまだDJ Bingoにサインアップしていません。先にGoogle認証でサインインしてもらう必要があります。",
         });
       }
 
@@ -406,7 +407,7 @@ export const bingoRouter = createTRPCRouter({
 
       if (!game) {
         throw new TRPCError({
-          code: "NOT_FOUND", 
+          code: "NOT_FOUND",
           message: "Game not found",
         });
       }

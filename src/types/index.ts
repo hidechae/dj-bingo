@@ -21,8 +21,12 @@ export type IncompleteParticipant = {
   createdAt: Date;
 };
 
-export const BingoSizeValues = ["THREE_BY_THREE", "FOUR_BY_FOUR", "FIVE_BY_FIVE"] as const;
-export type BingoSize = typeof BingoSizeValues[number];
+export const BingoSizeValues = [
+  "THREE_BY_THREE",
+  "FOUR_BY_FOUR",
+  "FIVE_BY_FIVE",
+] as const;
+export type BingoSize = (typeof BingoSizeValues)[number];
 
 export const BingoSize = {
   THREE_BY_THREE: "THREE_BY_THREE",
@@ -30,8 +34,13 @@ export const BingoSize = {
   FIVE_BY_FIVE: "FIVE_BY_FIVE",
 } as const;
 
-export const GameStatusValues = ["EDITING", "ENTRY", "PLAYING", "FINISHED"] as const;
-export type GameStatus = typeof GameStatusValues[number];
+export const GameStatusValues = [
+  "EDITING",
+  "ENTRY",
+  "PLAYING",
+  "FINISHED",
+] as const;
+export type GameStatus = (typeof GameStatusValues)[number];
 
 export const GameStatus = {
   EDITING: "EDITING",
