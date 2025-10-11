@@ -35,8 +35,8 @@ export const SongSelectionModal = ({
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50"
+    <div
+      className="bg-opacity-50 fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600"
       onClick={handleBackdropClick}
     >
       <div className="relative mx-4 w-full max-w-2xl rounded-md border bg-white p-6 shadow-lg">
@@ -50,12 +50,22 @@ export const SongSelectionModal = ({
             aria-label="モーダルを閉じる"
             title="閉じる"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
-        
+
         <div className="mb-4">
           <p className="text-sm text-gray-600">
             利用可能な楽曲から1つを選択してください
