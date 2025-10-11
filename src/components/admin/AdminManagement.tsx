@@ -25,7 +25,7 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
       // Completely suppress error propagation
       // The UI will display the error via addAdminMutation.error
     },
-    retry: process.env.NODE_ENV === "production", // Retry in production, not in development
+    retry: false, // Always false for mutations as requested
   });
 
   const removeAdminMutation = api.bingo.removeAdmin.useMutation({

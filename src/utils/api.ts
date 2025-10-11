@@ -33,7 +33,7 @@ export const api = createTRPCNext<AppRouter>({
             refetchOnWindowFocus: false,
           },
           mutations: {
-            retry: process.env.NODE_ENV === "production",
+            retry: false, // Always false for mutations as requested
             // Suppress error throwing to prevent Next.js error overlays
             useErrorBoundary: false,
           },
