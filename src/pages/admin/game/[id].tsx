@@ -17,6 +17,7 @@ import { useParticipantSort } from "~/hooks/useParticipantSort";
 import { GameInfoSidebar } from "~/components/admin/GameInfoSidebar";
 import { SongList } from "~/components/admin/SongList";
 import { ParticipantTable } from "~/components/admin/ParticipantTable";
+import { SortableHeader } from "~/components/admin/SortableHeader";
 import { StatusChangeModal } from "~/components/admin/StatusChangeModal";
 import { AdminManagement } from "~/components/admin/AdminManagement";
 
@@ -30,6 +31,7 @@ const AdminGameManagement: NextPage = () => {
   const [pendingStatusChange, setPendingStatusChange] =
     useState<GameStatus | null>(null);
   const [showAdminManagement, setShowAdminManagement] = useState(false);
+  const [activeTab, setActiveTab] = useState<"songs" | "participants">("songs");
 
   const {
     bingoGame,
@@ -211,28 +213,130 @@ const AdminGameManagement: NextPage = () => {
             />
 
             <div className="lg:col-span-2">
-              <SongList
-                bingoGame={bingoGame}
-                songEditingMode={songEditingMode}
-                editingSongs={editingSongs}
-                onSongEdit={handleSongEdit}
-                onAddSong={addSong}
-                onUpdateSong={updateSong}
-                onRemoveSong={removeSong}
-                onCancelEdit={cancelEditing}
-                onToggleSongPlayed={toggleSongPlayed}
-                isSaving={updateSongsMutation.isPending}
-                isMarkingPlayed={markSongMutation.isPending}
-              />
+              {/* Tab Navigation */}
+              <div className="mb-6">
+                <nav className="flex space-x-8" aria-label="Tabs">
+                  <button
+                    onClick={() => setActiveTab("songs")}
+                    className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === "songs"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    楽曲リスト
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("participants")}
+                    className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === "participants"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    参加者一覧
+                  </button>
+                </nav>
+              </div>
+
+              {/* Tab Content */}
+              {activeTab === "songs" && (
+                <SongList
+                  bingoGame={bingoGame}
+                  songEditingMode={songEditingMode}
+                  editingSongs={editingSongs}
+                  onSongEdit={handleSongEdit}
+                  onAddSong={addSong}
+                  onUpdateSong={updateSong}
+                  onRemoveSong={removeSong}
+                  onCancelEdit={cancelEditing}
+                  onToggleSongPlayed={toggleSongPlayed}
+                  isSaving={updateSongsMutation.isPending}
+                  isMarkingPlayed={markSongMutation.isPending}
+                />
+              )}
+
+              {activeTab === "participants" && (
+                <div className="rounded-lg bg-white p-6 shadow-sm">
+                  <h3 className="mb-4 text-lg font-medium text-gray-900">参加者一覧</h3>
+                  {participants && participants.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <SortableHeader
+                              label="名前"
+                              field="name"
+                              currentSortField={sortField}
+                              sortDirection={sortDirection}
+                              onSort={handleSort}
+                            />
+                            <SortableHeader
+                              label="グリッド状態"
+                              field="isGridComplete"
+                              currentSortField={sortField}
+                              sortDirection={sortDirection}
+                              onSort={handleSort}
+                            />
+                            <SortableHeader
+                              label="勝利状態"
+                              field="hasWon"
+                              currentSortField={sortField}
+                              sortDirection={sortDirection}
+                              onSort={handleSort}
+                            />
+                            <SortableHeader
+                              label="参加時間"
+                              field="createdAt"
+                              currentSortField={sortField}
+                              sortDirection={sortDirection}
+                              onSort={handleSort}
+                            />
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-white">
+                          {sortedParticipants.map((participant) => (
+                            <tr key={participant.id}>
+                              <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                                {participant.name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                                    participant.isGridComplete
+                                      ? "bg-green-100 text-green-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  }`}
+                                >
+                                  {participant.isGridComplete ? "完成" : "設定中"}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {participant.hasWon ? (
+                                  <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">
+                                    勝利！
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-gray-500">未勝利</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                                {new Date(participant.createdAt).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="py-4 text-center text-gray-500">
+                      まだ参加者がいません
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-
-          <ParticipantTable
-            participants={sortedParticipants}
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-          />
         </div>
       </main>
 
