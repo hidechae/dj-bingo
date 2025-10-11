@@ -21,40 +21,42 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
       // Show copy message for the newly added admin
       setShowCopyMessage(generateInviteMessage(newAdmin.user.name || newAdmin.user.email!));
     },
+    onError: (error) => {
+      // Error will be displayed in the UI via addAdminMutation.error
+      console.error("Failed to add admin:", error);
+    },
   });
 
   const removeAdminMutation = api.bingo.removeAdmin.useMutation({
     onSuccess: () => {
       void refetch();
     },
+    onError: (error) => {
+      // Log error and show user-friendly message
+      console.error("Failed to remove admin:", error);
+      alert("管理者の削除に失敗しました。もう一度お試しください。");
+    },
   });
 
-  const handleAddAdmin = async (e: React.FormEvent) => {
+  const handleAddAdmin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
 
-    try {
-      await addAdminMutation.mutateAsync({
-        gameId,
-        email: email.trim(),
-      });
-    } catch (error) {
-      // Error is handled by the mutation
-      console.error("Failed to add admin:", error);
-    }
+    // Use mutate instead of mutateAsync to avoid unhandled promise rejections
+    addAdminMutation.mutate({
+      gameId,
+      email: email.trim(),
+    });
   };
 
-  const handleRemoveAdmin = async (adminId: string) => {
+  const handleRemoveAdmin = (adminId: string) => {
     if (!confirm("このユーザーを管理者から削除しますか？")) return;
 
-    try {
-      await removeAdminMutation.mutateAsync({
-        gameId,
-        adminId,
-      });
-    } catch (error) {
-      console.error("Failed to remove admin:", error);
-    }
+    // Use mutate instead of mutateAsync to avoid unhandled promise rejections
+    removeAdminMutation.mutate({
+      gameId,
+      adminId,
+    });
   };
 
   const generateInviteMessage = (adminName: string) => {

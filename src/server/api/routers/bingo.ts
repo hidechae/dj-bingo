@@ -123,7 +123,7 @@ export const bingoRouter = createTRPCRouter({
       if (!hasPermission) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You don't have permission to add admins to this game",
+          message: "このゲームに管理者を追加する権限がありません",
         });
       }
 
@@ -143,7 +143,7 @@ export const bingoRouter = createTRPCRouter({
       if (!targetUser) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "User with this email address has not signed up yet. They need to sign in with Google first.",
+          message: "このメールアドレスのユーザーはまだDJ Bingoにサインアップしていません。先にGoogle認証でサインインしてもらう必要があります。",
         });
       }
 
@@ -160,7 +160,7 @@ export const bingoRouter = createTRPCRouter({
       if (!game) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Game not found",
+          message: "ゲームが見つかりません",
         });
       }
 
@@ -168,7 +168,7 @@ export const bingoRouter = createTRPCRouter({
       if (game.createdBy === targetUser.id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "This user is already the creator of this game",
+          message: "このユーザーは既にゲームの作成者です",
         });
       }
 
@@ -176,7 +176,7 @@ export const bingoRouter = createTRPCRouter({
       if (game.gameAdmins.length > 0) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "This user is already an admin of this game",
+          message: "このユーザーは既に管理者として追加されています",
         });
       }
 
