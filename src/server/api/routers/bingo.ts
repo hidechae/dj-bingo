@@ -447,6 +447,16 @@ export const bingoRouter = createTRPCRouter({
           });
         }
       } else if (
+        input.newStatus === GameStatus.EDITING &&
+        currentStatus === GameStatus.ENTRY
+      ) {
+        // Transition from ENTRY to EDITING - optionally clear participants
+        if (!preserveParticipants) {
+          await ctx.db.participant.deleteMany({
+            where: { bingoGameId: input.gameId },
+          });
+        }
+      } else if (
         input.newStatus === GameStatus.ENTRY &&
         currentStatus === GameStatus.PLAYING
       ) {
