@@ -1,3 +1,5 @@
+[![Lint, Type Check, and Build](https://github.com/hidechae/dj-bingo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hidechae/dj-bingo/actions/workflows/ci.yml)
+
 # DJ Bingo Application
 
 DJビンゴは、DJイベントで使用できるインタラクティブなビンゴゲームアプリケーションです。T3 Stack（Next.js、TypeScript、Prisma、tRPC）で構築されています。
