@@ -4,15 +4,33 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { data: bingoGames, isLoading } = api.bingo.getAllByUser.useQuery(
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const { data: bingoGames, isLoading, refetch } = api.bingo.getAllByUser.useQuery(
     undefined,
     { enabled: !!session }
   );
+
+  const duplicateMutation = api.bingo.duplicate.useMutation({
+    onSuccess: (data) => {
+      void refetch();
+      void router.push(`/admin/game/${data.id}`);
+      setDuplicatingId(null);
+    },
+    onError: () => {
+      setDuplicatingId(null);
+    },
+  });
+
+  const handleQuickDuplicate = (gameId: string) => {
+    if (duplicatingId) return; // Prevent multiple duplications
+    setDuplicatingId(gameId);
+    duplicateMutation.mutate({ gameId });
+  };
 
   useEffect(() => {
     if (status === "loading") return;
@@ -104,7 +122,7 @@ const AdminDashboard: NextPage = () => {
                         )}
                       </div>
                     </div>
-                    <div className="mt-4 flex gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2">
                       <Link
                         href={`/admin/game/${game.id}`}
                         className="text-sm font-medium text-blue-600 hover:text-blue-800"
@@ -117,11 +135,18 @@ const AdminDashboard: NextPage = () => {
                       >
                         参加用URL
                       </Link>
+                      <button
+                        onClick={() => handleQuickDuplicate(game.id)}
+                        disabled={duplicatingId === game.id}
+                        className="text-sm font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50"
+                      >
+                        {duplicatingId === game.id ? "複製中..." : "クイック複製"}
+                      </button>
                       <Link
                         href={`/admin/duplicate/${game.id}`}
-                        className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                        className="text-sm font-medium text-orange-600 hover:text-orange-800"
                       >
-                        複製
+                        編集して複製
                       </Link>
                     </div>
                   </div>
