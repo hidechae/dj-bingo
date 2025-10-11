@@ -21,10 +21,11 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
       // Show copy message for the newly added admin
       setShowCopyMessage(generateInviteMessage(newAdmin.user.name || newAdmin.user.email!));
     },
-    onError: (error) => {
-      // Error will be displayed in the UI via addAdminMutation.error
-      console.error("Failed to add admin:", error);
+    onError: () => {
+      // Completely suppress error propagation
+      // The UI will display the error via addAdminMutation.error
     },
+    retry: false, // Don't retry on error
   });
 
   const removeAdminMutation = api.bingo.removeAdmin.useMutation({
@@ -42,11 +43,16 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
     e.preventDefault();
     if (!email.trim()) return;
 
-    // Use mutate instead of mutateAsync to avoid unhandled promise rejections
-    addAdminMutation.mutate({
-      gameId,
-      email: email.trim(),
-    });
+    try {
+      // Use mutate instead of mutateAsync to avoid unhandled promise rejections
+      addAdminMutation.mutate({
+        gameId,
+        email: email.trim(),
+      });
+    } catch {
+      // Catch any synchronous errors and suppress them completely
+      // The error will still be available via addAdminMutation.error for UI display
+    }
   };
 
   const handleRemoveAdmin = (adminId: string) => {

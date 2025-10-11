@@ -26,6 +26,19 @@ export const api = createTRPCNext<AppRouter>({
           transformer: superjson,
         }),
       ],
+      queryClientConfig: {
+        defaultOptions: {
+          queries: {
+            retry: false,
+            refetchOnWindowFocus: false,
+          },
+          mutations: {
+            retry: false,
+            // Suppress error throwing to prevent Next.js error overlays
+            useErrorBoundary: false,
+          },
+        },
+      },
     } as CreateTRPCClientOptions<AppRouter>;
   },
   transformer: superjson,
