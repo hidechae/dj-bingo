@@ -97,52 +97,111 @@ export const GameInfoSidebar = ({
           ステータス変更
         </h3>
         <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => onStatusChange(GameStatus.EDITING)}
-            disabled={
-              currentStatus === GameStatus.EDITING ||
-              isChangingStatus ||
-              !isValidStatusTransition(currentStatus, GameStatus.EDITING)
-            }
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            編集中
-          </button>
-          <button
-            onClick={() => onStatusChange(GameStatus.ENTRY)}
-            disabled={
-              currentStatus === GameStatus.ENTRY ||
-              isChangingStatus ||
-              !isValidStatusTransition(currentStatus, GameStatus.ENTRY)
-            }
-            className="rounded-md border border-blue-300 px-3 py-2 text-sm text-blue-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            エントリー中
-          </button>
-          <button
-            onClick={() => onStatusChange(GameStatus.PLAYING)}
-            disabled={
-              currentStatus === GameStatus.PLAYING ||
-              isChangingStatus ||
-              !isValidStatusTransition(currentStatus, GameStatus.PLAYING)
-            }
-            className="rounded-md border border-green-300 px-3 py-2 text-sm text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            ゲーム中
-          </button>
-          <button
-            onClick={() => onStatusChange(GameStatus.FINISHED)}
-            disabled={
-              currentStatus === GameStatus.FINISHED ||
-              isChangingStatus ||
-              !isValidStatusTransition(currentStatus, GameStatus.FINISHED)
-            }
-            className="rounded-md border border-red-300 px-3 py-2 text-sm text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            終了
-          </button>
+          <StatusButton
+            status={GameStatus.EDITING}
+            currentStatus={currentStatus}
+            isChangingStatus={isChangingStatus}
+            onStatusChange={onStatusChange}
+            label="編集中"
+          />
+          <StatusButton
+            status={GameStatus.ENTRY}
+            currentStatus={currentStatus}
+            isChangingStatus={isChangingStatus}
+            onStatusChange={onStatusChange}
+            label="エントリー中"
+          />
+          <StatusButton
+            status={GameStatus.PLAYING}
+            currentStatus={currentStatus}
+            isChangingStatus={isChangingStatus}
+            onStatusChange={onStatusChange}
+            label="ゲーム中"
+          />
+          <StatusButton
+            status={GameStatus.FINISHED}
+            currentStatus={currentStatus}
+            isChangingStatus={isChangingStatus}
+            onStatusChange={onStatusChange}
+            label="終了"
+          />
         </div>
       </div>
     </div>
+  );
+};
+
+const StatusButton = ({
+  status,
+  currentStatus,
+  isChangingStatus,
+  onStatusChange,
+  label,
+}: {
+  status: GameStatus;
+  currentStatus: GameStatus;
+  isChangingStatus: boolean;
+  onStatusChange: (status: GameStatus) => void;
+  label: string;
+}) => {
+  const isCurrent = currentStatus === status;
+  const isDisabled =
+    isCurrent || isChangingStatus || !isValidStatusTransition(currentStatus, status);
+
+  const getButtonStyles = () => {
+    if (isCurrent) {
+      // Current status - prominent styling based on status type
+      switch (status) {
+        case GameStatus.EDITING:
+          return "bg-gray-600 text-white border-gray-600 shadow-md font-semibold";
+        case GameStatus.ENTRY:
+          return "bg-blue-600 text-white border-blue-600 shadow-md font-semibold";
+        case GameStatus.PLAYING:
+          return "bg-green-600 text-white border-green-600 shadow-md font-semibold";
+        case GameStatus.FINISHED:
+          return "bg-red-600 text-white border-red-600 shadow-md font-semibold";
+        default:
+          return "bg-gray-600 text-white border-gray-600 shadow-md font-semibold";
+      }
+    }
+
+    if (isDisabled) {
+      // Disabled/inactive - muted styling
+      return "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50";
+    }
+
+    // Available transition - colored but subtle
+    switch (status) {
+      case GameStatus.EDITING:
+        return "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400";
+      case GameStatus.ENTRY:
+        return "border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400";
+      case GameStatus.PLAYING:
+        return "border-green-300 text-green-700 hover:bg-green-50 hover:border-green-400";
+      case GameStatus.FINISHED:
+        return "border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400";
+      default:
+        return "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400";
+    }
+  };
+
+  return (
+    <button
+      onClick={() => onStatusChange(status)}
+      disabled={isDisabled}
+      className={`relative rounded-md border px-3 py-2 text-sm transition-colors ${getButtonStyles()}`}
+      aria-label={isCurrent ? `${label} (現在のステータス)` : label}
+    >
+      {isCurrent && (
+        <span 
+          className="absolute -top-1 -right-1 flex h-3 w-3"
+          aria-hidden="true"
+        >
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+        </span>
+      )}
+      {label}
+    </button>
   );
 };

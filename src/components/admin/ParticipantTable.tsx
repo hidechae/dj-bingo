@@ -3,6 +3,7 @@ import {
   type SortDirection,
 } from "~/hooks/useParticipantSort";
 import { type Participant } from "~/types";
+import { SortableHeader } from "./SortableHeader";
 
 type ParticipantTableProps = {
   participants: Participant[];
@@ -36,13 +37,6 @@ export const ParticipantTable = ({
                 onSort={onSort}
               />
               <SortableHeader
-                label="参加時間"
-                field="createdAt"
-                currentSortField={sortField}
-                sortDirection={sortDirection}
-                onSort={onSort}
-              />
-              <SortableHeader
                 label="グリッド状態"
                 field="isGridComplete"
                 currentSortField={sortField}
@@ -56,6 +50,13 @@ export const ParticipantTable = ({
                 sortDirection={sortDirection}
                 onSort={onSort}
               />
+              <SortableHeader
+                label="参加時間"
+                field="createdAt"
+                currentSortField={sortField}
+                sortDirection={sortDirection}
+                onSort={onSort}
+              />
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
@@ -63,9 +64,6 @@ export const ParticipantTable = ({
               <tr key={participant.id}>
                 <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
                   {participant.name}
-                </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                  {new Date(participant.createdAt).toLocaleString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
@@ -87,6 +85,9 @@ export const ParticipantTable = ({
                     <span className="text-sm text-gray-500">未勝利</span>
                   )}
                 </td>
+                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                  {new Date(participant.createdAt).toLocaleString()}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -96,28 +97,4 @@ export const ParticipantTable = ({
   );
 };
 
-const SortableHeader = ({
-  label,
-  field,
-  currentSortField,
-  sortDirection,
-  onSort,
-}: {
-  label: string;
-  field: ParticipantSortField;
-  currentSortField: ParticipantSortField;
-  sortDirection: SortDirection;
-  onSort: (field: ParticipantSortField) => void;
-}) => (
-  <th
-    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-    onClick={() => onSort(field)}
-  >
-    <div className="flex items-center">
-      {label}
-      {currentSortField === field && (
-        <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
-      )}
-    </div>
-  </th>
-);
+
