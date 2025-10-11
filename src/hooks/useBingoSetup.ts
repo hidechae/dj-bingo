@@ -28,8 +28,8 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
 
   // 参加者情報の取得
   const { data: participant } = api.participant.getBySessionToken.useQuery(
-    { sessionToken },
-    { enabled: !!sessionToken }
+    { sessionToken, bingoGameId: gameId as string },
+    { enabled: !!sessionToken && !!gameId }
   );
 
   /**

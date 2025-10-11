@@ -38,9 +38,14 @@ export const participantRouter = createTRPCRouter({
         });
       }
 
-      // Check if participant already exists with this session token
+      // Check if participant already exists with this session token for this specific game
       const existingParticipant = await ctx.db.participant.findUnique({
-        where: { sessionToken: input.sessionToken },
+        where: { 
+          sessionToken_bingoGameId: {
+            sessionToken: input.sessionToken,
+            bingoGameId: input.bingoGameId,
+          }
+        },
       });
 
       if (existingParticipant) {
@@ -69,9 +74,41 @@ export const participantRouter = createTRPCRouter({
     }),
 
   getBySessionToken: publicProcedure
-    .input(z.object({ sessionToken: z.string() }))
+    .input(z.object({ 
+      sessionToken: z.string(),
+      bingoGameId: z.string().optional(),
+    }))
     .query(async ({ ctx, input }) => {
-      const participant = await ctx.db.participant.findUnique({
+      // If bingoGameId is provided, find participant for specific game
+      if (input.bingoGameId) {
+        const participant = await ctx.db.participant.findUnique({
+          where: { 
+            sessionToken_bingoGameId: {
+              sessionToken: input.sessionToken,
+              bingoGameId: input.bingoGameId,
+            }
+          },
+          include: {
+            bingoGame: {
+              include: {
+                songs: {
+                  orderBy: [{ artist: "asc" }, { title: "asc" }],
+                },
+              },
+            },
+            participantSongs: {
+              include: {
+                song: true,
+              },
+              orderBy: { position: "asc" },
+            },
+          },
+        });
+        return participant;
+      }
+
+      // If no bingoGameId provided, return first participant found (backward compatibility)
+      const participant = await ctx.db.participant.findFirst({
         where: { sessionToken: input.sessionToken },
         include: {
           bingoGame: {
@@ -88,6 +125,7 @@ export const participantRouter = createTRPCRouter({
             orderBy: { position: "asc" },
           },
         },
+        orderBy: { createdAt: "desc" }, // Get most recent participation
       });
 
       return participant;
@@ -106,11 +144,12 @@ export const participantRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const participant = await ctx.db.participant.findUnique({
+      const participant = await ctx.db.participant.findFirst({
         where: { sessionToken: input.sessionToken },
         include: {
           bingoGame: true,
         },
+        orderBy: { createdAt: "desc" }, // Get most recent participation
       });
 
       if (!participant) {
@@ -154,8 +193,9 @@ export const participantRouter = createTRPCRouter({
   getBingoStatus: publicProcedure
     .input(z.object({ sessionToken: z.string() }))
     .query(async ({ ctx, input }) => {
-      const participant = await ctx.db.participant.findUnique({
+      const participant = await ctx.db.participant.findFirst({
         where: { sessionToken: input.sessionToken },
+        orderBy: { createdAt: "desc" }, // Get most recent participation
         include: {
           bingoGame: {
             include: {
