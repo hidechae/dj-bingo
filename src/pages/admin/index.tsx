@@ -10,10 +10,11 @@ const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
-  const { data: bingoGames, isLoading, refetch } = api.bingo.getAllByUser.useQuery(
-    undefined,
-    { enabled: !!session }
-  );
+  const {
+    data: bingoGames,
+    isLoading,
+    refetch,
+  } = api.bingo.getAllByUser.useQuery(undefined, { enabled: !!session });
 
   const duplicateMutation = api.bingo.duplicate.useMutation({
     onSuccess: (data) => {
@@ -131,23 +132,23 @@ const AdminDashboard: NextPage = () => {
                       </Link>
                       <Link
                         href={`/game/${game.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-sm font-medium text-green-600 hover:text-green-800"
                       >
                         参加用URL
                       </Link>
                       <button
                         onClick={() => handleQuickDuplicate(game.id)}
-                        disabled={duplicatingId === game.id || duplicateMutation.isPending}
+                        disabled={
+                          duplicatingId === game.id ||
+                          duplicateMutation.isPending
+                        }
                         className="text-sm font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50"
                       >
-                        {duplicatingId === game.id ? "複製中..." : "クイック複製"}
+                        {duplicatingId === game.id ? "複製中..." : "複製"}
                       </button>
-                      <Link
-                        href={`/admin/duplicate/${game.id}`}
-                        className="text-sm font-medium text-orange-600 hover:text-orange-800"
-                      >
-                        編集して複製
-                      </Link>
+
                     </div>
                   </div>
                 </div>
