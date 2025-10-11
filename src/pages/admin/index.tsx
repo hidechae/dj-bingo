@@ -77,9 +77,10 @@ const AdminDashboard: NextPage = () => {
           {bingoGames && bingoGames.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {bingoGames.map((game) => (
-                <div
+                <Link
                   key={game.id}
-                  className="overflow-hidden rounded-lg bg-white shadow-sm"
+                  href={`/admin/game/${game.id}`}
+                  className="block cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className="p-6">
                     <h3 className="mb-2 text-lg font-medium text-gray-900">
@@ -104,16 +105,8 @@ const AdminDashboard: NextPage = () => {
                         )}
                       </div>
                     </div>
-                    <div className="mt-4">
-                      <Link
-                        href={`/admin/game/${game.id}`}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                      >
-                        管理
-                      </Link>
-                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
