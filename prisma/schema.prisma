@@ -109,7 +109,7 @@ model Song {
 model Participant {
     id               String            @id @default(cuid())
     name             String
-    sessionToken     String            @unique @map("session_token")
+    sessionToken     String            @map("session_token")
     bingoGameId      String            @map("bingo_game_id")
     bingoGame        BingoGame         @relation(fields: [bingoGameId], references: [id], onDelete: Cascade)
     createdAt        DateTime          @default(now()) @map("created_at")
@@ -118,6 +118,7 @@ model Participant {
     wonAt            DateTime?         @map("won_at")
     participantSongs ParticipantSong[]
 
+    @@unique([sessionToken, bingoGameId])
     @@map("participants")
 }
 

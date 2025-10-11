@@ -21,9 +21,9 @@ export const useBingoPlay = (gameId: string | string[] | undefined) => {
   // ビンゴ状態を5秒ごとにポーリング
   const { data: bingoStatus, refetch } =
     api.participant.getBingoStatus.useQuery(
-      { sessionToken },
+      { sessionToken, bingoGameId: gameId as string },
       {
-        enabled: !!sessionToken,
+        enabled: !!sessionToken && !!gameId,
         refetchInterval: 5000, // Poll every 5 seconds for updates
       }
     );
