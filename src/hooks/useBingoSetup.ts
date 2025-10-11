@@ -25,6 +25,8 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
   const [gridSize, setGridSize] = useState(3);
   // 現在選択中のグリッド位置（null = 未選択）
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+  // モーダルの表示状態
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 参加者情報の取得
   const { data: participant } = api.participant.getBySessionToken.useQuery(
@@ -109,12 +111,13 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
   };
 
   /**
-   * グリッド上の位置を選択する
+   * グリッド上の位置を選択してモーダルを開く
    *
    * @param position - 選択する位置
    */
   const handlePositionSelect = (position: number) => {
     setSelectedPosition(position);
+    setIsModalOpen(true);
   };
 
   /**
@@ -127,7 +130,16 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
     if (selectedPosition !== null && !isSongUsed(songId)) {
       handleSongSelect(selectedPosition, songId);
       setSelectedPosition(null); // 割り当て後は選択を解除
+      setIsModalOpen(false); // モーダルを閉じる
     }
+  };
+
+  /**
+   * モーダルを閉じる
+   */
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedPosition(null);
   };
 
   /**
@@ -153,6 +165,7 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
   const handleClearAll = () => {
     setSelectedSongs({});
     setSelectedPosition(null);
+    setIsModalOpen(false);
   };
 
   /**
@@ -195,12 +208,14 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
     selectedSongs,
     gridSize,
     selectedPosition,
+    isModalOpen,
     assignSongsMutation,
     handlePositionSelect,
     handleSongAssign,
     handleClearPosition,
     handleClearAll,
     handleSubmit,
+    handleModalClose,
     isSongUsed,
   };
 };

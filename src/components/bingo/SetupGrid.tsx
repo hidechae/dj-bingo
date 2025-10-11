@@ -23,8 +23,11 @@ export const SetupGrid = ({
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-900">ビンゴグリッド</h3>
       <div
-        className="grid gap-2"
-        style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
+        className="mx-auto grid gap-2 sm:gap-3 md:gap-4"
+        style={{
+          gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+          maxWidth: `${gridSize * 120}px`,
+        }}
       >
         {Array.from({ length: totalPositions }, (_, index) => (
           <GridCell
@@ -64,7 +67,7 @@ const GridCell = ({
   return (
     <div
       onClick={() => onSelect(position)}
-      className={`relative aspect-square cursor-pointer rounded-lg border-2 p-2 text-xs transition-all ${
+      className={`relative aspect-square cursor-pointer rounded-lg border-2 p-2 text-xs transition-all sm:p-3 sm:text-sm md:p-4 md:text-base ${
         isSelected
           ? "border-solid border-yellow-400 bg-yellow-100 shadow-md"
           : songId
@@ -75,11 +78,13 @@ const GridCell = ({
       {song ? (
         <>
           <div className="flex h-full flex-col items-center justify-center pr-4 text-center">
-            <div className="text-xs font-medium text-gray-900">
+            <div className="text-xs font-medium text-gray-900 sm:text-sm md:text-base">
               {song.title}
             </div>
             {song.artist && (
-              <div className="mt-1 text-xs text-gray-600">{song.artist}</div>
+              <div className="mt-1 text-xs text-gray-600 sm:text-sm">
+                {song.artist}
+              </div>
             )}
           </div>
           <button
@@ -87,7 +92,7 @@ const GridCell = ({
               e.stopPropagation();
               onClear(position);
             }}
-            className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white transition-colors hover:bg-red-600"
+            className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white transition-colors hover:bg-red-600 sm:h-5 sm:w-5 md:h-6 md:w-6"
             title="このマスをクリア"
           >
             ×

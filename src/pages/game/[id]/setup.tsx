@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useBingoSetup } from "~/hooks/useBingoSetup";
 import { SetupHeader } from "~/components/bingo/SetupHeader";
 import { SetupGrid } from "~/components/bingo/SetupGrid";
-import { SongSelectionList } from "~/components/bingo/SongSelectionList";
+import { SongSelectionModal } from "~/components/bingo/SongSelectionModal";
 
 const SetupBingo: NextPage = () => {
   const router = useRouter();
@@ -15,12 +15,14 @@ const SetupBingo: NextPage = () => {
     selectedSongs,
     gridSize,
     selectedPosition,
+    isModalOpen,
     assignSongsMutation,
     handlePositionSelect,
     handleSongAssign,
     handleClearPosition,
     handleClearAll,
     handleSubmit,
+    handleModalClose,
     isSongUsed,
   } = useBingoSetup(id);
 
@@ -52,7 +54,7 @@ const SetupBingo: NextPage = () => {
               selectedPosition={selectedPosition}
             />
 
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div className="flex justify-center">
               <SetupGrid
                 gridSize={gridSize}
                 selectedSongs={selectedSongs}
@@ -60,13 +62,6 @@ const SetupBingo: NextPage = () => {
                 availableSongs={availableSongs}
                 onPositionSelect={handlePositionSelect}
                 onClearPosition={handleClearPosition}
-              />
-
-              <SongSelectionList
-                songs={availableSongs}
-                selectedPosition={selectedPosition}
-                isSongUsed={isSongUsed}
-                onSongAssign={handleSongAssign}
               />
             </div>
 
@@ -91,6 +86,15 @@ const SetupBingo: NextPage = () => {
             </div>
           </div>
         </div>
+
+        <SongSelectionModal
+          isOpen={isModalOpen}
+          songs={availableSongs}
+          selectedPosition={selectedPosition}
+          isSongUsed={isSongUsed}
+          onSongSelect={handleSongAssign}
+          onClose={handleModalClose}
+        />
       </main>
     </>
   );

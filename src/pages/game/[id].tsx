@@ -23,7 +23,8 @@ const ParticipantGame: NextPage = () => {
 
   const joinMutation = api.participant.join.useMutation({
     onSuccess: () => {
-      // Participant successfully joined, will redirect to setup
+      // Participant successfully joined, redirect to setup
+      void router.push(`/game/${id}/setup`);
     },
     onError: (error) => {
       if (error.message === "Already joined this game") {
