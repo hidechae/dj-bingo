@@ -68,7 +68,7 @@ const SetupBingo: NextPage = () => {
             <div className="mt-8 flex items-center justify-between">
               <button
                 onClick={handleClearAll}
-                className="px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
+                className="cursor-pointer px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
               >
                 すべてクリア
               </button>
@@ -79,7 +79,7 @@ const SetupBingo: NextPage = () => {
                   selectedCount !== totalPositions ||
                   assignSongsMutation.isPending
                 }
-                className="rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="cursor-pointer rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {assignSongsMutation.isPending ? "設定中..." : "ビンゴを開始"}
               </button>

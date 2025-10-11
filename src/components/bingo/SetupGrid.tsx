@@ -92,7 +92,7 @@ const GridCell = ({
               e.stopPropagation();
               onClear(position);
             }}
-            className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white transition-colors hover:bg-red-600 sm:h-5 sm:w-5 md:h-6 md:w-6"
+            className="absolute top-1 right-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-red-500 text-xs text-white transition-colors hover:bg-red-600 sm:h-5 sm:w-5 md:h-6 md:w-6"
             title="このマスをクリア"
           >
             ×

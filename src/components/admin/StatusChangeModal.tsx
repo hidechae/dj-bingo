@@ -53,7 +53,7 @@ export const StatusChangeModal = ({
           <div className="mt-4 flex justify-center gap-2">
             <button
               onClick={onCancel}
-              className="rounded-sm bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400"
+              className="cursor-pointer rounded-sm bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400"
             >
               キャンセル
             </button>
@@ -75,13 +75,13 @@ const PlayingToEntryConfirmation = ({
     <div className="flex justify-center gap-2">
       <button
         onClick={() => onConfirm({ preservePlayedSongs: true })}
-        className="rounded-sm bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+        className="cursor-pointer rounded-sm bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
       >
         維持する
       </button>
       <button
         onClick={() => onConfirm({ preservePlayedSongs: false })}
-        className="rounded-sm bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+        className="cursor-pointer rounded-sm bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
       >
         リセットする
       </button>
@@ -100,13 +100,13 @@ const EntryToEditingConfirmation = ({
     <div className="flex justify-center gap-2">
       <button
         onClick={() => onConfirm({ preserveParticipants: true })}
-        className="rounded-sm bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+        className="cursor-pointer rounded-sm bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
       >
         維持する
       </button>
       <button
         onClick={() => onConfirm({ preserveParticipants: false })}
-        className="rounded-sm bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+        className="cursor-pointer rounded-sm bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
       >
         削除する
       </button>
@@ -143,7 +143,7 @@ const EntryToPlayingConfirmation = ({
     <div className="flex justify-center gap-2">
       <button
         onClick={() => onConfirm()}
-        className="rounded-sm bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
+        className="cursor-pointer rounded-sm bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
       >
         変更する
       </button>

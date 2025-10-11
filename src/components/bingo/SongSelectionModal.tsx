@@ -46,7 +46,7 @@ export const SongSelectionModal = ({
           </h3>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
             aria-label="モーダルを閉じる"
             title="閉じる"
           >
@@ -91,7 +91,7 @@ export const SongSelectionModal = ({
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="rounded-sm bg-gray-300 px-4 py-2 text-sm text-gray-800 transition-colors hover:bg-gray-400"
+            className="cursor-pointer rounded-sm bg-gray-300 px-4 py-2 text-sm text-gray-800 transition-colors hover:bg-gray-400"
           >
             キャンセル
           </button>
