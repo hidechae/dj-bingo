@@ -190,11 +190,12 @@ const StatusButton = ({
       onClick={() => onStatusChange(status)}
       disabled={isDisabled}
       className={`relative rounded-md border px-3 py-2 text-sm transition-colors ${getButtonStyles()}`}
+      aria-label={isCurrent ? `${label} (現在のステータス)` : label}
     >
       {isCurrent && (
         <span 
           className="absolute -top-1 -right-1 flex h-3 w-3"
-          aria-label="現在のステータス"
+          aria-hidden="true"
         >
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
           <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
