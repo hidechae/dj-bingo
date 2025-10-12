@@ -1,12 +1,19 @@
 // Shared types and enums for the DJ Bingo application
 
-import { type RouterOutputs } from "~/utils/api";
+import {
+  type BingoGameWithDetails,
+  type SongEntity,
+  type ParticipantWithSongs,
+  type ParticipantSongWithSong,
+  BingoSize,
+  GameStatus,
+} from "~/domain/models";
 
-// Common tRPC output types
-export type BingoGame = NonNullable<RouterOutputs["bingo"]["getById"]>;
-export type Song = BingoGame["songs"][number];
-export type Participant = BingoGame["participants"][number];
-export type ParticipantSong = Participant["participantSongs"][number];
+// Re-export domain types for backward compatibility
+export type BingoGame = BingoGameWithDetails;
+export type Song = SongEntity;
+export type Participant = ParticipantWithSongs;
+export type ParticipantSong = ParticipantSongWithSong;
 
 // Grid cell type used in play screen
 export type GridCell = {
@@ -21,18 +28,15 @@ export type IncompleteParticipant = {
   createdAt: Date;
 };
 
+// Export domain enums
+export { BingoSize, GameStatus };
+
+// Enum values for Zod validation
 export const BingoSizeValues = [
   "THREE_BY_THREE",
   "FOUR_BY_FOUR",
   "FIVE_BY_FIVE",
 ] as const;
-export type BingoSize = (typeof BingoSizeValues)[number];
-
-export const BingoSize = {
-  THREE_BY_THREE: "THREE_BY_THREE",
-  FOUR_BY_FOUR: "FOUR_BY_FOUR",
-  FIVE_BY_FIVE: "FIVE_BY_FIVE",
-} as const;
 
 export const GameStatusValues = [
   "EDITING",
@@ -40,14 +44,6 @@ export const GameStatusValues = [
   "PLAYING",
   "FINISHED",
 ] as const;
-export type GameStatus = (typeof GameStatusValues)[number];
-
-export const GameStatus = {
-  EDITING: "EDITING",
-  ENTRY: "ENTRY",
-  PLAYING: "PLAYING",
-  FINISHED: "FINISHED",
-} as const;
 
 // Helper functions for bingo game logic
 

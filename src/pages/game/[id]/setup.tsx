@@ -26,7 +26,7 @@ const SetupBingo: NextPage = () => {
     isSongUsed,
   } = useBingoSetup(id);
 
-  if (!participant) {
+  if (!participant || !participant.bingoGame) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-2xl">Loading...</div>
