@@ -4,7 +4,7 @@
  * API通信中のローディング状態を管理し、UI全体でのローディングインジケーター表示と
  * 操作無効化を提供します。
  */
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useIsMutating, useIsFetching } from '@tanstack/react-query';
 
 interface LoadingContextType {
@@ -43,12 +43,17 @@ export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) =>
   // クエリの場合は重要でない限りオーバーレイ表示しない
   const isGlobalLoading = isMutationLoading || customLoading;
 
+  // setCustomLoadingを安定化
+  const stableSetCustomLoading = useCallback((loading: boolean) => {
+    setCustomLoading(loading);
+  }, []);
+
   return (
     <LoadingContext.Provider value={{
       isGlobalLoading,
       isMutationLoading,
       isQueryLoading,
-      setCustomLoading
+      setCustomLoading: stableSetCustomLoading
     }}>
       {children}
     </LoadingContext.Provider>

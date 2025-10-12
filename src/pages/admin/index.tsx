@@ -27,12 +27,8 @@ const AdminDashboard: NextPage = () => {
     }
   }, [session, status, router]);
 
-  if (status === "loading" || isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-2xl">Loading...</div>
-      </div>
-    );
+  if (status === "loading" || (!!session && isLoading)) {
+    return null; // グローバルローディングオーバーレイが表示される
   }
 
   if (!session) {

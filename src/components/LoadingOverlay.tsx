@@ -18,7 +18,10 @@ export const LoadingOverlay: React.FC = () => {
     if (isGlobalLoading) {
       // 500ms後にローディング表示（短時間の操作での点滅を避ける）
       timeoutId = setTimeout(() => {
-        setIsVisible(true);
+        // タイムアウト実行時に再度ローディング状態を確認
+        if (isGlobalLoading) {
+          setIsVisible(true);
+        }
       }, 500);
     } else {
       // ローディング終了時は即座に非表示
