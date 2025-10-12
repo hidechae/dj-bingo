@@ -173,10 +173,36 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const providers = await getProviders();
-  return {
-    props: { providers: providers ?? {} },
-  };
+  console.log("🔄 SIGNIN PAGE - getServerSideProps called");
+  
+  try {
+    const providers = await getProviders();
+    console.log("📋 PROVIDERS LOADED:");
+    
+    if (providers) {
+      const providerIds = Object.keys(providers);
+      console.log(`  - Total providers: ${providerIds.length}`);
+      providerIds.forEach(id => {
+        console.log(`  - ${id}: ${providers[id]?.name}`);
+      });
+      
+      const hasCredentials = providerIds.includes('credentials');
+      const hasGoogle = providerIds.includes('google');
+      console.log(`  - Has credentials provider: ${hasCredentials}`);
+      console.log(`  - Has Google provider: ${hasGoogle}`);
+    } else {
+      console.log("  - No providers found (null/undefined)");
+    }
+    
+    return {
+      props: { providers: providers ?? {} },
+    };
+  } catch (error) {
+    console.error("❌ Error in getServerSideProps:", error);
+    return {
+      props: { providers: {} },
+    };
+  }
 };
 
 export default SignIn;

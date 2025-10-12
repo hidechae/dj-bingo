@@ -21,6 +21,15 @@ declare module "next-auth" {
   }
 }
 
+// Log environment variables for debugging (without exposing secrets)
+console.log("🔧 AUTH CONFIG DEBUG:");
+console.log("  - Google OAuth configured:", !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET));
+console.log("  - GOOGLE_CLIENT_ID exists:", !!env.GOOGLE_CLIENT_ID);
+console.log("  - GOOGLE_CLIENT_SECRET exists:", !!env.GOOGLE_CLIENT_SECRET);
+console.log("  - DATABASE_URL exists:", !!process.env.DATABASE_URL);
+console.log("  - NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET);
+console.log("  - NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+
 export const authOptions: NextAuthOptions = {
   callbacks: {
     session: ({ session, user, token }) => {
@@ -80,18 +89,31 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("📧 CREDENTIALS AUTH ATTEMPT:", { 
+          hasEmail: !!credentials?.email, 
+          hasPassword: !!credentials?.password 
+        });
+        
         try {
           if (!credentials?.email || !credentials?.password) {
+            console.log("❌ Missing credentials");
             return null;
           }
 
+          console.log("🔍 Searching for user:", credentials.email);
           const user = await db.user.findUnique({
             where: {
               email: credentials.email,
             },
           });
 
-          if (!user || !user.password) {
+          if (!user) {
+            console.log("❌ User not found");
+            return null;
+          }
+
+          if (!user.password) {
+            console.log("❌ User has no password (OAuth-only user)");
             return null;
           }
 
@@ -101,16 +123,18 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isPasswordValid) {
+            console.log("❌ Invalid password");
             return null;
           }
 
+          console.log("✅ Credentials authentication successful for:", user.email);
           return {
             id: user.id,
             email: user.email,
             name: user.name,
           };
         } catch (error) {
-          console.error("Credentials auth error:", error);
+          console.error("❌ Credentials auth error:", error);
           return null;
         }
       },
@@ -120,6 +144,13 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
   },
 };
+
+// Log the final provider configuration
+const providers = authOptions.providers;
+console.log("🚀 FINAL PROVIDERS CONFIGURED:");
+providers.forEach((provider, index) => {
+  console.log(`  ${index + 1}. ${provider.id} (${provider.name})`);
+});
 
 export const getServerAuthSession = (ctx: {
   req: GetServerSidePropsContext["req"];
