@@ -65,34 +65,35 @@ describe("BingoGameRepository", () => {
 
   describe("findByIdWithSongs", () => {
     it("should return BingoGameWithSongs when game exists", async () => {
-      const mockGame: Prisma.BingoGameGetPayload<{ include: { songs: true } }> = {
-        id: "game-1",
-        title: "Test Game",
-        size: BingoSize.THREE_BY_THREE,
-        status: GameStatus.EDITING,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: "user-1",
-        isActive: true,
-        songs: [
-          {
-            id: "song-1",
-            title: "Song 1",
-            artist: "Artist 1",
-            bingoGameId: "game-1",
-            isPlayed: false,
-            playedAt: null,
-          },
-          {
-            id: "song-2",
-            title: "Song 2",
-            artist: null,
-            bingoGameId: "game-1",
-            isPlayed: true,
-            playedAt: new Date(),
-          },
-        ],
-      };
+      const mockGame: Prisma.BingoGameGetPayload<{ include: { songs: true } }> =
+        {
+          id: "game-1",
+          title: "Test Game",
+          size: BingoSize.THREE_BY_THREE,
+          status: GameStatus.EDITING,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          createdBy: "user-1",
+          isActive: true,
+          songs: [
+            {
+              id: "song-1",
+              title: "Song 1",
+              artist: "Artist 1",
+              bingoGameId: "game-1",
+              isPlayed: false,
+              playedAt: null,
+            },
+            {
+              id: "song-2",
+              title: "Song 2",
+              artist: null,
+              bingoGameId: "game-1",
+              isPlayed: true,
+              playedAt: new Date(),
+            },
+          ],
+        };
 
       vi.mocked(mockPrisma.bingoGame.findUnique).mockResolvedValue(mockGame);
 
@@ -124,7 +125,9 @@ describe("BingoGameRepository", () => {
       const mockGame: Prisma.BingoGameGetPayload<{
         include: {
           songs: true;
-          participants: { include: { participantSongs: { include: { song: true } } } };
+          participants: {
+            include: { participantSongs: { include: { song: true } } };
+          };
           user: true;
         };
       }> = {
@@ -298,7 +301,9 @@ describe("BingoGameRepository", () => {
       const mockUpdatedGame: Prisma.BingoGameGetPayload<{
         include: {
           songs: true;
-          participants: { include: { participantSongs: { include: { song: true } } } };
+          participants: {
+            include: { participantSongs: { include: { song: true } } };
+          };
           user: true;
         };
       }> = {
@@ -353,7 +358,9 @@ describe("BingoGameRepository", () => {
       const mockUpdatedGame: Prisma.BingoGameGetPayload<{
         include: {
           songs: true;
-          participants: { include: { participantSongs: { include: { song: true } } } };
+          participants: {
+            include: { participantSongs: { include: { song: true } } };
+          };
           user: true;
         };
       }> = {
