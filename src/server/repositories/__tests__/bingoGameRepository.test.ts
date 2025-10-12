@@ -1,8 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { BingoGameRepository } from "../bingoGameRepository";
+import { BingoGameRepository } from "~/server/repositories";
 import { createMockPrismaClient } from "~/test/mockPrisma";
 import { BingoSize, GameStatus } from "~/domain/models";
-import { type PrismaClient } from "@prisma/client";
+import {
+  type PrismaClient,
+  type BingoGame,
+  type Song,
+  type Participant,
+  type User,
+  type GameAdmin,
+  Prisma,
+} from "@prisma/client";
 
 describe("BingoGameRepository", () => {
   let mockPrisma: PrismaClient;
@@ -15,11 +23,11 @@ describe("BingoGameRepository", () => {
 
   describe("findById", () => {
     it("should return a BingoGameEntity when game exists", async () => {
-      const mockGame = {
+      const mockGame: BingoGame = {
         id: "game-1",
         title: "Test Game",
-        size: "THREE_BY_THREE",
-        status: "EDITING",
+        size: BingoSize.THREE_BY_THREE,
+        status: GameStatus.EDITING,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: "user-1",
@@ -57,11 +65,11 @@ describe("BingoGameRepository", () => {
 
   describe("findByIdWithSongs", () => {
     it("should return BingoGameWithSongs when game exists", async () => {
-      const mockGame = {
+      const mockGame: Prisma.BingoGameGetPayload<{ include: { songs: true } }> = {
         id: "game-1",
         title: "Test Game",
-        size: "THREE_BY_THREE",
-        status: "EDITING",
+        size: BingoSize.THREE_BY_THREE,
+        status: GameStatus.EDITING,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: "user-1",
@@ -113,11 +121,17 @@ describe("BingoGameRepository", () => {
 
   describe("findByIdWithDetails", () => {
     it("should return BingoGameWithDetails including participants and user", async () => {
-      const mockGame = {
+      const mockGame: Prisma.BingoGameGetPayload<{
+        include: {
+          songs: true;
+          participants: { include: { participantSongs: { include: { song: true } } } };
+          user: true;
+        };
+      }> = {
         id: "game-1",
         title: "Test Game",
-        size: "FIVE_BY_FIVE",
-        status: "PLAYING",
+        size: BingoSize.FIVE_BY_FIVE,
+        status: GameStatus.PLAYING,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: "user-1",
@@ -166,6 +180,7 @@ describe("BingoGameRepository", () => {
           email: "test@example.com",
           emailVerified: new Date(),
           image: "https://example.com/image.jpg",
+          password: null,
         },
       };
 
@@ -189,11 +204,13 @@ describe("BingoGameRepository", () => {
 
   describe("create", () => {
     it("should create a new bingo game without songs", async () => {
-      const mockCreatedGame = {
+      const mockCreatedGame: Prisma.BingoGameGetPayload<{
+        include: { songs: true; participants: true };
+      }> = {
         id: "new-game",
         title: "New Game",
-        size: "FOUR_BY_FOUR",
-        status: "EDITING",
+        size: BingoSize.FOUR_BY_FOUR,
+        status: GameStatus.EDITING,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: "user-1",
@@ -234,11 +251,13 @@ describe("BingoGameRepository", () => {
     });
 
     it("should create a new bingo game with songs", async () => {
-      const mockCreatedGame = {
+      const mockCreatedGame: Prisma.BingoGameGetPayload<{
+        include: { songs: true; participants: true };
+      }> = {
         id: "new-game",
         title: "New Game",
-        size: "THREE_BY_THREE",
-        status: "EDITING",
+        size: BingoSize.THREE_BY_THREE,
+        status: GameStatus.EDITING,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: "user-1",
@@ -276,11 +295,17 @@ describe("BingoGameRepository", () => {
 
   describe("update", () => {
     it("should update a bingo game title", async () => {
-      const mockUpdatedGame = {
+      const mockUpdatedGame: Prisma.BingoGameGetPayload<{
+        include: {
+          songs: true;
+          participants: { include: { participantSongs: { include: { song: true } } } };
+          user: true;
+        };
+      }> = {
         id: "game-1",
         title: "Updated Title",
-        size: "THREE_BY_THREE",
-        status: "EDITING",
+        size: BingoSize.THREE_BY_THREE,
+        status: GameStatus.EDITING,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: "user-1",
@@ -293,6 +318,7 @@ describe("BingoGameRepository", () => {
           email: "test@example.com",
           emailVerified: null,
           image: null,
+          password: null,
         },
       };
 
@@ -324,11 +350,17 @@ describe("BingoGameRepository", () => {
     });
 
     it("should update a bingo game status", async () => {
-      const mockUpdatedGame = {
+      const mockUpdatedGame: Prisma.BingoGameGetPayload<{
+        include: {
+          songs: true;
+          participants: { include: { participantSongs: { include: { song: true } } } };
+          user: true;
+        };
+      }> = {
         id: "game-1",
         title: "Test Game",
-        size: "THREE_BY_THREE",
-        status: "ENTRY",
+        size: BingoSize.THREE_BY_THREE,
+        status: GameStatus.ENTRY,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: "user-1",
@@ -341,6 +373,7 @@ describe("BingoGameRepository", () => {
           email: "test@example.com",
           emailVerified: null,
           image: null,
+          password: null,
         },
       };
 
@@ -356,11 +389,11 @@ describe("BingoGameRepository", () => {
 
   describe("delete", () => {
     it("should delete a bingo game", async () => {
-      const mockDeletedGame = {
+      const mockDeletedGame: BingoGame = {
         id: "game-1",
         title: "Deleted Game",
-        size: "THREE_BY_THREE",
-        status: "EDITING",
+        size: BingoSize.THREE_BY_THREE,
+        status: GameStatus.EDITING,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: "user-1",
@@ -379,12 +412,19 @@ describe("BingoGameRepository", () => {
 
   describe("findManyByUser", () => {
     it("should return games created by or administered by the user", async () => {
-      const mockGames = [
+      const mockGames: Prisma.BingoGameGetPayload<{
+        include: {
+          songs: true;
+          participants: true;
+          user: true;
+          gameAdmins: { include: { user: true } };
+        };
+      }>[] = [
         {
           id: "game-1",
           title: "Game 1",
-          size: "THREE_BY_THREE",
-          status: "EDITING",
+          size: BingoSize.THREE_BY_THREE,
+          status: GameStatus.EDITING,
           createdAt: new Date("2024-01-01"),
           updatedAt: new Date(),
           createdBy: "user-1",
@@ -397,14 +437,15 @@ describe("BingoGameRepository", () => {
             email: "test@example.com",
             emailVerified: null,
             image: null,
+            password: null,
           },
           gameAdmins: [],
         },
         {
           id: "game-2",
           title: "Game 2",
-          size: "FIVE_BY_FIVE",
-          status: "PLAYING",
+          size: BingoSize.FIVE_BY_FIVE,
+          status: GameStatus.PLAYING,
           createdAt: new Date("2024-01-02"),
           updatedAt: new Date(),
           createdBy: "user-2",
@@ -417,6 +458,7 @@ describe("BingoGameRepository", () => {
             email: "other@example.com",
             emailVerified: null,
             image: null,
+            password: null,
           },
           gameAdmins: [
             {
@@ -431,6 +473,7 @@ describe("BingoGameRepository", () => {
                 email: "test@example.com",
                 emailVerified: null,
                 image: null,
+                password: null,
               },
             },
           ],
