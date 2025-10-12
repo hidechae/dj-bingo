@@ -24,10 +24,15 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
 
   // デバッグ用：コンソールに出力
   console.log("Providers:", providers);
+  console.log("Provider IDs:", providers ? Object.keys(providers) : "No providers");
 
   // Filter out credentials provider from OAuth providers for display
   const oauthProviders = providers ? Object.values(providers).filter(provider => provider.id !== "credentials") : [];
   const hasCredentialsProvider = providers ? Object.values(providers).some(provider => provider.id === "credentials") : false;
+  
+  // Additional debugging
+  console.log("OAuth Providers:", oauthProviders.map(p => p.id));
+  console.log("Has Credentials Provider:", hasCredentialsProvider);
 
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,19 +71,17 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
             管理者ログイン
           </h1>
 
-          {!providers || Object.keys(providers).length === 0 ? (
-            <div className="text-center text-white">
-              <p className="mb-2 text-xl">
-                認証プロバイダーが設定されていません
-              </p>
-              <p className="text-sm text-white/70">
-                環境変数を確認してください
-              </p>
-            </div>
-          ) : (
-            <div className="w-full flex flex-col gap-6">
-              {/* Email/Password Authentication Form */}
-              {hasCredentialsProvider && (
+          <div className="w-full flex flex-col gap-6">
+            {/* Email/Password Authentication Form - Always show as fallback */}
+            {(hasCredentialsProvider || (!providers || Object.keys(providers).length === 0)) && (
+              <div>
+                {(!providers || Object.keys(providers).length === 0) && (
+                  <div className="text-center text-white mb-4">
+                    <p className="text-sm text-white/70">
+                      プロバイダーの読み込み中またはメール認証のみ利用可能
+                    </p>
+                  </div>
+                )}
                 <div className="bg-white/10 rounded-lg p-6">
                   <form onSubmit={handleCredentialsSignIn} className="flex flex-col gap-4">
                     <div>
@@ -131,12 +134,13 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
                     </Link>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* OAuth Providers */}
-              {oauthProviders.length > 0 && (
+            {/* OAuth Providers */}
+            {oauthProviders.length > 0 && (
                 <div className="flex flex-col gap-3">
-                  {hasCredentialsProvider && (
+                  {(hasCredentialsProvider || (!providers || Object.keys(providers).length === 0)) && (
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t border-white/30" />
@@ -158,7 +162,6 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
                 </div>
               )}
             </div>
-          )}
 
           <div className="text-center text-white/70">
             <p>管理者のみがビンゴゲームを作成・管理できます</p>
