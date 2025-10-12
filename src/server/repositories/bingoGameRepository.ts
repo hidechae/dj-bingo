@@ -7,6 +7,7 @@ import {
   type BingoGameWithAdmins,
   type BingoGameFull,
   type CreateBingoGameInput,
+  type UserEntity,
   BingoSize,
   GameStatus,
 } from "~/domain/models";
@@ -315,13 +316,7 @@ export class BingoGameRepository {
           },
         })),
       })),
-      user: {
-        id: prismaGame.user.id,
-        name: prismaGame.user.name,
-        email: prismaGame.user.email,
-        emailVerified: prismaGame.user.emailVerified,
-        image: prismaGame.user.image,
-      },
+      user: this.toUserEntity(prismaGame.user),
     };
   }
 
@@ -330,26 +325,14 @@ export class BingoGameRepository {
   ): BingoGameWithAdmins {
     return {
       ...this.toDomain(prismaGame),
-      user: {
-        id: prismaGame.user.id,
-        name: prismaGame.user.name,
-        email: prismaGame.user.email,
-        emailVerified: prismaGame.user.emailVerified,
-        image: prismaGame.user.image,
-      },
+      user: this.toUserEntity(prismaGame.user),
       gameAdmins: prismaGame.gameAdmins.map((ga) => ({
         id: ga.id,
         bingoGameId: ga.bingoGameId,
         userId: ga.userId,
         addedBy: ga.addedBy,
         addedAt: ga.addedAt,
-        user: {
-          id: ga.user.id,
-          name: ga.user.name,
-          email: ga.user.email,
-          emailVerified: ga.user.emailVerified,
-          image: ga.user.image,
-        },
+        user: this.toUserEntity(ga.user),
       })),
     };
   }
@@ -363,14 +346,19 @@ export class BingoGameRepository {
         userId: ga.userId,
         addedBy: ga.addedBy,
         addedAt: ga.addedAt,
-        user: {
-          id: ga.user.id,
-          name: ga.user.name,
-          email: ga.user.email,
-          emailVerified: ga.user.emailVerified,
-          image: ga.user.image,
-        },
+        user: this.toUserEntity(ga.user),
       })),
+    };
+  }
+
+  private toUserEntity(prismaUser: { id: string; name: string | null; email: string | null; emailVerified: Date | null; image: string | null }): UserEntity {
+    return {
+      id: prismaUser.id,
+      name: prismaUser.name,
+      email: prismaUser.email,
+      emailVerified: prismaUser.emailVerified,
+      image: prismaUser.image,
+      // Don't include password for security
     };
   }
 }

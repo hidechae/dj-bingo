@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";
 import { db } from "~/server/db";
+import { createRepositories } from "~/server/repositories";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -20,10 +21,11 @@ export default async function handler(
   try {
     const { name, email, password } = registerSchema.parse(req.body);
 
+    // Use repository layer instead of direct Prisma access
+    const repositories = createRepositories(db);
+
     // Check if user already exists
-    const existingUser = await db.user.findUnique({
-      where: { email },
-    });
+    const existingUser = await repositories.user.findByEmail(email);
 
     if (existingUser) {
       return res
@@ -35,12 +37,10 @@ export default async function handler(
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create user
-    const user = await db.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
+    const user = await repositories.user.create({
+      name,
+      email,
+      password: hashedPassword,
     });
 
     return res.status(201).json({
