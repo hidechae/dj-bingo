@@ -13,6 +13,7 @@ import bcrypt from "bcryptjs";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { createRepositories } from "~/server/repositories";
+import { UserEntity } from "~/domain/models";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -80,14 +81,14 @@ const createProviders = () => {
 
           // Use repository layer instead of direct Prisma access
           const repositories = createRepositories(db);
-          
+
           // Add timeout and connection resilience
-          const user = await Promise.race([
+          const user = (await Promise.race([
             repositories.user.findByEmailWithPassword(credentials.email),
             new Promise((_, reject) =>
               setTimeout(() => reject(new Error("Database timeout")), 10000)
             ),
-          ]) as any;
+          ])) as UserEntity;
 
           if (!user) {
             console.log("❌ User not found");

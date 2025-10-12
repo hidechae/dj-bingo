@@ -351,7 +351,13 @@ export class BingoGameRepository {
     };
   }
 
-  private toUserEntity(prismaUser: { id: string; name: string | null; email: string | null; emailVerified: Date | null; image: string | null }): UserEntity {
+  private toUserEntity(prismaUser: {
+    id: string;
+    name: string | null;
+    email: string | null;
+    emailVerified: Date | null;
+    image: string | null;
+  }): UserEntity {
     return {
       id: prismaUser.id,
       name: prismaUser.name,
