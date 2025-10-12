@@ -20,6 +20,15 @@ export class UserRepository {
     return this.toDomain(user);
   }
 
+  // Method for authentication that includes password
+  async findByEmailWithPassword(email: string): Promise<UserEntity | null> {
+    const user = await this.db.user.findUnique({
+      where: { email },
+    });
+    if (!user) return null;
+    return this.toDomainWithPassword(user);
+  }
+
   async findMany(where?: { id?: string }): Promise<UserEntity[]> {
     const users = await this.db.user.findMany({
       where,
@@ -32,6 +41,7 @@ export class UserRepository {
     email?: string | null;
     emailVerified?: Date | null;
     image?: string | null;
+    password?: string | null;
   }): Promise<UserEntity> {
     const user = await this.db.user.create({
       data,
@@ -46,6 +56,7 @@ export class UserRepository {
       email?: string | null;
       emailVerified?: Date | null;
       image?: string | null;
+      password?: string | null;
     }
   ): Promise<UserEntity> {
     const user = await this.db.user.update({
@@ -69,6 +80,18 @@ export class UserRepository {
       email: prismaUser.email,
       emailVerified: prismaUser.emailVerified,
       image: prismaUser.image,
+      // Don't include password for security
+    };
+  }
+
+  private toDomainWithPassword(prismaUser: PrismaUser): UserEntity {
+    return {
+      id: prismaUser.id,
+      name: prismaUser.name,
+      email: prismaUser.email,
+      emailVerified: prismaUser.emailVerified,
+      image: prismaUser.image,
+      password: prismaUser.password,
     };
   }
 }

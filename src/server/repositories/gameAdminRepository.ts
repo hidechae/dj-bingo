@@ -2,7 +2,11 @@ import {
   type PrismaClient,
   type GameAdmin as PrismaGameAdmin,
 } from "@prisma/client";
-import { type GameAdminEntity, type GameAdminWithUser } from "~/domain/models";
+import {
+  type GameAdminEntity,
+  type GameAdminWithUser,
+  type UserEntity,
+} from "~/domain/models";
 
 type PrismaGameAdminWithUser = PrismaGameAdmin & {
   user: {
@@ -97,13 +101,24 @@ export class GameAdminRepository {
   ): GameAdminWithUser {
     return {
       ...this.toDomain(prismaGameAdmin),
-      user: {
-        id: prismaGameAdmin.user.id,
-        name: prismaGameAdmin.user.name,
-        email: prismaGameAdmin.user.email,
-        emailVerified: prismaGameAdmin.user.emailVerified,
-        image: prismaGameAdmin.user.image,
-      },
+      user: this.toUserEntity(prismaGameAdmin.user),
+    };
+  }
+
+  private toUserEntity(prismaUser: {
+    id: string;
+    name: string | null;
+    email: string | null;
+    emailVerified: Date | null;
+    image: string | null;
+  }): UserEntity {
+    return {
+      id: prismaUser.id,
+      name: prismaUser.name,
+      email: prismaUser.email,
+      emailVerified: prismaUser.emailVerified,
+      image: prismaUser.image,
+      // Don't include password for security
     };
   }
 }

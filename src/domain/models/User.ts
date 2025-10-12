@@ -6,4 +6,5 @@ export type UserEntity = {
   email: string | null;
   emailVerified: Date | null;
   image: string | null;
+  password?: string | null; // Optional for security - only included when needed
 };
