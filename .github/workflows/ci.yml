@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
         with:
-          generate-prisma: 'true'
+          generate-prisma: "true"
 
       - name: Run TypeScript type check
         run: npm run type-check
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
         with:
-          generate-prisma: 'true'
+          generate-prisma: "true"
 
       - name: Run tests
         run: npm run test:run
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
         with:
-          generate-prisma: 'true'
+          generate-prisma: "true"
 
       - name: Build application
         run: npm run build
