@@ -175,7 +175,7 @@ describe("BingoGameRepository", () => {
           email: "test@example.com",
           emailVerified: new Date(),
           image: "https://example.com/image.jpg",
-            password: null,
+          password: null,
         },
       };
 
@@ -316,7 +316,7 @@ describe("BingoGameRepository", () => {
           email: "test@example.com",
           emailVerified: null,
           image: null,
-            password: null,
+          password: null,
         },
       };
 
@@ -373,7 +373,7 @@ describe("BingoGameRepository", () => {
           email: "test@example.com",
           emailVerified: null,
           image: null,
-            password: null,
+          password: null,
         },
       };
 
@@ -473,7 +473,7 @@ describe("BingoGameRepository", () => {
                 email: "test@example.com",
                 emailVerified: null,
                 image: null,
-            password: null,
+                password: null,
               },
             },
           ],
