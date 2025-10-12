@@ -40,11 +40,11 @@ export const participantRouter = createTRPCRouter({
 
       // Check if participant already exists with this session token for this specific game
       const existingParticipant = await ctx.db.participant.findUnique({
-        where: { 
+        where: {
           sessionToken_bingoGameId: {
             sessionToken: input.sessionToken,
             bingoGameId: input.bingoGameId,
-          }
+          },
         },
       });
 
@@ -74,19 +74,21 @@ export const participantRouter = createTRPCRouter({
     }),
 
   getBySessionToken: publicProcedure
-    .input(z.object({ 
-      sessionToken: z.string(),
-      bingoGameId: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        sessionToken: z.string(),
+        bingoGameId: z.string().optional(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       // If bingoGameId is provided, find participant for specific game
       if (input.bingoGameId) {
         const participant = await ctx.db.participant.findUnique({
-          where: { 
+          where: {
             sessionToken_bingoGameId: {
               sessionToken: input.sessionToken,
               bingoGameId: input.bingoGameId,
-            }
+            },
           },
           include: {
             bingoGame: {
@@ -147,11 +149,11 @@ export const participantRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Find participant for specific game
       const participant = await ctx.db.participant.findUnique({
-        where: { 
+        where: {
           sessionToken_bingoGameId: {
             sessionToken: input.sessionToken,
             bingoGameId: input.bingoGameId,
-          }
+          },
         },
         include: {
           bingoGame: true,
@@ -197,18 +199,20 @@ export const participantRouter = createTRPCRouter({
     }),
 
   getBingoStatus: publicProcedure
-    .input(z.object({ 
-      sessionToken: z.string(),
-      bingoGameId: z.string(),
-    }))
+    .input(
+      z.object({
+        sessionToken: z.string(),
+        bingoGameId: z.string(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       // Find participant for specific game
       const participant = await ctx.db.participant.findUnique({
-        where: { 
+        where: {
           sessionToken_bingoGameId: {
             sessionToken: input.sessionToken,
             bingoGameId: input.bingoGameId,
-          }
+          },
         },
         include: {
           bingoGame: {
