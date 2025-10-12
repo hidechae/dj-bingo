@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
+import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const ParticipantGame: NextPage = () => {
   const router = useRouter();
@@ -11,15 +12,20 @@ const ParticipantGame: NextPage = () => {
   const [participantName, setParticipantName] = useState("");
   const [isJoining, setIsJoining] = useState(false);
 
-  const { data: bingoGame } = api.bingo.getById.useQuery(
+  const { data: bingoGame, isLoading: bingoGameLoading } = api.bingo.getById.useQuery(
     { id: id as string },
     { enabled: !!id }
   );
 
-  const { data: participant } = api.participant.getBySessionToken.useQuery(
+  const { data: participant, isLoading: participantLoading } = api.participant.getBySessionToken.useQuery(
     { sessionToken, bingoGameId: id as string },
     { enabled: !!sessionToken && !!id }
   );
+
+  // 初期ロード中はグローバルローディングを表示
+  useInitialLoading({ 
+    isLoading: bingoGameLoading || (!!sessionToken && participantLoading) 
+  });
 
   const joinMutation = api.participant.join.useMutation({
     onSuccess: () => {
@@ -77,11 +83,7 @@ const ParticipantGame: NextPage = () => {
   };
 
   if (!bingoGame) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-2xl">Loading...</div>
-      </div>
-    );
+    return null; // グローバルローディングオーバーレイが表示される
   }
 
   if (!bingoGame.isActive) {

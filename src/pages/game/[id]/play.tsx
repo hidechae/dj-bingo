@@ -8,6 +8,7 @@ import { BingoGrid } from "~/components/bingo/BingoGrid";
 import { IncompleteGridWarning } from "~/components/bingo/IncompleteGridWarning";
 import { WinStatus } from "~/components/bingo/WinStatus";
 import { RecentlyPlayedSongs } from "~/components/bingo/RecentlyPlayedSongs";
+import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const PlayBingo: NextPage = () => {
   const router = useRouter();
@@ -17,12 +18,11 @@ const PlayBingo: NextPage = () => {
 
   const { bingoStatus, refetch } = useBingoPlay(id);
 
+  // 初期ロード中はグローバルローディングを表示
+  useInitialLoading({ isLoading: !bingoStatus });
+
   if (!bingoStatus) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-2xl">Loading...</div>
-      </div>
-    );
+    return null; // グローバルローディングオーバーレイが表示される
   }
 
   const { participant, grid, gridSize, hasWon } = bingoStatus;

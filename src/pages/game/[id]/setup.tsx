@@ -5,6 +5,7 @@ import { useBingoSetup } from "~/hooks/useBingoSetup";
 import { SetupHeader } from "~/components/bingo/SetupHeader";
 import { SetupGrid } from "~/components/bingo/SetupGrid";
 import { SongSelectionModal } from "~/components/bingo/SongSelectionModal";
+import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const SetupBingo: NextPage = () => {
   const router = useRouter();
@@ -26,12 +27,11 @@ const SetupBingo: NextPage = () => {
     isSongUsed,
   } = useBingoSetup(id);
 
+  // 初期ロード中はグローバルローディングを表示
+  useInitialLoading({ isLoading: !participant });
+
   if (!participant) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-2xl">Loading...</div>
-      </div>
-    );
+    return null; // ローディングオーバーレイが表示されるため、この画面は不要
   }
 
   const availableSongs = participant.bingoGame.songs;
