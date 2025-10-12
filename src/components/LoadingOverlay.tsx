@@ -1,11 +1,11 @@
 /**
  * グローバルローディングオーバーレイコンポーネント
- * 
+ *
  * API通信中に画面全体を覆うローディングインジケーターを表示し、
  * ユーザーの操作を無効化します。
  */
-import React, { useEffect, useState } from 'react';
-import { useLoading } from '~/contexts/LoadingContext';
+import React, { useEffect, useState } from "react";
+import { useLoading } from "~/contexts/LoadingContext";
 
 export const LoadingOverlay: React.FC = () => {
   const { isGlobalLoading, isMutationLoading } = useLoading();
@@ -40,22 +40,20 @@ export const LoadingOverlay: React.FC = () => {
   }
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      style={{ backdropFilter: 'blur(2px)' }}
+    <div
+      className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"
+      style={{ backdropFilter: "blur(2px)" }}
     >
       <div className="flex flex-col items-center space-y-4 rounded-lg bg-white p-6 shadow-xl">
         {/* スピナーアニメーション */}
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
-        
+
         {/* ローディングメッセージ */}
         <div className="text-center">
           <p className="text-lg font-medium text-gray-900">
-            {isMutationLoading ? 'データを保存中...' : '読み込み中...'}
+            {isMutationLoading ? "データを保存中..." : "読み込み中..."}
           </p>
-          <p className="text-sm text-gray-600">
-            しばらくお待ちください
-          </p>
+          <p className="text-sm text-gray-600">しばらくお待ちください</p>
         </div>
       </div>
     </div>

@@ -16,8 +16,8 @@ const AdminDashboard: NextPage = () => {
   );
 
   // 重要な初期データロード中はグローバルローディングを表示
-  useInitialLoading({ 
-    isLoading: status === "loading" || (!!session && isLoading) 
+  useInitialLoading({
+    isLoading: status === "loading" || (!!session && isLoading),
   });
 
   useEffect(() => {

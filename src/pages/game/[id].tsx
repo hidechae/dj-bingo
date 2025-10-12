@@ -12,19 +12,18 @@ const ParticipantGame: NextPage = () => {
   const [participantName, setParticipantName] = useState("");
   const [isJoining, setIsJoining] = useState(false);
 
-  const { data: bingoGame, isLoading: bingoGameLoading } = api.bingo.getById.useQuery(
-    { id: id as string },
-    { enabled: !!id }
-  );
+  const { data: bingoGame, isLoading: bingoGameLoading } =
+    api.bingo.getById.useQuery({ id: id as string }, { enabled: !!id });
 
-  const { data: participant, isLoading: participantLoading } = api.participant.getBySessionToken.useQuery(
-    { sessionToken, bingoGameId: id as string },
-    { enabled: !!sessionToken && !!id }
-  );
+  const { data: participant, isLoading: participantLoading } =
+    api.participant.getBySessionToken.useQuery(
+      { sessionToken, bingoGameId: id as string },
+      { enabled: !!sessionToken && !!id }
+    );
 
   // 初期ロード中はグローバルローディングを表示
-  useInitialLoading({ 
-    isLoading: bingoGameLoading || (!!sessionToken && participantLoading) 
+  useInitialLoading({
+    isLoading: bingoGameLoading || (!!sessionToken && participantLoading),
   });
 
   const joinMutation = api.participant.join.useMutation({

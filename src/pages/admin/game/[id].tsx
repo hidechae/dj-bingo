@@ -70,8 +70,8 @@ const AdminGameManagement: NextPage = () => {
     useParticipantSort();
 
   // 認証とゲームデータロード中はグローバルローディングを表示
-  useInitialLoading({ 
-    isLoading: status === "loading" || (!!session && !bingoGame) 
+  useInitialLoading({
+    isLoading: status === "loading" || (!!session && !bingoGame),
   });
 
   useEffect(() => {
