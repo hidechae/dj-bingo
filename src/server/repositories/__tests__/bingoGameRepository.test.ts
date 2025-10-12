@@ -202,9 +202,7 @@ describe("BingoGameRepository", () => {
         participants: [],
       };
 
-      vi.mocked(mockPrisma.bingoGame.create).mockResolvedValue(
-        mockCreatedGame
-      );
+      vi.mocked(mockPrisma.bingoGame.create).mockResolvedValue(mockCreatedGame);
 
       const input = {
         title: "New Game",
@@ -258,9 +256,7 @@ describe("BingoGameRepository", () => {
         participants: [],
       };
 
-      vi.mocked(mockPrisma.bingoGame.create).mockResolvedValue(
-        mockCreatedGame
-      );
+      vi.mocked(mockPrisma.bingoGame.create).mockResolvedValue(mockCreatedGame);
 
       const input = {
         title: "New Game",
@@ -300,9 +296,7 @@ describe("BingoGameRepository", () => {
         },
       };
 
-      vi.mocked(mockPrisma.bingoGame.update).mockResolvedValue(
-        mockUpdatedGame
-      );
+      vi.mocked(mockPrisma.bingoGame.update).mockResolvedValue(mockUpdatedGame);
 
       const result = await repository.update("game-1", {
         title: "Updated Title",
@@ -350,9 +344,7 @@ describe("BingoGameRepository", () => {
         },
       };
 
-      vi.mocked(mockPrisma.bingoGame.update).mockResolvedValue(
-        mockUpdatedGame
-      );
+      vi.mocked(mockPrisma.bingoGame.update).mockResolvedValue(mockUpdatedGame);
 
       const result = await repository.update("game-1", {
         status: GameStatus.ENTRY,
@@ -375,9 +367,7 @@ describe("BingoGameRepository", () => {
         isActive: true,
       };
 
-      vi.mocked(mockPrisma.bingoGame.delete).mockResolvedValue(
-        mockDeletedGame
-      );
+      vi.mocked(mockPrisma.bingoGame.delete).mockResolvedValue(mockDeletedGame);
 
       await repository.delete("game-1");
 
