@@ -1,5 +1,5 @@
 name: 'Setup Project'
-description: 'Checkout code, setup Node.js, install dependencies, and optionally generate Prisma client'
+description: 'Setup Node.js, install dependencies, and optionally generate Prisma client'
 
 inputs:
   generate-prisma:
@@ -10,9 +10,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-
     - name: Setup Node.js
       uses: actions/setup-node@v5
       with:

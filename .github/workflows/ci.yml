@@ -13,6 +13,7 @@ jobs:
     name: Check Formatting
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
 
       - name: Check code formatting
@@ -22,6 +23,7 @@ jobs:
     name: Lint Code
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
 
       - name: Run ESLint
@@ -31,6 +33,7 @@ jobs:
     name: Type Check
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
         with:
           generate-prisma: 'true'
@@ -42,6 +45,7 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
         with:
           generate-prisma: 'true'
@@ -63,6 +67,7 @@ jobs:
       SKIP_ENV_VALIDATION: true
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
         with:
           generate-prisma: 'true'
