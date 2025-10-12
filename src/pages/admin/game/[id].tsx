@@ -33,6 +33,8 @@ const AdminGameManagement: NextPage = () => {
   const [showAdminManagement, setShowAdminManagement] = useState(false);
   const [activeTab, setActiveTab] = useState<"songs" | "participants">("songs");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [titleEditingMode, setTitleEditingMode] = useState(false);
+  const [editingTitle, setEditingTitle] = useState("");
 
   const {
     bingoGame,
@@ -40,6 +42,7 @@ const AdminGameManagement: NextPage = () => {
     incompleteParticipants,
     changeStatusMutation,
     updateSongsMutation,
+    updateTitleMutation,
     toggleSongPlayed,
     markSongMutation,
   } = useGameManagement(id as string);
@@ -178,6 +181,37 @@ const AdminGameManagement: NextPage = () => {
     }
   };
 
+  const handleTitleEdit = () => {
+    if (titleEditingMode) {
+      // Save title
+      if (editingTitle.trim()) {
+        updateTitleMutation.mutate(
+          {
+            gameId: id as string,
+            title: editingTitle.trim(),
+          },
+          {
+            onSuccess: () => {
+              setTitleEditingMode(false);
+            },
+            onError: (error) => {
+              alert(`タイトルの更新に失敗しました: ${error.message}`);
+            },
+          }
+        );
+      }
+    } else {
+      // Start editing
+      setEditingTitle(bingoGame?.title || "");
+      setTitleEditingMode(true);
+    }
+  };
+
+  const handleTitleCancel = () => {
+    setTitleEditingMode(false);
+    setEditingTitle("");
+  };
+
   const handleDuplicate = () => {
     if (!id || duplicateMutation.isPending) return;
     if (
@@ -188,7 +222,6 @@ const AdminGameManagement: NextPage = () => {
       duplicateMutation.mutate({ gameId: id as string });
     }
   };
-
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -233,9 +266,68 @@ const AdminGameManagement: NextPage = () => {
                     />
                   </svg>
                 </button>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  {bingoGame.title} - 管理画面
-                </h1>
+                {titleEditingMode ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleTitleEdit();
+                        } else if (e.key === "Escape") {
+                          handleTitleCancel();
+                        }
+                      }}
+                      className="min-w-0 flex-1 border-b-2 border-blue-500 bg-transparent text-xl font-semibold text-gray-900 focus:border-blue-700 focus:outline-none"
+                      autoFocus
+                      required
+                    />
+                    <button
+                      onClick={handleTitleEdit}
+                      disabled={
+                        !editingTitle.trim() || updateTitleMutation.isPending
+                      }
+                      className="text-green-600 hover:text-green-800 disabled:opacity-50"
+                      title="保存"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={handleTitleCancel}
+                      disabled={updateTitleMutation.isPending}
+                      className="text-red-600 hover:text-red-800"
+                      title="キャンセル"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl font-semibold text-gray-900">
+                      {bingoGame.title} - 管理画面
+                    </h1>
+                    <button
+                      onClick={handleTitleEdit}
+                      className="text-gray-400 hover:text-gray-600"
+                      title="ビンゴ名を編集"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="relative" data-dropdown>
                 <button

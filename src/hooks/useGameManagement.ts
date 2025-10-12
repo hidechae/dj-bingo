@@ -67,6 +67,16 @@ export const useGameManagement = (gameId: string) => {
   });
 
   /**
+   * ビンゴゲームのタイトルを更新するmutation
+   * 成功時にゲーム情報を再取得
+   */
+  const updateTitleMutation = api.bingo.updateTitle.useMutation({
+    onSuccess: () => {
+      void refetchGame();
+    },
+  });
+
+  /**
    * 楽曲の演奏状態をトグルする（演奏済み⇔未演奏）
    *
    * @param songId - 対象の楽曲ID
@@ -85,6 +95,7 @@ export const useGameManagement = (gameId: string) => {
     markSongMutation,
     changeStatusMutation,
     updateSongsMutation,
+    updateTitleMutation,
     toggleSongPlayed,
   };
 };
