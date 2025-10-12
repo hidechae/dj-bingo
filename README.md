@@ -121,6 +121,16 @@ npm run type-check
 npm run lint
 ```
 
+### Git フック
+
+このプロジェクトには pre-commit フックが設定されており、コミット前に自動的に以下のコマンドを実行します：
+
+1. `npm ci` - 依存関係の確認とインストール
+2. `npm run format` - Prettier による自動フォーマット
+3. `npm run lint` - ESLint による静的解析
+
+フォーマットの問題は自動修正され、リンターエラーがある場合はコミットが中断されます。
+
 ## データベース管理
 
 ### Prisma Studio（データベースGUI）
