@@ -55,82 +55,87 @@ const createProviders = () => {
   }
 
   // Always add credentials provider
-  console.log("  ✅ Adding Credentials provider");
-  providers.push(
-    CredentialsProvider({
-      id: "credentials",
-      name: "Email and Password",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        console.log("📧 CREDENTIALS AUTH ATTEMPT:", {
-          hasEmail: !!credentials?.email,
-          hasPassword: !!credentials?.password,
-        });
+  console.log("  ✅ BEFORE Adding Credentials provider");
+  try {
+    providers.push(
+      CredentialsProvider({
+        id: "credentials",
+        name: "Email and Password",
+        credentials: {
+          email: { label: "Email", type: "email" },
+          password: { label: "Password", type: "password" },
+        },
+        async authorize(credentials) {
+          console.log("📧 CREDENTIALS AUTH ATTEMPT:", {
+            hasEmail: !!credentials?.email,
+            hasPassword: !!credentials?.password,
+          });
 
-        // Early return for missing credentials to prevent unnecessary DB calls during provider init
-        if (!credentials?.email || !credentials?.password) {
-          console.log("❌ Missing credentials");
-          return null;
-        }
-
-        try {
-          console.log("🔍 Searching for user:", credentials.email);
-
-          // Use repository layer instead of direct Prisma access
-          const repositories = createRepositories(db);
-
-          // Add timeout and connection resilience
-          const user = (await Promise.race([
-            repositories.user.findByEmailWithPassword(credentials.email),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error("Database timeout")), 10000)
-            ),
-          ])) as UserEntity;
-
-          if (!user) {
-            console.log("❌ User not found");
+          // Early return for missing credentials to prevent unnecessary DB calls during provider init
+          if (!credentials?.email || !credentials?.password) {
+            console.log("❌ Missing credentials");
             return null;
           }
 
-          if (!user.password) {
-            console.log("❌ User has no password (OAuth-only user)");
+          try {
+            console.log("🔍 Searching for user:", credentials.email);
+
+            // Use repository layer instead of direct Prisma access
+            const repositories = createRepositories(db);
+
+            // Add timeout and connection resilience
+            const user = (await Promise.race([
+              repositories.user.findByEmailWithPassword(credentials.email),
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Database timeout")), 10000)
+              ),
+            ])) as UserEntity;
+
+            if (!user) {
+              console.log("❌ User not found");
+              return null;
+            }
+
+            if (!user.password) {
+              console.log("❌ User has no password (OAuth-only user)");
+              return null;
+            }
+
+            const isPasswordValid = await bcrypt.compare(
+              credentials.password,
+              user.password
+            );
+
+            if (!isPasswordValid) {
+              console.log("❌ Invalid password");
+              return null;
+            }
+
+            console.log(
+              "✅ Credentials authentication successful for:",
+              user.email
+            );
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+            };
+          } catch (error) {
+            console.error(
+              "❌ Credentials auth error (but provider still available):",
+              error
+            );
+            // Don't throw the error - just return null to keep provider available
+            // This prevents NextAuth from excluding the credentials provider due to DB issues
             return null;
           }
-
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
-
-          if (!isPasswordValid) {
-            console.log("❌ Invalid password");
-            return null;
-          }
-
-          console.log(
-            "✅ Credentials authentication successful for:",
-            user.email
-          );
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-          };
-        } catch (error) {
-          console.error(
-            "❌ Credentials auth error (but provider still available):",
-            error
-          );
-          // Don't throw the error - just return null to keep provider available
-          // This prevents NextAuth from excluding the credentials provider due to DB issues
-          return null;
-        }
-      },
-    })
-  );
+        },
+      })
+    );
+    console.log("  ✅ AFTER Adding Credentials provider");
+  } catch (error) {
+    console.error("  ❌ ERROR Adding Credentials provider:", error);
+  }
 
   console.log(`🚀 TOTAL PROVIDERS CREATED: ${providers.length}`);
   return providers;
