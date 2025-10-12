@@ -48,7 +48,11 @@ const ParticipantGame: NextPage = () => {
 
   useEffect(() => {
     // Redirect to setup/play page if already joined
-    if (participant && participant.bingoGameId === id) {
+    if (
+      participant &&
+      participant.bingoGameId === id &&
+      participant.bingoGame
+    ) {
       if (!participant.isGridComplete) {
         // If game is PLAYING and grid is incomplete, go directly to play
         if (participant.bingoGame.status === "PLAYING") {

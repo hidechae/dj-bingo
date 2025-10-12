@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-import { GameStatus, BingoSize, getGridSize } from "~/types";
+import { getGridSize } from "~/types";
+import { GameStatus } from "~/domain/models";
 
 export const participantRouter = createTRPCRouter({
   join: publicProcedure
@@ -14,14 +15,9 @@ export const participantRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // Check if bingo game exists and is active
-      const bingoGame = await ctx.db.bingoGame.findUnique({
-        where: { id: input.bingoGameId },
-        include: {
-          songs: {
-            orderBy: [{ artist: "asc" }, { title: "asc" }],
-          },
-        },
-      });
+      const bingoGame = await ctx.repositories.bingoGame.findByIdWithSongs(
+        input.bingoGameId
+      );
 
       if (!bingoGame || !bingoGame.isActive) {
         throw new TRPCError({
@@ -39,13 +35,9 @@ export const participantRouter = createTRPCRouter({
       }
 
       // Check if participant already exists with this session token for this specific game
-      const existingParticipant = await ctx.db.participant.findUnique({
-        where: {
-          sessionToken_bingoGameId: {
-            sessionToken: input.sessionToken,
-            bingoGameId: input.bingoGameId,
-          },
-        },
+      const existingParticipant = await ctx.repositories.participant.findFirst({
+        sessionToken: input.sessionToken,
+        bingoGameId: input.bingoGameId,
       });
 
       if (existingParticipant) {
@@ -55,22 +47,17 @@ export const participantRouter = createTRPCRouter({
         });
       }
 
-      const participant = await ctx.db.participant.create({
-        data: {
-          name: input.name,
-          bingoGameId: input.bingoGameId,
-          sessionToken: input.sessionToken,
-        },
-        include: {
-          bingoGame: {
-            include: {
-              songs: true,
-            },
-          },
-        },
+      const participant = await ctx.repositories.participant.create({
+        name: input.name,
+        bingoGameId: input.bingoGameId,
+        sessionToken: input.sessionToken,
       });
 
-      return participant;
+      // Return participant with bingoGame info
+      return {
+        ...participant,
+        bingoGame,
+      };
     }),
 
   getBySessionToken: publicProcedure
@@ -83,54 +70,43 @@ export const participantRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       // If bingoGameId is provided, find participant for specific game
       if (input.bingoGameId) {
-        const participant = await ctx.db.participant.findUnique({
-          where: {
-            sessionToken_bingoGameId: {
-              sessionToken: input.sessionToken,
-              bingoGameId: input.bingoGameId,
-            },
-          },
-          include: {
-            bingoGame: {
-              include: {
-                songs: {
-                  orderBy: [{ artist: "asc" }, { title: "asc" }],
-                },
-              },
-            },
-            participantSongs: {
-              include: {
-                song: true,
-              },
-              orderBy: { position: "asc" },
-            },
-          },
-        });
-        return participant;
+        const participant =
+          await ctx.repositories.participant.findFirstWithSongs({
+            sessionToken: input.sessionToken,
+            bingoGameId: input.bingoGameId,
+          });
+
+        if (!participant) return null;
+
+        // Get bingoGame with songs
+        const bingoGame = await ctx.repositories.bingoGame.findByIdWithSongs(
+          participant.bingoGameId
+        );
+
+        return {
+          ...participant,
+          bingoGame,
+        };
       }
 
       // If no bingoGameId provided, return first participant found (backward compatibility)
-      const participant = await ctx.db.participant.findFirst({
-        where: { sessionToken: input.sessionToken },
-        include: {
-          bingoGame: {
-            include: {
-              songs: {
-                orderBy: [{ artist: "asc" }, { title: "asc" }],
-              },
-            },
-          },
-          participantSongs: {
-            include: {
-              song: true,
-            },
-            orderBy: { position: "asc" },
-          },
-        },
-        orderBy: { createdAt: "desc" }, // Get most recent participation
-      });
+      const participant = await ctx.repositories.participant.findFirstWithSongs(
+        {
+          sessionToken: input.sessionToken,
+        }
+      );
 
-      return participant;
+      if (!participant) return null;
+
+      // Get bingoGame with songs
+      const bingoGame = await ctx.repositories.bingoGame.findByIdWithSongs(
+        participant.bingoGameId
+      );
+
+      return {
+        ...participant,
+        bingoGame,
+      };
     }),
 
   assignSongs: publicProcedure
@@ -148,16 +124,9 @@ export const participantRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // Find participant for specific game
-      const participant = await ctx.db.participant.findUnique({
-        where: {
-          sessionToken_bingoGameId: {
-            sessionToken: input.sessionToken,
-            bingoGameId: input.bingoGameId,
-          },
-        },
-        include: {
-          bingoGame: true,
-        },
+      const participant = await ctx.repositories.participant.findFirst({
+        sessionToken: input.sessionToken,
+        bingoGameId: input.bingoGameId,
       });
 
       if (!participant) {
@@ -167,8 +136,20 @@ export const participantRouter = createTRPCRouter({
         });
       }
 
+      // Get game to check status
+      const bingoGame = await ctx.repositories.bingoGame.findById(
+        participant.bingoGameId
+      );
+
+      if (!bingoGame) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Game not found",
+        });
+      }
+
       // Check if game is in ENTRY status (grid can only be edited during ENTRY)
-      if (participant.bingoGame.status !== GameStatus.ENTRY) {
+      if (bingoGame.status !== GameStatus.ENTRY) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Grid can only be edited during ENTRY status",
@@ -176,26 +157,25 @@ export const participantRouter = createTRPCRouter({
       }
 
       // Delete existing assignments
-      await ctx.db.participantSong.deleteMany({
-        where: { participantId: participant.id },
+      await ctx.repositories.participantSong.deleteMany({
+        participantId: participant.id,
       });
 
       // Create new assignments
-      const participantSongs = await ctx.db.participantSong.createMany({
-        data: input.songAssignments.map((assignment) => ({
+      const count = await ctx.repositories.participantSong.createMany(
+        input.songAssignments.map((assignment) => ({
           participantId: participant.id,
           songId: assignment.songId,
           position: assignment.position,
-        })),
-      });
+        }))
+      );
 
       // Mark participant as having completed grid setup
-      await ctx.db.participant.update({
-        where: { id: participant.id },
-        data: { isGridComplete: true },
+      await ctx.repositories.participant.update(participant.id, {
+        isGridComplete: true,
       });
 
-      return participantSongs;
+      return { count };
     }),
 
   getBingoStatus: publicProcedure
@@ -207,36 +187,28 @@ export const participantRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Find participant for specific game
-      const participant = await ctx.db.participant.findUnique({
-        where: {
-          sessionToken_bingoGameId: {
-            sessionToken: input.sessionToken,
-            bingoGameId: input.bingoGameId,
-          },
-        },
-        include: {
-          bingoGame: {
-            include: {
-              songs: {
-                orderBy: [{ artist: "asc" }, { title: "asc" }],
-              },
-            },
-          },
-          participantSongs: {
-            include: {
-              song: true,
-            },
-            orderBy: { position: "asc" },
-          },
-        },
-      });
+      const participant = await ctx.repositories.participant.findFirstWithSongs(
+        {
+          sessionToken: input.sessionToken,
+          bingoGameId: input.bingoGameId,
+        }
+      );
 
       if (!participant) {
         return null;
       }
 
+      // Get bingoGame with songs
+      const bingoGame = await ctx.repositories.bingoGame.findByIdWithSongs(
+        participant.bingoGameId
+      );
+
+      if (!bingoGame) {
+        return null;
+      }
+
       // Create grid representation
-      const gridSize = getGridSize(participant.bingoGame.size as BingoSize);
+      const gridSize = getGridSize(bingoGame.size);
       const grid = Array(gridSize * gridSize).fill(null);
 
       participant.participantSongs.forEach((ps) => {
@@ -247,7 +219,10 @@ export const participantRouter = createTRPCRouter({
       });
 
       return {
-        participant,
+        participant: {
+          ...participant,
+          bingoGame,
+        },
         grid,
         gridSize,
         hasWon: participant.hasWon,
