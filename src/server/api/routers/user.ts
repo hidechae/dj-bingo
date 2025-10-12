@@ -27,7 +27,14 @@ export const userRouter = createTRPCRouter({
 
   // Get current user with password info (to check if password is set)
   getProfileWithPasswordInfo: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.repositories.user.findByEmailWithPassword(ctx.session.user.email!);
+    if (!ctx.session.user.email) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "ユーザーのメールアドレスが見つかりません",
+      });
+    }
+
+    const user = await ctx.repositories.user.findByEmailWithPassword(ctx.session.user.email);
     
     if (!user) {
       throw new TRPCError({

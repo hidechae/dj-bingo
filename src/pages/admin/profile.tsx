@@ -14,6 +14,8 @@ const AdminProfile: NextPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const utils = api.useUtils();
+
   const { data: userProfile } = api.user.getProfileWithPasswordInfo.useQuery(
     undefined,
     { enabled: !!session }
@@ -33,8 +35,6 @@ const AdminProfile: NextPage = () => {
       setSuccess("");
     },
   });
-
-  const utils = api.useUtils();
 
   useEffect(() => {
     if (status === "loading") return;
