@@ -497,10 +497,10 @@ export const bingoRouter = createTRPCRouter({
 
       // Handle status-specific logic
       if (
-        input.newStatus === GameStatus.ENTRY &&
-        currentStatus === GameStatus.EDITING
+        input.newStatus === GameStatus.EDITING &&
+        currentStatus === GameStatus.ENTRY
       ) {
-        // Transition from EDITING to ENTRY - optionally clear participants
+        // Transition from ENTRY to EDITING - optionally clear participants
         if (!preserveParticipants) {
           await ctx.db.participant.deleteMany({
             where: { bingoGameId: input.gameId },
