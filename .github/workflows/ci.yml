@@ -1,4 +1,4 @@
-name: Lint, Type Check, and Build
+name: CI
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint-and-build:
-    name: Run Quality Checks
+    name: Lint, Test, and Build
     runs-on: ubuntu-latest
 
     env:
@@ -46,6 +46,9 @@ jobs:
 
       - name: Run TypeScript type check
         run: npm run type-check
+
+      - name: Run tests
+        run: npm run test:run
 
       - name: Build application
         run: npm run build
