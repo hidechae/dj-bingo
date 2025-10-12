@@ -11,6 +11,7 @@ import {
   isValidStatusTransition,
   getRequiredSongCount,
 } from "~/types";
+import { api } from "~/utils/api";
 import { useGameManagement } from "~/hooks/useGameManagement";
 import { useSongEditor } from "~/hooks/useSongEditor";
 import { useParticipantSort } from "~/hooks/useParticipantSort";
@@ -31,6 +32,7 @@ const AdminGameManagement: NextPage = () => {
     useState<GameStatus | null>(null);
   const [showAdminManagement, setShowAdminManagement] = useState(false);
   const [activeTab, setActiveTab] = useState<"songs" | "participants">("songs");
+  const [showDropdown, setShowDropdown] = useState(false);
   const [titleEditingMode, setTitleEditingMode] = useState(false);
   const [editingTitle, setEditingTitle] = useState("");
 
@@ -44,6 +46,12 @@ const AdminGameManagement: NextPage = () => {
     toggleSongPlayed,
     markSongMutation,
   } = useGameManagement(id as string);
+
+  const duplicateMutation = api.bingo.duplicate.useMutation({
+    onSuccess: (data) => {
+      void router.push(`/admin/game/${data.id}`);
+    },
+  });
 
   const {
     songEditingMode,
@@ -75,6 +83,21 @@ const AdminGameManagement: NextPage = () => {
         .catch(console.error);
     }
   }, [id]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest("[data-dropdown]")) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showDropdown]);
 
   const handleStatusChange = (newStatus: GameStatus) => {
     const currentStatus = bingoGame?.status as GameStatus;
@@ -189,6 +212,16 @@ const AdminGameManagement: NextPage = () => {
     setEditingTitle("");
   };
 
+  const handleDuplicate = () => {
+    if (!id || duplicateMutation.isPending) return;
+    if (
+      confirm(
+        "このビンゴを複製しますか？複製されたビンゴは編集状態で作成されます。"
+      )
+    ) {
+      duplicateMutation.mutate({ gameId: id as string });
+    }
+  };
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -213,7 +246,26 @@ const AdminGameManagement: NextPage = () => {
         <div className="bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => router.push("/admin")}
+                  className="cursor-pointer text-gray-500 hover:text-gray-700"
+                  title="ダッシュボードに戻る"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
                 {titleEditingMode ? (
                   <div className="flex items-center gap-2">
                     <input
@@ -265,19 +317,121 @@ const AdminGameManagement: NextPage = () => {
                   </div>
                 )}
               </div>
+              <div className="relative" data-dropdown>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="cursor-pointer rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  title="メニュー"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                    />
+                  </svg>
+                </button>
+                {showDropdown && (
+                  <div className="ring-opacity-5 absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black">
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          handleDuplicate();
+                        }}
+                        disabled={duplicateMutation.isPending}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {duplicateMutation.isPending ? "複製中..." : "複製"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          setShowAdminManagement(true);
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        管理者の管理
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setShowAdminManagement(true)}
-                  className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
-                >
-                  管理者の管理
-                </button>
-                <button
                   onClick={() => router.push("/admin")}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="cursor-pointer text-gray-500 hover:text-gray-700"
+                  title="ダッシュボードに戻る"
                 >
-                  ダッシュボードに戻る
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
                 </button>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {bingoGame.title} - 管理画面
+                </h1>
+              </div>
+              <div className="relative" data-dropdown>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="cursor-pointer rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  title="メニュー"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                    />
+                  </svg>
+                </button>
+                {showDropdown && (
+                  <div className="ring-opacity-5 absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black">
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          handleDuplicate();
+                        }}
+                        disabled={duplicateMutation.isPending}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {duplicateMutation.isPending ? "複製中..." : "複製"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          setShowAdminManagement(true);
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        管理者の管理
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -300,7 +454,7 @@ const AdminGameManagement: NextPage = () => {
                 <nav className="flex space-x-8" aria-label="Tabs">
                   <button
                     onClick={() => setActiveTab("songs")}
-                    className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
+                    className={`cursor-pointer border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
                       activeTab === "songs"
                         ? "border-blue-500 text-blue-600"
                         : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
@@ -310,7 +464,7 @@ const AdminGameManagement: NextPage = () => {
                   </button>
                   <button
                     onClick={() => setActiveTab("participants")}
-                    className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
+                    className={`cursor-pointer border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
                       activeTab === "participants"
                         ? "border-blue-500 text-blue-600"
                         : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"

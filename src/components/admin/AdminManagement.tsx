@@ -109,7 +109,7 @@ ${baseUrl}/admin
           <h2 className="text-xl font-semibold text-gray-900">管理者の管理</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="cursor-pointer text-gray-500 hover:text-gray-700"
           >
             ✕
           </button>
@@ -145,7 +145,7 @@ ${baseUrl}/admin
             <button
               type="submit"
               disabled={addAdminMutation.isPending || !email.trim()}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {addAdminMutation.isPending ? "追加中..." : "管理者を追加"}
             </button>
@@ -196,7 +196,7 @@ ${baseUrl}/admin
                 <button
                   onClick={() => handleRemoveAdmin(admin.id)}
                   disabled={removeAdminMutation.isPending}
-                  className="text-sm font-medium text-red-600 hover:text-red-800 disabled:opacity-50"
+                  className="cursor-pointer text-sm font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   削除
                 </button>
@@ -221,7 +221,7 @@ ${baseUrl}/admin
                 </h3>
                 <button
                   onClick={closeCopyMessage}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="cursor-pointer text-gray-500 hover:text-gray-700"
                 >
                   ✕
                 </button>
@@ -236,13 +236,13 @@ ${baseUrl}/admin
               <div className="flex gap-2">
                 <button
                   onClick={() => copyToClipboard(showCopyMessage)}
-                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  className="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                 >
                   クリップボードにコピー
                 </button>
                 <button
                   onClick={closeCopyMessage}
-                  className="rounded-md bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
+                  className="cursor-pointer rounded-md bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
                 >
                   閉じる
                 </button>

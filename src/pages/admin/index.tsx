@@ -4,34 +4,15 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
-  const {
-    data: bingoGames,
-    isLoading,
-    refetch,
-  } = api.bingo.getAllByUser.useQuery(undefined, { enabled: !!session });
-
-  const duplicateMutation = api.bingo.duplicate.useMutation({
-    onSuccess: (data) => {
-      void refetch();
-      void router.push(`/admin/game/${data.id}`);
-      setDuplicatingId(null);
-    },
-    onError: () => {
-      setDuplicatingId(null);
-    },
-  });
-
-  const handleQuickDuplicate = (gameId: string) => {
-    if (duplicatingId || duplicateMutation.isPending) return; // Prevent multiple duplications
-    setDuplicatingId(gameId);
-    duplicateMutation.mutate({ gameId });
-  };
+  const { data: bingoGames, isLoading } = api.bingo.getAllByUser.useQuery(
+    undefined,
+    { enabled: !!session }
+  );
 
   useEffect(() => {
     if (status === "loading") return;
@@ -71,7 +52,7 @@ const AdminDashboard: NextPage = () => {
                 </span>
                 <button
                   onClick={() => signOut()}
-                  className="text-sm text-gray-500 hover:text-gray-700"
+                  className="cursor-pointer text-sm text-gray-500 hover:text-gray-700"
                 >
                   ログアウト
                 </button>
@@ -96,9 +77,10 @@ const AdminDashboard: NextPage = () => {
           {bingoGames && bingoGames.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {bingoGames.map((game) => (
-                <div
+                <Link
                   key={game.id}
-                  className="overflow-hidden rounded-lg bg-white shadow-sm"
+                  href={`/admin/game/${game.id}`}
+                  className="block cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className="p-6">
                     <h3 className="mb-2 text-lg font-medium text-gray-900">
@@ -123,34 +105,8 @@ const AdminDashboard: NextPage = () => {
                         )}
                       </div>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <Link
-                        href={`/admin/game/${game.id}`}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                      >
-                        管理
-                      </Link>
-                      <Link
-                        href={`/game/${game.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-green-600 hover:text-green-800"
-                      >
-                        参加用URL
-                      </Link>
-                      <button
-                        onClick={() => handleQuickDuplicate(game.id)}
-                        disabled={
-                          duplicatingId === game.id ||
-                          duplicateMutation.isPending
-                        }
-                        className="text-sm font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50"
-                      >
-                        {duplicatingId === game.id ? "複製中..." : "複製"}
-                      </button>
-                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

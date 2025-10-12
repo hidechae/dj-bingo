@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api, type RouterOutputs } from "~/utils/api";
 import { BingoSize } from "~/types";
+import { SongEditMode } from "~/components/admin/SongEditMode";
 
 interface Song {
   title: string;
@@ -85,7 +86,7 @@ const CreateBingo: NextPage = () => {
               </h1>
               <button
                 onClick={() => router.back()}
-                className="text-gray-500 hover:text-gray-700"
+                className="cursor-pointer text-gray-500 hover:text-gray-700"
               >
                 戻る
               </button>
@@ -129,63 +130,23 @@ const CreateBingo: NextPage = () => {
             </div>
 
             <div className="rounded-lg bg-white px-6 py-8 shadow-sm">
-              <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">
-                  楽曲リスト (後で追加・編集可能)
-                </h3>
-                <button
-                  type="button"
-                  onClick={addSong}
-                  className="rounded-md bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
-                >
-                  曲を追加
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {songs.map((song, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={song.title}
-                        onChange={(e) =>
-                          updateSong(index, "title", e.target.value)
-                        }
-                        placeholder="曲名"
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-xs focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={song.artist}
-                        onChange={(e) =>
-                          updateSong(index, "artist", e.target.value)
-                        }
-                        placeholder="アーティスト名"
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-xs focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                    {songs.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeSong(index)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        削除
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <h3 className="mb-6 text-lg font-medium text-gray-900">
+                楽曲リスト (後で追加・編集可能)
+              </h3>
+              <SongEditMode
+                songs={songs}
+                onUpdateSong={updateSong}
+                onRemoveSong={removeSong}
+                onAddSong={addSong}
+                allowRemoveAll={false}
+              />
             </div>
 
             <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={createBingoMutation.isPending}
-                className="rounded-lg bg-blue-600 px-8 py-3 text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                className="cursor-pointer rounded-lg bg-blue-600 px-8 py-3 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {createBingoMutation.isPending ? "作成中..." : "ビンゴを作成"}
               </button>

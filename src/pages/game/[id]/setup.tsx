@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useBingoSetup } from "~/hooks/useBingoSetup";
 import { SetupHeader } from "~/components/bingo/SetupHeader";
 import { SetupGrid } from "~/components/bingo/SetupGrid";
-import { SongSelectionList } from "~/components/bingo/SongSelectionList";
+import { SongSelectionModal } from "~/components/bingo/SongSelectionModal";
 
 const SetupBingo: NextPage = () => {
   const router = useRouter();
@@ -15,12 +15,14 @@ const SetupBingo: NextPage = () => {
     selectedSongs,
     gridSize,
     selectedPosition,
+    isModalOpen,
     assignSongsMutation,
     handlePositionSelect,
     handleSongAssign,
     handleClearPosition,
     handleClearAll,
     handleSubmit,
+    handleModalClose,
     isSongUsed,
   } = useBingoSetup(id);
 
@@ -52,7 +54,7 @@ const SetupBingo: NextPage = () => {
               selectedPosition={selectedPosition}
             />
 
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div className="flex justify-center">
               <SetupGrid
                 gridSize={gridSize}
                 selectedSongs={selectedSongs}
@@ -61,19 +63,12 @@ const SetupBingo: NextPage = () => {
                 onPositionSelect={handlePositionSelect}
                 onClearPosition={handleClearPosition}
               />
-
-              <SongSelectionList
-                songs={availableSongs}
-                selectedPosition={selectedPosition}
-                isSongUsed={isSongUsed}
-                onSongAssign={handleSongAssign}
-              />
             </div>
 
             <div className="mt-8 flex items-center justify-between">
               <button
                 onClick={handleClearAll}
-                className="px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
+                className="cursor-pointer px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
               >
                 すべてクリア
               </button>
@@ -84,13 +79,22 @@ const SetupBingo: NextPage = () => {
                   selectedCount !== totalPositions ||
                   assignSongsMutation.isPending
                 }
-                className="rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="cursor-pointer rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {assignSongsMutation.isPending ? "設定中..." : "ビンゴを開始"}
               </button>
             </div>
           </div>
         </div>
+
+        <SongSelectionModal
+          isOpen={isModalOpen}
+          songs={availableSongs}
+          selectedPosition={selectedPosition}
+          isSongUsed={isSongUsed}
+          onSongSelect={handleSongAssign}
+          onClose={handleModalClose}
+        />
       </main>
     </>
   );

@@ -23,7 +23,8 @@ const ParticipantGame: NextPage = () => {
 
   const joinMutation = api.participant.join.useMutation({
     onSuccess: () => {
-      // Participant successfully joined, will redirect to setup
+      // Participant successfully joined, redirect to setup
+      void router.push(`/game/${id}/setup`);
     },
     onError: (error) => {
       if (error.message === "Already joined this game") {
@@ -116,7 +117,7 @@ const ParticipantGame: NextPage = () => {
             </p>
             <button
               onClick={() => router.push(`/game/${id}/play`)}
-              className="rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
+              className="cursor-pointer rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
             >
               ゲームに参加
             </button>
@@ -199,7 +200,7 @@ const ParticipantGame: NextPage = () => {
               <button
                 type="submit"
                 disabled={isJoining || !participantName.trim()}
-                className="w-full rounded-md bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full cursor-pointer rounded-md bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isJoining ? "参加中..." : "ビンゴに参加する"}
               </button>
