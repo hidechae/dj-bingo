@@ -1,4 +1,4 @@
-name: Lint, Type Check, and Build
+name: CI
 
 on:
   pull_request:
@@ -9,10 +9,54 @@ on:
       - main
 
 jobs:
-  lint-and-build:
-    name: Run Quality Checks
+  format:
+    name: Check Formatting
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
 
+      - name: Check code formatting
+        run: npm run format:check
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+
+      - name: Run ESLint
+        run: npm run lint
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+        with:
+          generate-prisma: "true"
+
+      - name: Run TypeScript type check
+        run: npm run type-check
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+        with:
+          generate-prisma: "true"
+
+      - name: Run tests
+        run: npm run test:run
+
+  build:
+    name: Build Application
+    needs: [format, lint, type-check, test]
+    runs-on: ubuntu-latest
     env:
       # Dummy values for build-time environment variables
       DATABASE_URL: postgresql://user:password@localhost:5432/db
@@ -23,29 +67,10 @@ jobs:
       SKIP_ENV_VALIDATION: true
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
         with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Generate Prisma Client
-        run: npm run db:generate
-
-      - name: Check code formatting
-        run: npm run format:check
-
-      - name: Run ESLint
-        run: npm run lint
-
-      - name: Run TypeScript type check
-        run: npm run type-check
+          generate-prisma: "true"
 
       - name: Build application
         run: npm run build
