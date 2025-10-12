@@ -26,7 +26,9 @@ export default async function handler(
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "このメールアドレスは既に使用されています" });
+      return res
+        .status(400)
+        .json({ message: "このメールアドレスは既に使用されています" });
     }
 
     // Hash password
@@ -51,14 +53,16 @@ export default async function handler(
     });
   } catch (error) {
     console.error("Registration error:", error);
-    
+
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: "入力データが正しくありません",
-        errors: error.issues
+        errors: error.issues,
       });
     }
 
-    return res.status(500).json({ message: "内部サーバーエラーが発生しました" });
+    return res
+      .status(500)
+      .json({ message: "内部サーバーエラーが発生しました" });
   }
 }

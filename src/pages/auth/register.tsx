@@ -81,10 +81,10 @@ const Register: NextPage = () => {
           <meta name="description" content="DJ Bingo 管理者登録完了" />
         </Head>
         <main className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-[#2e026d] to-[#15162c]">
-          <div className="container flex flex-col items-center justify-center gap-8 px-4 py-16 max-w-md">
-            <div className="bg-green-600 rounded-full p-3">
+          <div className="container flex max-w-md flex-col items-center justify-center gap-8 px-4 py-16">
+            <div className="rounded-full bg-green-600 p-3">
               <svg
-                className="w-8 h-8 text-white"
+                className="h-8 w-8 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -97,10 +97,10 @@ const Register: NextPage = () => {
                 />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-white text-center">
+            <h1 className="text-center text-3xl font-bold text-white">
               登録が完了しました！
             </h1>
-            <p className="text-white/70 text-center">
+            <p className="text-center text-white/70">
               2秒後にログインページに移動します...
             </p>
           </div>
@@ -116,15 +116,18 @@ const Register: NextPage = () => {
         <meta name="description" content="DJ Bingo 管理者新規登録" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-[#2e026d] to-[#15162c]">
-        <div className="container flex flex-col items-center justify-center gap-8 px-4 py-16 max-w-md">
+        <div className="container flex max-w-md flex-col items-center justify-center gap-8 px-4 py-16">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-[3rem]">
             新規登録
           </h1>
 
-          <div className="w-full bg-white/10 rounded-lg p-6">
+          <div className="w-full rounded-lg bg-white/10 p-6">
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="name"
+                  className="mb-1 block text-sm font-medium text-white"
+                >
                   お名前
                 </label>
                 <input
@@ -134,13 +137,16 @@ const Register: NextPage = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="田中太郎"
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="email"
+                  className="mb-1 block text-sm font-medium text-white"
+                >
                   メールアドレス
                 </label>
                 <input
@@ -150,13 +156,16 @@ const Register: NextPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="example@example.com"
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="password"
+                  className="mb-1 block text-sm font-medium text-white"
+                >
                   パスワード
                 </label>
                 <input
@@ -166,13 +175,16 @@ const Register: NextPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="6文字以上で入力"
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="confirmPassword"
+                  className="mb-1 block text-sm font-medium text-white"
+                >
                   パスワード（確認）
                 </label>
                 <input
@@ -182,30 +194,28 @@ const Register: NextPage = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="パスワードを再入力"
                 />
               </div>
-              
+
               {error && (
-                <div className="text-red-300 text-sm text-center">
-                  {error}
-                </div>
+                <div className="text-center text-sm text-red-300">{error}</div>
               )}
-              
+
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLoading ? "登録中..." : "アカウントを作成"}
               </button>
             </form>
-            
+
             <div className="mt-4 text-center">
               <Link
                 href="/auth/signin"
-                className="text-blue-300 hover:text-blue-200 text-sm underline"
+                className="text-sm text-blue-300 underline hover:text-blue-200"
               >
                 既にアカウントをお持ちの方はこちら
               </Link>

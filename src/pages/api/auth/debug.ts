@@ -13,7 +13,7 @@ export default async function handler(
 
   try {
     console.log("🔍 AUTH DEBUG API CALLED");
-    
+
     // Get environment info (without exposing secrets)
     const envInfo = {
       NODE_ENV: process.env.NODE_ENV,
@@ -28,14 +28,16 @@ export default async function handler(
 
     // Get configured providers
     const providers = await getProviders();
-    const providerInfo = providers ? Object.keys(providers).map(id => ({
-      id,
-      name: providers[id]?.name,
-      type: providers[id]?.type,
-    })) : null;
+    const providerInfo = providers
+      ? Object.keys(providers).map((id) => ({
+          id,
+          name: providers[id]?.name,
+          type: providers[id]?.type,
+        }))
+      : null;
 
     // Get authOptions providers directly
-    const configuredProviders = authOptions.providers.map(provider => ({
+    const configuredProviders = authOptions.providers.map((provider) => ({
       id: provider.id,
       name: provider.name,
       type: provider.type,
@@ -59,13 +61,19 @@ export default async function handler(
       providersFromAuthOptions: configuredProviders,
       totalProvidersLoaded: providerInfo?.length || 0,
       totalProvidersConfigured: configuredProviders.length,
-      hasCredentialsProvider: providerInfo?.some(p => p.id === 'credentials') || false,
-      hasGoogleProvider: providerInfo?.some(p => p.id === 'google') || false,
-      hasCredentialsProviderConfigured: configuredProviders.some(p => p.id === 'credentials'),
-      hasGoogleProviderConfigured: configuredProviders.some(p => p.id === 'google'),
+      hasCredentialsProvider:
+        providerInfo?.some((p) => p.id === "credentials") || false,
+      hasGoogleProvider: providerInfo?.some((p) => p.id === "google") || false,
+      hasCredentialsProviderConfigured: configuredProviders.some(
+        (p) => p.id === "credentials"
+      ),
+      hasGoogleProviderConfigured: configuredProviders.some(
+        (p) => p.id === "google"
+      ),
       databaseConnected: dbConnected,
       databaseError: dbError,
-      providerMismatch: (providerInfo?.length || 0) !== configuredProviders.length,
+      providerMismatch:
+        (providerInfo?.length || 0) !== configuredProviders.length,
     };
 
     console.log("📊 DEBUG INFO:", JSON.stringify(debugInfo, null, 2));
@@ -73,15 +81,14 @@ export default async function handler(
     return res.status(200).json({
       success: true,
       debug: debugInfo,
-      message: "Check server logs for detailed information"
+      message: "Check server logs for detailed information",
     });
-
   } catch (error) {
     console.error("❌ Debug API error:", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
-      message: "Check server logs for error details"
+      message: "Check server logs for error details",
     });
   }
 }

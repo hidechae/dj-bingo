@@ -23,7 +23,10 @@ declare module "next-auth" {
 
 // Log environment variables for debugging (without exposing secrets)
 console.log("🔧 AUTH CONFIG DEBUG:");
-console.log("  - Google OAuth configured:", !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET));
+console.log(
+  "  - Google OAuth configured:",
+  !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)
+);
 console.log("  - GOOGLE_CLIENT_ID exists:", !!env.GOOGLE_CLIENT_ID);
 console.log("  - GOOGLE_CLIENT_SECRET exists:", !!env.GOOGLE_CLIENT_SECRET);
 console.log("  - DATABASE_URL exists:", !!process.env.DATABASE_URL);
@@ -33,9 +36,9 @@ console.log("  - NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 // Create providers array dynamically to ensure credentials provider is always included
 const createProviders = () => {
   console.log("🏗️ CREATING PROVIDERS...");
-  
+
   const providers = [];
-  
+
   // Add Google OAuth provider if credentials are available
   if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
     console.log("  ✅ Adding Google OAuth provider");
@@ -48,7 +51,7 @@ const createProviders = () => {
   } else {
     console.log("  ❌ Google OAuth not configured");
   }
-  
+
   // Always add credentials provider
   console.log("  ✅ Adding Credentials provider");
   providers.push(
@@ -60,11 +63,11 @@ const createProviders = () => {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("📧 CREDENTIALS AUTH ATTEMPT:", { 
-          hasEmail: !!credentials?.email, 
-          hasPassword: !!credentials?.password 
+        console.log("📧 CREDENTIALS AUTH ATTEMPT:", {
+          hasEmail: !!credentials?.email,
+          hasPassword: !!credentials?.password,
         });
-        
+
         // Early return for missing credentials to prevent unnecessary DB calls during provider init
         if (!credentials?.email || !credentials?.password) {
           console.log("❌ Missing credentials");
@@ -73,18 +76,18 @@ const createProviders = () => {
 
         try {
           console.log("🔍 Searching for user:", credentials.email);
-          
+
           // Add timeout and connection resilience
-          const user = await Promise.race([
+          const user = (await Promise.race([
             db.user.findUnique({
               where: {
                 email: credentials.email,
               },
             }),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Database timeout')), 10000)
-            )
-          ]) as any;
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Database timeout")), 10000)
+            ),
+          ])) as any;
 
           if (!user) {
             console.log("❌ User not found");
@@ -106,14 +109,20 @@ const createProviders = () => {
             return null;
           }
 
-          console.log("✅ Credentials authentication successful for:", user.email);
+          console.log(
+            "✅ Credentials authentication successful for:",
+            user.email
+          );
           return {
             id: user.id,
             email: user.email,
             name: user.name,
           };
         } catch (error) {
-          console.error("❌ Credentials auth error (but provider still available):", error);
+          console.error(
+            "❌ Credentials auth error (but provider still available):",
+            error
+          );
           // Don't throw the error - just return null to keep provider available
           // This prevents NextAuth from excluding the credentials provider due to DB issues
           return null;
@@ -121,7 +130,7 @@ const createProviders = () => {
       },
     })
   );
-  
+
   console.log(`🚀 TOTAL PROVIDERS CREATED: ${providers.length}`);
   return providers;
 };
