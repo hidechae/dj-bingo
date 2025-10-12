@@ -65,8 +65,8 @@ const Register: NextPage = () => {
       } else {
         setError(data.message || "登録に失敗しました");
       }
-    } catch (error) {
-      console.error("Registration error:", error);
+    } catch (err) {
+      console.error("Registration error:", err);
       setError("登録に失敗しました");
     } finally {
       setIsLoading(false);

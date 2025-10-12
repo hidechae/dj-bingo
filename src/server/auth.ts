@@ -55,6 +55,9 @@ export const authOptions: NextAuthOptions = {
     },
   },
   adapter: PrismaAdapter(db) as Adapter,
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     // Add Google OAuth provider if credentials are available
     ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
@@ -107,9 +110,6 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/auth/signin",
-  },
-  session: {
-    strategy: "jwt",
   },
 };
 

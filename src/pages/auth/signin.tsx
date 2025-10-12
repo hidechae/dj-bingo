@@ -46,8 +46,8 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
       } else if (result?.ok) {
         await router.push("/admin");
       }
-    } catch (error) {
-      console.error("Sign in error:", error);
+    } catch (err) {
+      console.error("Sign in error:", err);
       setError("ログインに失敗しました");
     } finally {
       setIsLoading(false);
