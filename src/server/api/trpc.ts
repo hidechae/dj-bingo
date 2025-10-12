@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
+import { createRepositories } from "~/server/repositories";
 
 interface CreateContextOptions {
   session: Session | null;
@@ -15,6 +16,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     db,
+    repositories: createRepositories(db),
   };
 };
 

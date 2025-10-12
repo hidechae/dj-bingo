@@ -19,9 +19,10 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
       await refetch();
       setEmail("");
       // Show copy message for the newly added admin
-      setShowCopyMessage(
-        generateInviteMessage(newAdmin.user.name || newAdmin.user.email!)
-      );
+      if (newAdmin) {
+        const adminName = newAdmin.user.name || newAdmin.user.email || "管理者";
+        setShowCopyMessage(generateInviteMessage(adminName));
+      }
     },
     onError: () => {
       // Completely suppress error propagation
