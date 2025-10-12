@@ -2,15 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { BingoGameRepository } from "~/server/repositories";
 import { createMockPrismaClient } from "~/test/mockPrisma";
 import { BingoSize, GameStatus } from "~/domain/models";
-import {
-  type PrismaClient,
-  type BingoGame,
-  type Song,
-  type Participant,
-  type User,
-  type GameAdmin,
-  Prisma,
-} from "@prisma/client";
+import { type PrismaClient, type BingoGame, Prisma } from "@prisma/client";
 
 describe("BingoGameRepository", () => {
   let mockPrisma: PrismaClient;
