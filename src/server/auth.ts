@@ -30,6 +30,102 @@ console.log("  - DATABASE_URL exists:", !!process.env.DATABASE_URL);
 console.log("  - NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET);
 console.log("  - NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 
+// Create providers array dynamically to ensure credentials provider is always included
+const createProviders = () => {
+  console.log("🏗️ CREATING PROVIDERS...");
+  
+  const providers = [];
+  
+  // Add Google OAuth provider if credentials are available
+  if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+    console.log("  ✅ Adding Google OAuth provider");
+    providers.push(
+      GoogleProvider({
+        clientId: env.GOOGLE_CLIENT_ID,
+        clientSecret: env.GOOGLE_CLIENT_SECRET,
+      })
+    );
+  } else {
+    console.log("  ❌ Google OAuth not configured");
+  }
+  
+  // Always add credentials provider
+  console.log("  ✅ Adding Credentials provider");
+  providers.push(
+    CredentialsProvider({
+      id: "credentials",
+      name: "Email and Password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        console.log("📧 CREDENTIALS AUTH ATTEMPT:", { 
+          hasEmail: !!credentials?.email, 
+          hasPassword: !!credentials?.password 
+        });
+        
+        // Early return for missing credentials to prevent unnecessary DB calls during provider init
+        if (!credentials?.email || !credentials?.password) {
+          console.log("❌ Missing credentials");
+          return null;
+        }
+
+        try {
+          console.log("🔍 Searching for user:", credentials.email);
+          
+          // Add timeout and connection resilience
+          const user = await Promise.race([
+            db.user.findUnique({
+              where: {
+                email: credentials.email,
+              },
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Database timeout')), 10000)
+            )
+          ]) as any;
+
+          if (!user) {
+            console.log("❌ User not found");
+            return null;
+          }
+
+          if (!user.password) {
+            console.log("❌ User has no password (OAuth-only user)");
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isPasswordValid) {
+            console.log("❌ Invalid password");
+            return null;
+          }
+
+          console.log("✅ Credentials authentication successful for:", user.email);
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          };
+        } catch (error) {
+          console.error("❌ Credentials auth error (but provider still available):", error);
+          // Don't throw the error - just return null to keep provider available
+          // This prevents NextAuth from excluding the credentials provider due to DB issues
+          return null;
+        }
+      },
+    })
+  );
+  
+  console.log(`🚀 TOTAL PROVIDERS CREATED: ${providers.length}`);
+  return providers;
+};
+
 export const authOptions: NextAuthOptions = {
   callbacks: {
     session: ({ session, user, token }) => {
@@ -70,76 +166,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  providers: [
-    // Add Google OAuth provider if credentials are available
-    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
-      ? [
-          GoogleProvider({
-            clientId: env.GOOGLE_CLIENT_ID,
-            clientSecret: env.GOOGLE_CLIENT_SECRET,
-          }),
-        ]
-      : []),
-    // Email/Password authentication - Always include this provider
-    CredentialsProvider({
-      id: "credentials",
-      name: "Email and Password",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        console.log("📧 CREDENTIALS AUTH ATTEMPT:", { 
-          hasEmail: !!credentials?.email, 
-          hasPassword: !!credentials?.password 
-        });
-        
-        try {
-          if (!credentials?.email || !credentials?.password) {
-            console.log("❌ Missing credentials");
-            return null;
-          }
-
-          console.log("🔍 Searching for user:", credentials.email);
-          const user = await db.user.findUnique({
-            where: {
-              email: credentials.email,
-            },
-          });
-
-          if (!user) {
-            console.log("❌ User not found");
-            return null;
-          }
-
-          if (!user.password) {
-            console.log("❌ User has no password (OAuth-only user)");
-            return null;
-          }
-
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
-
-          if (!isPasswordValid) {
-            console.log("❌ Invalid password");
-            return null;
-          }
-
-          console.log("✅ Credentials authentication successful for:", user.email);
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-          };
-        } catch (error) {
-          console.error("❌ Credentials auth error:", error);
-          return null;
-        }
-      },
-    }),
-  ],
+  providers: createProviders(),
   pages: {
     signIn: "/auth/signin",
   },

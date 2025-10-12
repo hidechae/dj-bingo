@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getProviders } from "next-auth/react";
 import { authOptions } from "~/server/auth";
+import { db } from "~/server/db";
 
 export default async function handler(
   req: NextApiRequest,
@@ -40,14 +41,31 @@ export default async function handler(
       type: provider.type,
     }));
 
+    // Test database connectivity
+    let dbConnected = false;
+    let dbError = null;
+    try {
+      // Simple query to test DB connectivity
+      await db.$queryRaw`SELECT 1`;
+      dbConnected = true;
+    } catch (error) {
+      dbError = error instanceof Error ? error.message : "Unknown DB error";
+    }
+
     const debugInfo = {
       timestamp: new Date().toISOString(),
       environment: envInfo,
       providersFromGetProviders: providerInfo,
       providersFromAuthOptions: configuredProviders,
       totalProvidersLoaded: providerInfo?.length || 0,
+      totalProvidersConfigured: configuredProviders.length,
       hasCredentialsProvider: providerInfo?.some(p => p.id === 'credentials') || false,
       hasGoogleProvider: providerInfo?.some(p => p.id === 'google') || false,
+      hasCredentialsProviderConfigured: configuredProviders.some(p => p.id === 'credentials'),
+      hasGoogleProviderConfigured: configuredProviders.some(p => p.id === 'google'),
+      databaseConnected: dbConnected,
+      databaseError: dbError,
+      providerMismatch: (providerInfo?.length || 0) !== configuredProviders.length,
     };
 
     console.log("📊 DEBUG INFO:", JSON.stringify(debugInfo, null, 2));
