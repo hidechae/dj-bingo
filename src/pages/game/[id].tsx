@@ -17,8 +17,8 @@ const ParticipantGame: NextPage = () => {
   );
 
   const { data: participant } = api.participant.getBySessionToken.useQuery(
-    { sessionToken },
-    { enabled: !!sessionToken }
+    { sessionToken, bingoGameId: id as string },
+    { enabled: !!sessionToken && !!id }
   );
 
   const joinMutation = api.participant.join.useMutation({
