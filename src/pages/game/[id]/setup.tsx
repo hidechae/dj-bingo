@@ -28,9 +28,9 @@ const SetupBingo: NextPage = () => {
   } = useBingoSetup(id);
 
   // 初期ロード中はグローバルローディングを表示
-  useInitialLoading({ isLoading: !participant });
+  useInitialLoading({ isLoading: !participant || !participant?.bingoGame });
 
-  if (!participant) {
+  if (!participant || !participant.bingoGame) {
     return null; // ローディングオーバーレイが表示されるため、この画面は不要
   }
 

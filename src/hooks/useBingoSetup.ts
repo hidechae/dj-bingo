@@ -64,6 +64,12 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
         return;
       }
 
+      // bingoGameが存在しない場合は参加画面へ
+      if (!participant.bingoGame) {
+        void router.push(`/game/${gameId}`);
+        return;
+      }
+
       // グリッド編集はENTRYステータスでのみ許可
       if (participant.bingoGame.status !== "ENTRY") {
         if (participant.isGridComplete) {
