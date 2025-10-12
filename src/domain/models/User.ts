@@ -8,8 +8,3 @@ export type UserEntity = {
   image: string | null;
   password?: string | null; // Optional for security - only included when needed
 };
-
-// Type for authentication purposes that includes password
-export type UserEntityWithPassword = UserEntity & {
-  password: string | null;
-};

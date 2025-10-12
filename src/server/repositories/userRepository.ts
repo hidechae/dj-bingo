@@ -1,5 +1,5 @@
 import { type PrismaClient, type User as PrismaUser } from "@prisma/client";
-import { type UserEntity, type UserEntityWithPassword } from "~/domain/models";
+import { type UserEntity } from "~/domain/models";
 
 export class UserRepository {
   constructor(private db: PrismaClient) {}
@@ -21,7 +21,7 @@ export class UserRepository {
   }
 
   // Method for authentication that includes password
-  async findByEmailWithPassword(email: string): Promise<UserEntityWithPassword | null> {
+  async findByEmailWithPassword(email: string): Promise<UserEntity | null> {
     const user = await this.db.user.findUnique({
       where: { email },
     });
@@ -84,7 +84,7 @@ export class UserRepository {
     };
   }
 
-  private toDomainWithPassword(prismaUser: PrismaUser): UserEntityWithPassword {
+  private toDomainWithPassword(prismaUser: PrismaUser): UserEntity {
     return {
       id: prismaUser.id,
       name: prismaUser.name,
