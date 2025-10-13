@@ -11,6 +11,9 @@ const AdminProfile: NextPage = () => {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -48,10 +51,19 @@ const AdminProfile: NextPage = () => {
     },
   });
 
-  const { data: googleLinkUrl } = api.user.getGoogleLinkUrl.useQuery(
-    undefined,
-    { enabled: !!session && !userProfile?.hasGoogleAccount }
-  );
+  const changePasswordMutation = api.user.changePassword.useMutation({
+    onSuccess: (data) => {
+      setSuccess(data.message);
+      setError("");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    },
+    onError: (error) => {
+      setError(error.message);
+      setSuccess("");
+    },
+  });
 
   useEffect(() => {
     if (status === "loading") return;
@@ -59,6 +71,36 @@ const AdminProfile: NextPage = () => {
       void router.push("/auth/signin");
     }
   }, [session, status, router]);
+
+  // Handle URL parameters for success/error messages
+  useEffect(() => {
+    const { success, error: urlError } = router.query;
+    
+    if (success === "google_linked") {
+      setSuccess("Googleアカウントが正常に関連付けられました");
+      setError("");
+      void utils.user.getProfileWithPasswordInfo.invalidate();
+      // Clear URL parameters
+      void router.replace("/admin/profile", undefined, { shallow: true });
+    } else if (urlError) {
+      const errorMessages: Record<string, string> = {
+        oauth_error: "Google OAuth認証でエラーが発生しました",
+        missing_parameters: "認証パラメータが不足しています",
+        invalid_state: "無効な認証状態です",
+        unauthorized: "認証されていません",
+        token_exchange_failed: "トークン交換に失敗しました",
+        user_info_failed: "ユーザー情報の取得に失敗しました",
+        account_already_linked: "このGoogleアカウントは既に他のユーザーに関連付けられています",
+        user_already_has_google: "このユーザーには既にGoogleアカウントが関連付けられています",
+        internal_error: "内部エラーが発生しました",
+      };
+      
+      setError(errorMessages[urlError as string] || "不明なエラーが発生しました");
+      setSuccess("");
+      // Clear URL parameters
+      void router.replace("/admin/profile", undefined, { shallow: true });
+    }
+  }, [router, utils]);
 
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +118,27 @@ const AdminProfile: NextPage = () => {
     }
 
     setPasswordMutation.mutate({ password });
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (newPassword !== confirmNewPassword) {
+      setError("新しいパスワードが一致しません");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError("新しいパスワードは6文字以上である必要があります");
+      return;
+    }
+
+    changePasswordMutation.mutate({
+      currentPassword,
+      newPassword,
+    });
   };
 
   if (status === "loading") {
@@ -252,12 +315,78 @@ const AdminProfile: NextPage = () => {
 
               {userProfile?.hasPassword && (
                 <div className="border-t pt-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    パスワード認証
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    パスワード変更
                   </h3>
-                  <p className="text-sm text-gray-600">
-                    パスワードが設定されています。メールアドレスとパスワードでログインできます。
+                  <p className="text-sm text-gray-600 mb-4">
+                    パスワードが設定されています。現在のパスワードを変更できます。
                   </p>
+                  
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div>
+                      <label
+                        htmlFor="currentPassword"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        現在のパスワード
+                      </label>
+                      <input
+                        type="password"
+                        id="currentPassword"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="現在のパスワードを入力"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label
+                        htmlFor="newPassword"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        新しいパスワード
+                      </label>
+                      <input
+                        type="password"
+                        id="newPassword"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="6文字以上の新しいパスワードを入力"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label
+                        htmlFor="confirmNewPassword"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        新しいパスワード（確認）
+                      </label>
+                      <input
+                        type="password"
+                        id="confirmNewPassword"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        required
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="新しいパスワードを再入力"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={changePasswordMutation.isPending}
+                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {changePasswordMutation.isPending
+                        ? "変更中..."
+                        : "パスワードを変更"}
+                    </button>
+                  </form>
                 </div>
               )}
 
@@ -271,47 +400,54 @@ const AdminProfile: NextPage = () => {
                     <p className="text-sm text-gray-600 mb-4">
                       Googleアカウントが関連付けられています。Googleアカウントでもログインできます。
                     </p>
-                    <button
-                      onClick={() => unlinkGoogleMutation.mutate()}
-                      disabled={unlinkGoogleMutation.isPending}
-                      className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {unlinkGoogleMutation.isPending
-                        ? "解除中..."
-                        : "Google認証を解除"}
-                    </button>
+                    {userProfile?.hasPassword ? (
+                      <button
+                        onClick={() => unlinkGoogleMutation.mutate()}
+                        disabled={unlinkGoogleMutation.isPending}
+                        className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {unlinkGoogleMutation.isPending
+                          ? "解除中..."
+                          : "Google認証を解除"}
+                      </button>
+                    ) : (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                        <p className="text-sm text-yellow-800">
+                          パスワードが設定されていないため、Googleアカウントの関連付けを解除できません。
+                          先にパスワードを設定してください。
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div>
                     <p className="text-sm text-gray-600 mb-4">
                       Googleアカウントを関連付けると、Googleアカウントでもログインできるようになります。
                     </p>
-                    {googleLinkUrl && (
-                      <a
-                        href={googleLinkUrl.url}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                      >
-                        <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                          <path
-                            fill="currentColor"
-                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                          />
-                          <path
-                            fill="currentColor"
-                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                          />
-                          <path
-                            fill="currentColor"
-                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                          />
-                          <path
-                            fill="currentColor"
-                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                          />
-                        </svg>
-                        Googleアカウントを関連付け
-                      </a>
-                    )}
+                    <a
+                      href="/api/auth/link-google-oauth"
+                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    >
+                      <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                        <path
+                          fill="currentColor"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                      Googleアカウントを関連付け
+                    </a>
                   </div>
                 )}
               </div>
