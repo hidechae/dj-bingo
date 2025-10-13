@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
@@ -14,6 +15,11 @@ const AdminDashboard: NextPage = () => {
     { enabled: !!session }
   );
 
+  // 重要な初期データロード中はグローバルローディングを表示
+  useInitialLoading({
+    isLoading: status === "loading" || (!!session && isLoading),
+  });
+
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
@@ -21,12 +27,8 @@ const AdminDashboard: NextPage = () => {
     }
   }, [session, status, router]);
 
-  if (status === "loading" || isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-2xl">Loading...</div>
-      </div>
-    );
+  if (status === "loading" || (!!session && isLoading)) {
+    return null; // グローバルローディングオーバーレイが表示される
   }
 
   if (!session) {

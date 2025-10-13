@@ -3,6 +3,8 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 
 import { api } from "~/utils/api";
+import { LoadingProvider } from "~/contexts/LoadingContext";
+import { LoadingOverlay } from "~/components/LoadingOverlay";
 
 import "~/styles/globals.css";
 
@@ -12,9 +14,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <div className="font-sans">
-        <Component {...pageProps} />
-      </div>
+      <LoadingProvider>
+        <div className="font-sans">
+          <Component {...pageProps} />
+          <LoadingOverlay />
+        </div>
+      </LoadingProvider>
     </SessionProvider>
   );
 };
