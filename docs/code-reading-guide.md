@@ -22,10 +22,11 @@ DJ Bingoは、DJイベントで使用できるインタラクティブなビン�
 - **Next.js 15** (Pages Router)
 - **TypeScript**
 - **tRPC** - 型安全なAPI通信
-- **Prisma** - ORMとデータベース管理
-- **NextAuth.js** - 認証（Google OAuth）
+- **Prisma 6** - ORMとデータベース管理
+- **NextAuth.js** - 認証（Google OAuth、Email/Password）
 - **TanStack Query** - データフェッチとキャッシュ管理
-- **Tailwind CSS** - スタイリング
+- **Tailwind CSS 4** - スタイリング
+- **bcryptjs** - パスワードハッシュ化
 
 ### ディレクトリ構造
 
@@ -515,13 +516,17 @@ join: publicProcedure
 ```
 User (管理者)
   │
-  └─── BingoGame (1:N)
+  ├─── BingoGame (1:N) - 作成したゲーム
+  │      │
+  │      ├─── Song (1:N)
+  │      │      │
+  │      │      └─── ParticipantSong (1:N)
+  │      │             │
+  │      └─── Participant (1:N) ──┘
+  │
+  └─── GameAdmin (1:N) - 管理権限があるゲーム
          │
-         ├─── Song (1:N)
-         │      │
-         │      └─── ParticipantSong (1:N)
-         │             │
-         └─── Participant (1:N) ──┘
+         └─── BingoGame (N:M)
 ```
 
 ### 主要なテーブル
@@ -533,10 +538,12 @@ model BingoGame {
   id          String      @id @default(cuid())
   title       String
   size        BingoSize   // THREE_BY_THREE | FOUR_BY_FOUR | FIVE_BY_FIVE
+  status      GameStatus  @default(EDITING) // EDITING | ENTRY | PLAYING | FINISHED
   createdBy   String
   user        User        @relation(fields: [createdBy], references: [id])
   songs       Song[]
   participants Participant[]
+  gameAdmins  GameAdmin[] // 共同管理者
   isActive    Boolean     @default(true)
 }
 ```
@@ -562,13 +569,15 @@ model Song {
 model Participant {
   id              String      @id @default(cuid())
   name            String
-  sessionToken    String      @unique  // localStorage由来の一意なトークン
+  sessionToken    String      // localStorage由来の一意なトークン
   bingoGameId     String
   bingoGame       BingoGame   @relation(fields: [bingoGameId], references: [id])
   isGridComplete  Boolean     @default(false)  // グリッド設定完了
   hasWon          Boolean     @default(false)  // ビンゴ達成
   wonAt           DateTime?
   participantSongs ParticipantSong[]
+
+  @@unique([sessionToken, bingoGameId]) // 同じゲームに複数回参加不可
 }
 ```
 
@@ -683,7 +692,15 @@ model ParticipantSong {
 - **Next.js Pages Router**: ファイルベースルーティング
 - **tRPC**: 型安全なAPI通信
 - **Prisma**: ORMによるデータベース操作
-- **NextAuth.js**: 認証フロー
+- **NextAuth.js**: 認証フロー（Google OAuth、Email/Password）
 - **TanStack Query**: 状態管理とキャッシング
+- **ゲームステータス管理**: ライフサイクル設計
+- **共同管理機能**: 複数管理者の権限設計
 
 1つずつ丁寧に読み進めることで、モダンなWeb開発の全体像が掴めるはずです。
+
+## 関連ドキュメント
+
+- [アーキテクチャ](./architecture.md) - システム全体の設計思想
+- [ユーザーフロー詳細](./user-flows.md) - 各機能の詳細なフロー
+- [トラブルシューティング](./troubleshooting/README.md) - よくある問題と解決方法

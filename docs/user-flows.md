@@ -33,11 +33,17 @@
   ↓
 /auth/signin
   ↓
-「Googleでログイン」クリック
-  ↓
-Google OAuth認証画面
-  ↓
-認証成功
+認証方法を選択
+  ├─ Googleでログイン
+  │    ↓
+  │  Google OAuth認証画面
+  │    ↓
+  │  認証成功
+  └─ Email/Passwordでログイン
+       ↓
+     メールアドレスとパスワード入力
+       ↓
+     認証成功
   ↓
 NextAuth.jsがセッション作成
   ↓
@@ -75,15 +81,20 @@ const Home: NextPage = () => {
 };
 ```
 
-**`src/server/auth.ts` - Google OAuth設定**
+**`src/server/auth.ts` - 認証設定**
 
 ```tsx
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db), // セッションをDBに保存
   providers: [
+    // Google OAuth
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
+    // Email & Password (bcryptjsでハッシュ化)
+    CredentialsProvider({
+      // メールアドレスとパスワードで認証
     }),
   ],
   pages: {
@@ -897,12 +908,15 @@ const createMutation = api.bingo.create.useMutation({
 
 ### 重要なポイント
 
-1. **管理者フロー**: 認証必須、protectedProcedureで保護
+1. **管理者フロー**: 認証必須（Google OAuth または Email/Password）、protectedProcedureで保護
 2. **参加者フロー**: 認証不要、sessionTokenで識別
 3. **リアルタイム更新**: ポーリング（3秒間隔）で実現
 4. **エラーハンドリング**: tRPCのエラーコードで適切に処理
+5. **ゲームステータス管理**: EDITING → ENTRY → PLAYING → FINISHED のライフサイクル
+6. **共同管理機能**: 複数の管理者で1つのゲームを管理可能
 
-### 次のステップ
+### 関連ドキュメント
 
-- [コードリーディングガイド](./code-reading-guide.md)でコードの詳細を学ぶ
-- [アーキテクチャ](./architecture.md)でシステム全体を理解する
+- [アーキテクチャ](./architecture.md) - システム全体の設計思想
+- [コードリーディングガイド](./code-reading-guide.md) - コードの詳細な読み方
+- [トラブルシューティング](./troubleshooting/README.md) - よくある問題と解決方法

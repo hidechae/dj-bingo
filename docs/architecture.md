@@ -23,11 +23,13 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 
 **管理者側:**
 
-- Google OAuthによる認証
+- Google OAuthまたはEmail/Passwordによる認証
 - ビンゴゲームの作成・管理
+- ゲームステータス管理（編集中、エントリー中、ゲーム中、終了）
 - 楽曲リストの設定
 - 楽曲の演奏状態管理
 - 参加者の状況確認
+- 共同管理者の追加
 - QRコード生成
 
 **参加者側:**
@@ -45,28 +47,29 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 | 技術               | バージョン | 用途                                   |
 | ------------------ | ---------- | -------------------------------------- |
 | **Next.js**        | 15.5.0     | Reactフレームワーク、ルーティング、SSR |
-| **React**          | 18.3.1     | UIコンポーネント構築                   |
+| **React**          | 19.0.0     | UIコンポーネント構築                   |
 | **TypeScript**     | 5.6.2      | 型安全性の確保                         |
-| **Tailwind CSS**   | 3.4.13     | スタイリング                           |
+| **Tailwind CSS**   | 4.1.14     | スタイリング                           |
 | **TanStack Query** | 5.56.2     | データフェッチ、キャッシュ管理         |
 
 ### バックエンド
 
-| 技術            | バージョン | 用途                   |
-| --------------- | ---------- | ---------------------- |
-| **tRPC**        | 11.0.0-rc  | 型安全なAPI通信        |
-| **Prisma**      | 5.19.1     | ORM、データベース管理  |
-| **NextAuth.js** | 4.24.8     | 認証（Google OAuth）   |
-| **PostgreSQL**  | 15         | データベース           |
-| **Zod**         | 3.23.8     | スキーマバリデーション |
-| **SuperJSON**   | 2.2.1      | シリアライゼーション   |
+| 技術            | バージョン | 用途                                 |
+| --------------- | ---------- | ------------------------------------ |
+| **tRPC**        | 11.0.0-rc  | 型安全なAPI通信                      |
+| **Prisma**      | 6.0.0      | ORM、データベース管理                |
+| **NextAuth.js** | 4.24.8     | 認証（Google OAuth、Email/Password） |
+| **PostgreSQL**  | 15+        | データベース                         |
+| **Zod**         | 4.0.0      | スキーマバリデーション               |
+| **SuperJSON**   | 2.2.1      | シリアライゼーション                 |
+| **bcryptjs**    | 3.0.2      | パスワードハッシュ化                 |
 
 ### インフラ
 
-| 環境         | 技術                           |
-| ------------ | ------------------------------ |
-| **ローカル** | Docker Compose（PostgreSQL）   |
-| **本番**     | Neon（PostgreSQL）、Vercel推奨 |
+| 環境         | 技術                                                             |
+| ------------ | ---------------------------------------------------------------- |
+| **ローカル** | Docker Compose（PostgreSQL）                                     |
+| **本番**     | Supabase（PostgreSQL）+ Vercel、またはNeon（PostgreSQL）+ Vercel |
 
 ## アーキテクチャ図
 
@@ -127,7 +130,11 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 │                                                               │
 │  ┌────────┐  ┌──────┐  ┌────────────┐  ┌─────────────────┐ │
 │  │  User  │  │ Song │  │ BingoGame  │  │  Participant    │ │
-│  └────────┘  └──────┘  └────────────┘  └─────────────────┘ │
+│  └───┬────┘  └──────┘  └─────┬──────┘  └─────────────────┘ │
+│      │                        │                              │
+│      │                  ┌─────▼──────┐                      │
+│      └──────────────────┤ GameAdmin  │                      │
+│                         └────────────┘                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -408,12 +415,14 @@ dj-bingo/
 
 ### 管理者認証
 
-**技術:** NextAuth.js + Google OAuth
+**技術:** NextAuth.js + Google OAuth / Email & Password
 
 **フロー:**
 
 1. ユーザーが `/auth/signin` にアクセス
-2. Google OAuthにリダイレクト
+2. 認証方法を選択
+   - **Google OAuth**: Googleアカウントでログイン
+   - **Email/Password**: メールアドレスとパスワードでログイン（bcryptjsでハッシュ化）
 3. 認証成功後、NextAuth.jsがセッションをDBに保存
 4. `useSession()` で認証状態を取得
 
@@ -588,6 +597,68 @@ return <GameDetails game={data} />;
 - Prisma Studioでデータベース確認
 - 型エラーによる早期バグ検出
 
+## データベース設計の補足
+
+### 重要なスキーマ変更
+
+#### GameStatus Enum
+
+ゲームのライフサイクルを管理するステータス：
+
+```prisma
+enum GameStatus {
+  EDITING  @map("editing")  // 編集中: 楽曲リストを編集中
+  ENTRY    @map("entry")    // エントリー中: 参加者受付中
+  PLAYING  @map("playing")  // ゲーム中: プレイ中
+  FINISHED @map("finished") // 終了: ゲーム終了
+}
+```
+
+#### GameAdmin モデル
+
+複数の管理者でゲームを共同管理できる機能：
+
+```prisma
+model GameAdmin {
+  id          String    @id @default(cuid())
+  bingoGameId String
+  bingoGame   BingoGame @relation(fields: [bingoGameId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  addedBy     String    // 追加した管理者のID
+  addedAt     DateTime  @default(now())
+
+  @@unique([bingoGameId, userId])  // 同じユーザーを重複して追加できない
+}
+```
+
+#### Participant の複合ユニーク制約
+
+同じ参加者が同じゲームに複数回参加できないようにする：
+
+```prisma
+model Participant {
+  // ...
+  @@unique([sessionToken, bingoGameId])
+}
+```
+
+### 本番環境のデータベース構成
+
+#### Supabase 使用時（推奨）
+
+```
+環境変数の設定:
+- DATABASE_URL: Transaction Pooler（ポート 6543）+ pgbouncer=true
+- DIRECT_DATABASE_URL: Direct/Session Connection（ポート 5432）
+
+理由:
+- Transaction Pooler: サーバーレス環境での接続効率化
+- Direct Connection: マイグレーション実行用
+```
+
+詳細は [トラブルシューティング > データベース接続エラー](./troubleshooting/database-connection-errors.md) を参照。
+
 ## まとめ
 
 DJ Bingoは、モダンなフルスタックアーキテクチャの実例です。
@@ -598,5 +669,12 @@ DJ Bingoは、モダンなフルスタックアーキテクチャの実例です
 - **シンプルさ**: 最小限の技術スタックで最大の効果
 - **開発効率**: T3 Stackによる高いDX
 - **保守性**: 明確なレイヤー分離とディレクトリ構造
+- **柔軟性**: ゲームステータス管理と共同管理者機能
 
 このアーキテクチャは、小〜中規模のアプリケーションに最適であり、必要に応じてスケールアップ可能です。
+
+## 関連ドキュメント
+
+- [コードリーディングガイド](./code-reading-guide.md) - コードの詳細な読み方
+- [ユーザーフロー詳細](./user-flows.md) - 各機能の詳細なフロー
+- [トラブルシューティング](./troubleshooting/README.md) - よくある問題と解決方法
