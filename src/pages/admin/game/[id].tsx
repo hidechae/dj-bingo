@@ -20,6 +20,7 @@ import { SongList } from "~/components/admin/SongList";
 import { ParticipantTable } from "~/components/admin/ParticipantTable";
 import { StatusChangeModal } from "~/components/admin/StatusChangeModal";
 import { AdminManagement } from "~/components/admin/AdminManagement";
+import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const AdminGameManagement: NextPage = () => {
   const { data: session, status } = useSession();
@@ -67,6 +68,11 @@ const AdminGameManagement: NextPage = () => {
 
   const { sortField, sortDirection, handleSort, sortParticipants } =
     useParticipantSort();
+
+  // 認証とゲームデータロード中はグローバルローディングを表示
+  useInitialLoading({
+    isLoading: status === "loading" || (!!session && !bingoGame),
+  });
 
   useEffect(() => {
     if (status === "loading") return;
@@ -222,15 +228,11 @@ const AdminGameManagement: NextPage = () => {
       duplicateMutation.mutate({ gameId: id as string });
     }
   };
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-2xl">Loading...</div>
-      </div>
-    );
+  if (status === "loading" || !bingoGame) {
+    return null; // グローバルローディングオーバーレイが表示される
   }
 
-  if (!session || !bingoGame) {
+  if (!session) {
     return null;
   }
 

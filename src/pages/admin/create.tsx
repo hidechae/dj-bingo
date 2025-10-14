@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { api, type RouterOutputs } from "~/utils/api";
 import { BingoSize } from "~/types";
 import { SongEditMode } from "~/components/admin/SongEditMode";
+import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 interface Song {
   title: string;
@@ -24,6 +25,9 @@ const CreateBingo: NextPage = () => {
       void router.push(`/admin/game/${data.id}`);
     },
   });
+
+  // 認証チェック中はグローバルローディングを表示
+  useInitialLoading({ isLoading: status === "loading" });
 
   useEffect(() => {
     if (status === "loading") return;
@@ -60,11 +64,7 @@ const CreateBingo: NextPage = () => {
   };
 
   if (status === "loading") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-2xl">Loading...</div>
-      </div>
-    );
+    return null; // グローバルローディングオーバーレイが表示される
   }
 
   if (!session) {
