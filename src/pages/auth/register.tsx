@@ -137,7 +137,7 @@ const Register: NextPage = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="田中太郎"
                 />
               </div>
@@ -156,7 +156,7 @@ const Register: NextPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="example@example.com"
                 />
               </div>
@@ -175,7 +175,7 @@ const Register: NextPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="6文字以上で入力"
                 />
               </div>
@@ -194,7 +194,7 @@ const Register: NextPage = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="パスワードを再入力"
                 />
               </div>

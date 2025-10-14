@@ -52,6 +52,12 @@ const AdminDashboard: NextPage = () => {
                 <span className="text-sm text-gray-600">
                   {session.user?.name}さん
                 </span>
+                <Link
+                  href="/admin/profile"
+                  className="cursor-pointer text-sm text-gray-500 hover:text-gray-700"
+                >
+                  プロフィール
+                </Link>
                 <button
                   onClick={() => signOut()}
                   className="cursor-pointer text-sm text-gray-500 hover:text-gray-700"

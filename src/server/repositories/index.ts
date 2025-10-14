@@ -5,6 +5,7 @@ import { ParticipantRepository } from "./participantRepository";
 import { ParticipantSongRepository } from "./participantSongRepository";
 import { UserRepository } from "./userRepository";
 import { GameAdminRepository } from "./gameAdminRepository";
+import { AccountRepository } from "./accountRepository";
 
 export class Repositories {
   public readonly bingoGame: BingoGameRepository;
@@ -13,6 +14,7 @@ export class Repositories {
   public readonly participantSong: ParticipantSongRepository;
   public readonly user: UserRepository;
   public readonly gameAdmin: GameAdminRepository;
+  public readonly account: AccountRepository;
 
   constructor(db: PrismaClient) {
     this.bingoGame = new BingoGameRepository(db);
@@ -21,6 +23,7 @@ export class Repositories {
     this.participantSong = new ParticipantSongRepository(db);
     this.user = new UserRepository(db);
     this.gameAdmin = new GameAdminRepository(db);
+    this.account = new AccountRepository(db);
   }
 }
 
@@ -34,3 +37,4 @@ export * from "./participantRepository";
 export * from "./participantSongRepository";
 export * from "./userRepository";
 export * from "./gameAdminRepository";
+export * from "./accountRepository";

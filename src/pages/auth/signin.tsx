@@ -114,7 +114,7 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         placeholder="example@example.com"
                       />
                     </div>
@@ -131,7 +131,7 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         placeholder="パスワードを入力"
                       />
                     </div>
