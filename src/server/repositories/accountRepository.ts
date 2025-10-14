@@ -1,4 +1,7 @@
-import { type PrismaClient, type Account as PrismaAccount } from "@prisma/client";
+import {
+  type PrismaClient,
+  type Account as PrismaAccount,
+} from "@prisma/client";
 
 export interface AccountEntity {
   id: string;

@@ -8,7 +8,9 @@ import Link from "next/link";
 const GoogleLinkCallback: NextPage = () => {
   const router = useRouter();
   const { data: session } = useSession();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -19,7 +21,7 @@ const GoogleLinkCallback: NextPage = () => {
         if (session?.user) {
           setStatus("success");
           setMessage("Googleアカウントの関連付けが完了しました");
-          
+
           setTimeout(() => {
             void router.push("/admin/profile");
           }, 2000);
@@ -49,10 +51,8 @@ const GoogleLinkCallback: NextPage = () => {
         <div className="container flex max-w-md flex-col items-center justify-center gap-8 px-4 py-16">
           {status === "loading" && (
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-              <h1 className="text-2xl font-bold text-white mb-2">
-                処理中...
-              </h1>
+              <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-white"></div>
+              <h1 className="mb-2 text-2xl font-bold text-white">処理中...</h1>
               <p className="text-white/70">
                 Googleアカウントを関連付けています
               </p>
@@ -61,7 +61,7 @@ const GoogleLinkCallback: NextPage = () => {
 
           {status === "success" && (
             <div className="text-center">
-              <div className="rounded-full bg-green-600 p-3 mx-auto mb-4 w-fit">
+              <div className="mx-auto mb-4 w-fit rounded-full bg-green-600 p-3">
                 <svg
                   className="h-8 w-8 text-white"
                   fill="none"
@@ -76,12 +76,10 @@ const GoogleLinkCallback: NextPage = () => {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="mb-2 text-2xl font-bold text-white">
                 関連付け完了
               </h1>
-              <p className="text-white/70 mb-6">
-                {message}
-              </p>
+              <p className="mb-6 text-white/70">{message}</p>
               <p className="text-sm text-white/60">
                 2秒後にプロフィール画面に戻ります...
               </p>
@@ -90,7 +88,7 @@ const GoogleLinkCallback: NextPage = () => {
 
           {status === "error" && (
             <div className="text-center">
-              <div className="rounded-full bg-red-600 p-3 mx-auto mb-4 w-fit">
+              <div className="mx-auto mb-4 w-fit rounded-full bg-red-600 p-3">
                 <svg
                   className="h-8 w-8 text-white"
                   fill="none"
@@ -105,12 +103,10 @@ const GoogleLinkCallback: NextPage = () => {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="mb-2 text-2xl font-bold text-white">
                 エラーが発生しました
               </h1>
-              <p className="text-white/70 mb-6">
-                {message}
-              </p>
+              <p className="mb-6 text-white/70">{message}</p>
               <Link
                 href="/admin/profile"
                 className="inline-block rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"

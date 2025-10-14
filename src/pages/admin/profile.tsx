@@ -75,7 +75,7 @@ const AdminProfile: NextPage = () => {
   // Handle URL parameters for success/error messages
   useEffect(() => {
     const { success, error: urlError } = router.query;
-    
+
     if (success === "google_linked") {
       setSuccess("Googleアカウントが正常に関連付けられました");
       setError("");
@@ -90,12 +90,16 @@ const AdminProfile: NextPage = () => {
         unauthorized: "認証されていません",
         token_exchange_failed: "トークン交換に失敗しました",
         user_info_failed: "ユーザー情報の取得に失敗しました",
-        account_already_linked: "このGoogleアカウントは既に他のユーザーに関連付けられています",
-        user_already_has_google: "このユーザーには既にGoogleアカウントが関連付けられています",
+        account_already_linked:
+          "このGoogleアカウントは既に他のユーザーに関連付けられています",
+        user_already_has_google:
+          "このユーザーには既にGoogleアカウントが関連付けられています",
         internal_error: "内部エラーが発生しました",
       };
-      
-      setError(errorMessages[urlError as string] || "不明なエラーが発生しました");
+
+      setError(
+        errorMessages[urlError as string] || "不明なエラーが発生しました"
+      );
       setSuccess("");
       // Clear URL parameters
       void router.replace("/admin/profile", undefined, { shallow: true });
@@ -190,13 +194,13 @@ const AdminProfile: NextPage = () => {
         </div>
 
         <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="bg-white shadow-sm rounded-lg">
+          <div className="rounded-lg bg-white shadow-sm">
             <div className="p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
+              <h2 className="mb-4 text-lg font-medium text-gray-900">
                 アカウント情報
               </h2>
-              
-              <div className="space-y-4 mb-6">
+
+              <div className="mb-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     名前
@@ -205,7 +209,7 @@ const AdminProfile: NextPage = () => {
                     {userProfile?.name || "未設定"}
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     メールアドレス
@@ -244,13 +248,13 @@ const AdminProfile: NextPage = () => {
 
               {!userProfile?.hasPassword && (
                 <div className="border-t pt-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  <h3 className="mb-4 text-lg font-medium text-gray-900">
                     パスワードを設定
                   </h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="mb-4 text-sm text-gray-600">
                     パスワードを設定すると、Googleアカウント以外にメールアドレスとパスワードでもログインできるようになります。
                   </p>
-                  
+
                   <form onSubmit={handleSetPassword} className="space-y-4">
                     <div>
                       <label
@@ -265,11 +269,11 @@ const AdminProfile: NextPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                         placeholder="6文字以上のパスワードを入力"
                       />
                     </div>
-                    
+
                     <div>
                       <label
                         htmlFor="confirmPassword"
@@ -283,19 +287,19 @@ const AdminProfile: NextPage = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                         placeholder="パスワードを再入力"
                       />
                     </div>
 
                     {error && (
-                      <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                      <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
                         {error}
                       </div>
                     )}
 
                     {success && (
-                      <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+                      <div className="rounded-md bg-green-50 p-3 text-sm text-green-600">
                         {success}
                       </div>
                     )}
@@ -303,7 +307,7 @@ const AdminProfile: NextPage = () => {
                     <button
                       type="submit"
                       disabled={setPasswordMutation.isPending}
-                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {setPasswordMutation.isPending
                         ? "設定中..."
@@ -315,13 +319,13 @@ const AdminProfile: NextPage = () => {
 
               {userProfile?.hasPassword && (
                 <div className="border-t pt-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  <h3 className="mb-4 text-lg font-medium text-gray-900">
                     パスワード変更
                   </h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="mb-4 text-sm text-gray-600">
                     パスワードが設定されています。現在のパスワードを変更できます。
                   </p>
-                  
+
                   <form onSubmit={handleChangePassword} className="space-y-4">
                     <div>
                       <label
@@ -336,11 +340,11 @@ const AdminProfile: NextPage = () => {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         required
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                         placeholder="現在のパスワードを入力"
                       />
                     </div>
-                    
+
                     <div>
                       <label
                         htmlFor="newPassword"
@@ -354,11 +358,11 @@ const AdminProfile: NextPage = () => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                         placeholder="6文字以上の新しいパスワードを入力"
                       />
                     </div>
-                    
+
                     <div>
                       <label
                         htmlFor="confirmNewPassword"
@@ -372,7 +376,7 @@ const AdminProfile: NextPage = () => {
                         value={confirmNewPassword}
                         onChange={(e) => setConfirmNewPassword(e.target.value)}
                         required
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                         placeholder="新しいパスワードを再入力"
                       />
                     </div>
@@ -380,7 +384,7 @@ const AdminProfile: NextPage = () => {
                     <button
                       type="submit"
                       disabled={changePasswordMutation.isPending}
-                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {changePasswordMutation.isPending
                         ? "変更中..."
@@ -391,27 +395,27 @@ const AdminProfile: NextPage = () => {
               )}
 
               <div className="border-t pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="mb-4 text-lg font-medium text-gray-900">
                   Google認証の管理
                 </h3>
-                
+
                 {userProfile?.hasGoogleAccount ? (
                   <div>
-                    <p className="text-sm text-gray-600 mb-4">
+                    <p className="mb-4 text-sm text-gray-600">
                       Googleアカウントが関連付けられています。Googleアカウントでもログインできます。
                     </p>
                     {userProfile?.hasPassword ? (
                       <button
                         onClick={() => unlinkGoogleMutation.mutate()}
                         disabled={unlinkGoogleMutation.isPending}
-                        className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {unlinkGoogleMutation.isPending
                           ? "解除中..."
                           : "Google認証を解除"}
                       </button>
                     ) : (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                      <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3">
                         <p className="text-sm text-yellow-800">
                           パスワードが設定されていないため、Googleアカウントの関連付けを解除できません。
                           先にパスワードを設定してください。
@@ -421,13 +425,13 @@ const AdminProfile: NextPage = () => {
                   </div>
                 ) : (
                   <div>
-                    <p className="text-sm text-gray-600 mb-4">
+                    <p className="mb-4 text-sm text-gray-600">
                       Googleアカウントを関連付けると、Googleアカウントでもログインできるようになります。
                     </p>
                     {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                     <a
                       href="/api/auth/link-google-oauth"
-                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      className="inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
                     >
                       <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                         <path

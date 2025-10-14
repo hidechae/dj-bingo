@@ -21,36 +21,40 @@ export default async function handler(
 
   try {
     const session = await getServerSession(req, res, authOptions);
-    
+
     if (!session?.user?.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { googleId, accessToken, refreshToken } = linkGoogleSchema.parse(req.body);
+    const { googleId, accessToken, refreshToken } = linkGoogleSchema.parse(
+      req.body
+    );
 
     const repositories = createRepositories(db);
 
     // Check if this Google account is already linked to another user
-    const existingAccount = await repositories.account.findByProviderAndProviderAccountId(
-      "google",
-      googleId
-    );
+    const existingAccount =
+      await repositories.account.findByProviderAndProviderAccountId(
+        "google",
+        googleId
+      );
 
     if (existingAccount && existingAccount.userId !== session.user.id) {
-      return res.status(409).json({ 
-        message: "このGoogleアカウントは既に別のユーザーに関連付けられています" 
+      return res.status(409).json({
+        message: "このGoogleアカウントは既に別のユーザーに関連付けられています",
       });
     }
 
     // Check if the current user already has a Google account linked
-    const userGoogleAccount = await repositories.account.findByProviderAndUserId(
-      "google",
-      session.user.id
-    );
+    const userGoogleAccount =
+      await repositories.account.findByProviderAndUserId(
+        "google",
+        session.user.id
+      );
 
     if (userGoogleAccount) {
-      return res.status(409).json({ 
-        message: "このユーザーには既にGoogleアカウントが関連付けられています" 
+      return res.status(409).json({
+        message: "このユーザーには既にGoogleアカウントが関連付けられています",
       });
     }
 
@@ -78,8 +82,8 @@ export default async function handler(
       });
     }
 
-    return res.status(500).json({ 
-      message: "内部サーバーエラーが発生しました" 
+    return res.status(500).json({
+      message: "内部サーバーエラーが発生しました",
     });
   }
 }

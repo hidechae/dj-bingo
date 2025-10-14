@@ -25,7 +25,8 @@ describe("UserRepository", () => {
 
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(mockUser);
 
-      const result = await repository.findByEmailWithPassword("test@example.com");
+      const result =
+        await repository.findByEmailWithPassword("test@example.com");
 
       expect(result).toEqual({
         id: "user-1",
@@ -43,7 +44,9 @@ describe("UserRepository", () => {
     it("should return null when user does not exist", async () => {
       vi.mocked(mockPrisma.user.findUnique).mockResolvedValue(null);
 
-      const result = await repository.findByEmailWithPassword("nonexistent@example.com");
+      const result = await repository.findByEmailWithPassword(
+        "nonexistent@example.com"
+      );
 
       expect(result).toBeNull();
     });

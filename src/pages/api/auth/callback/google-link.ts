@@ -32,7 +32,7 @@ export default async function handler(
     }
 
     const userId = stateStr.replace("link_", "");
-    
+
     // Get current session and verify user
     const session = await getServerSession(req, res, authOptions);
     if (!session?.user?.id || session.user.id !== userId) {
@@ -46,7 +46,7 @@ export default async function handler(
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
-        code: Array.isArray(code) ? code[0]! : code as string,
+        code: Array.isArray(code) ? code[0]! : (code as string),
         client_id: env.GOOGLE_CLIENT_ID!,
         client_secret: env.GOOGLE_CLIENT_SECRET!,
         redirect_uri: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/auth/callback/google-link`,
@@ -62,11 +62,14 @@ export default async function handler(
     const tokens = await tokenResponse.json();
 
     // Get user info from Google
-    const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-      headers: {
-        Authorization: `Bearer ${tokens.access_token}`,
-      },
-    });
+    const userInfoResponse = await fetch(
+      "https://www.googleapis.com/oauth2/v2/userinfo",
+      {
+        headers: {
+          Authorization: `Bearer ${tokens.access_token}`,
+        },
+      }
+    );
 
     if (!userInfoResponse.ok) {
       console.error("User info fetch failed:", await userInfoResponse.text());
@@ -78,20 +81,19 @@ export default async function handler(
     const repositories = createRepositories(db);
 
     // Check if this Google account is already linked to another user
-    const existingAccount = await repositories.account.findByProviderAndProviderAccountId(
-      "google",
-      googleUser.id
-    );
+    const existingAccount =
+      await repositories.account.findByProviderAndProviderAccountId(
+        "google",
+        googleUser.id
+      );
 
     if (existingAccount && existingAccount.userId !== userId) {
       return res.redirect("/admin/profile?error=account_already_linked");
     }
 
     // Check if the current user already has a Google account linked
-    const userGoogleAccount = await repositories.account.findByProviderAndUserId(
-      "google",
-      userId
-    );
+    const userGoogleAccount =
+      await repositories.account.findByProviderAndUserId("google", userId);
 
     if (userGoogleAccount) {
       return res.redirect("/admin/profile?error=user_already_has_google");
@@ -105,7 +107,9 @@ export default async function handler(
       providerAccountId: googleUser.id,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
-      expires_at: tokens.expires_in ? Math.floor(Date.now() / 1000) + tokens.expires_in : null,
+      expires_at: tokens.expires_in
+        ? Math.floor(Date.now() / 1000) + tokens.expires_in
+        : null,
       token_type: tokens.token_type,
       scope: tokens.scope,
       id_token: tokens.id_token,

@@ -1,10 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 const setPasswordSchema = z.object({
   password: z.string().min(6, "パスワードは6文字以上である必要があります"),
@@ -14,7 +11,7 @@ export const userRouter = createTRPCRouter({
   // Get current user profile
   getProfile: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.repositories.user.findById(ctx.session.user.id);
-    
+
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
@@ -34,8 +31,10 @@ export const userRouter = createTRPCRouter({
       });
     }
 
-    const user = await ctx.repositories.user.findByEmailWithPassword(ctx.session.user.email);
-    
+    const user = await ctx.repositories.user.findByEmailWithPassword(
+      ctx.session.user.email
+    );
+
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
@@ -44,8 +43,12 @@ export const userRouter = createTRPCRouter({
     }
 
     // Check for linked accounts
-    const accounts = await ctx.repositories.account.findByUserId(ctx.session.user.id);
-    const hasGoogleAccount = accounts.some(account => account.provider === "google");
+    const accounts = await ctx.repositories.account.findByUserId(
+      ctx.session.user.id
+    );
+    const hasGoogleAccount = accounts.some(
+      (account) => account.provider === "google"
+    );
 
     return {
       ...user,
@@ -81,10 +84,6 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-
-
-
-
   // Unlink Google account
   unlinkGoogleAccount: protectedProcedure.mutation(async ({ ctx }) => {
     try {
@@ -96,18 +95,22 @@ export const userRouter = createTRPCRouter({
         });
       }
 
-      const user = await ctx.repositories.user.findByEmailWithPassword(ctx.session.user.email);
+      const user = await ctx.repositories.user.findByEmailWithPassword(
+        ctx.session.user.email
+      );
       if (!user?.password) {
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
-          message: "パスワードが設定されていない場合、Googleアカウントの関連付けを解除できません",
+          message:
+            "パスワードが設定されていない場合、Googleアカウントの関連付けを解除できません",
         });
       }
 
-      const userGoogleAccount = await ctx.repositories.account.findByProviderAndUserId(
-        "google",
-        ctx.session.user.id
-      );
+      const userGoogleAccount =
+        await ctx.repositories.account.findByProviderAndUserId(
+          "google",
+          ctx.session.user.id
+        );
 
       if (!userGoogleAccount) {
         throw new TRPCError({
@@ -139,10 +142,16 @@ export const userRouter = createTRPCRouter({
 
   // Change password for existing user
   changePassword: protectedProcedure
-    .input(z.object({
-      currentPassword: z.string().min(1, "現在のパスワードを入力してください"),
-      newPassword: z.string().min(6, "新しいパスワードは6文字以上である必要があります"),
-    }))
+    .input(
+      z.object({
+        currentPassword: z
+          .string()
+          .min(1, "現在のパスワードを入力してください"),
+        newPassword: z
+          .string()
+          .min(6, "新しいパスワードは6文字以上である必要があります"),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         if (!ctx.session.user.email) {
@@ -153,8 +162,10 @@ export const userRouter = createTRPCRouter({
         }
 
         // Get user with current password
-        const user = await ctx.repositories.user.findByEmailWithPassword(ctx.session.user.email);
-        
+        const user = await ctx.repositories.user.findByEmailWithPassword(
+          ctx.session.user.email
+        );
+
         if (!user || !user.password) {
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -163,7 +174,10 @@ export const userRouter = createTRPCRouter({
         }
 
         // Verify current password
-        const isCurrentPasswordValid = await bcrypt.compare(input.currentPassword, user.password);
+        const isCurrentPasswordValid = await bcrypt.compare(
+          input.currentPassword,
+          user.password
+        );
         if (!isCurrentPasswordValid) {
           throw new TRPCError({
             code: "UNAUTHORIZED",

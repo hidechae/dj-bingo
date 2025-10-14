@@ -13,7 +13,7 @@ export default async function handler(
 
   try {
     const session = await getServerSession(req, res, authOptions);
-    
+
     if (!session?.user?.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -25,9 +25,11 @@ export default async function handler(
 
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
     const redirectUri = `${baseUrl}/api/auth/callback/google-link`;
-    
+
     // Create Google OAuth URL with specific parameters for linking
-    const googleOAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+    const googleOAuthUrl = new URL(
+      "https://accounts.google.com/o/oauth2/v2/auth"
+    );
     googleOAuthUrl.searchParams.set("client_id", env.GOOGLE_CLIENT_ID);
     googleOAuthUrl.searchParams.set("redirect_uri", redirectUri);
     googleOAuthUrl.searchParams.set("response_type", "code");
@@ -40,8 +42,8 @@ export default async function handler(
     res.redirect(302, googleOAuthUrl.toString());
   } catch (error) {
     console.error("Google OAuth linking error:", error);
-    return res.status(500).json({ 
-      message: "内部サーバーエラーが発生しました" 
+    return res.status(500).json({
+      message: "内部サーバーエラーが発生しました",
     });
   }
 }
