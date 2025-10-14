@@ -46,7 +46,7 @@ export default async function handler(
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
-        code: Array.isArray(code) ? code[0] : code,
+        code: Array.isArray(code) ? code[0]! : code as string,
         client_id: env.GOOGLE_CLIENT_ID!,
         client_secret: env.GOOGLE_CLIENT_SECRET!,
         redirect_uri: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/auth/callback/google-link`,
