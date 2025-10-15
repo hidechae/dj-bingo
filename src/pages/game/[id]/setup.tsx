@@ -22,6 +22,7 @@ const SetupBingo: NextPage = () => {
     handleSongAssign,
     handleClearPosition,
     handleClearAll,
+    handleAutoSetup,
     handleSubmit,
     handleModalClose,
     isSongUsed,
@@ -66,12 +67,26 @@ const SetupBingo: NextPage = () => {
             </div>
 
             <div className="mt-8 flex items-center justify-between">
-              <button
-                onClick={handleClearAll}
-                className="cursor-pointer px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
-              >
-                すべてクリア
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleClearAll}
+                  className="cursor-pointer px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
+                >
+                  すべてクリア
+                </button>
+                <button
+                  onClick={handleAutoSetup}
+                  disabled={availableSongs.length < totalPositions}
+                  className="cursor-pointer rounded-lg bg-green-600 px-6 py-2 font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  title={
+                    availableSongs.length < totalPositions
+                      ? `楽曲数が不足しています（必要: ${totalPositions}曲、利用可能: ${availableSongs.length}曲）`
+                      : "ランダムに楽曲を自動設定"
+                  }
+                >
+                  ランダム設定
+                </button>
+              </div>
 
               <button
                 onClick={handleSubmit}
