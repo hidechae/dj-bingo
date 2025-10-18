@@ -20,13 +20,11 @@ export const SetupGrid = ({
   const totalPositions = gridSize * gridSize;
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">ビンゴグリッド</h3>
+    <div>
       <div
-        className="mx-auto grid gap-2 sm:gap-3 md:gap-4"
+        className="grid gap-2 sm:gap-3 md:gap-4"
         style={{
           gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-          maxWidth: `${gridSize * 120}px`,
         }}
       >
         {Array.from({ length: totalPositions }, (_, index) => (

@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import QRCode from "qrcode";
 import {
   GameStatus,
@@ -21,6 +21,7 @@ import { ParticipantTable } from "~/components/admin/ParticipantTable";
 import { StatusChangeModal } from "~/components/admin/StatusChangeModal";
 import { AdminManagement } from "~/components/admin/AdminManagement";
 import { TitleEditModal } from "~/components/admin/TitleEditModal";
+import { BingoNotificationModal } from "~/components/admin/BingoNotificationModal";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const AdminGameManagement: NextPage = () => {
@@ -36,6 +37,8 @@ const AdminGameManagement: NextPage = () => {
   const [activeTab, setActiveTab] = useState<"songs" | "participants">("songs");
   const [showDropdown, setShowDropdown] = useState(false);
   const [showTitleEditModal, setShowTitleEditModal] = useState(false);
+  const [newWinners, setNewWinners] = useState<string[]>([]);
+  const previousParticipantsRef = useRef<typeof participants>(null);
 
   const {
     bingoGame,
@@ -104,6 +107,37 @@ const AdminGameManagement: NextPage = () => {
         document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showDropdown]);
+
+  // 参加者の変更を監視して、新しくビンゴになった人を検出
+  useEffect(() => {
+    if (!participants || !previousParticipantsRef.current) {
+      previousParticipantsRef.current = participants;
+      return;
+    }
+
+    const previousParticipants = previousParticipantsRef.current;
+    const winners: string[] = [];
+
+    // 前回のデータと比較して、新しくhasWon=trueになった参加者を検出
+    participants.forEach((participant) => {
+      const previousParticipant = previousParticipants.find(
+        (p) => p.id === participant.id
+      );
+      if (
+        previousParticipant &&
+        !previousParticipant.hasWon &&
+        participant.hasWon
+      ) {
+        winners.push(participant.name);
+      }
+    });
+
+    if (winners.length > 0) {
+      setNewWinners(winners);
+    }
+
+    previousParticipantsRef.current = participants;
+  }, [participants]);
 
   const handleStatusChange = (newStatus: GameStatus) => {
     const currentStatus = bingoGame?.status as GameStatus;
@@ -410,6 +444,12 @@ const AdminGameManagement: NextPage = () => {
         onSave={handleTitleSave}
         onCancel={() => setShowTitleEditModal(false)}
         isSaving={updateTitleMutation.isPending}
+      />
+
+      <BingoNotificationModal
+        isOpen={newWinners.length > 0}
+        winnerNames={newWinners}
+        onClose={() => setNewWinners([])}
       />
     </>
   );

@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useBingoPlay } from "~/hooks/useBingoPlay";
 import { WinnerBanner } from "~/components/bingo/WinnerBanner";
 import { BingoGrid } from "~/components/bingo/BingoGrid";
@@ -10,16 +10,48 @@ import { WinStatus } from "~/components/bingo/WinStatus";
 import { RecentlyPlayedSongs } from "~/components/bingo/RecentlyPlayedSongs";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 
+const COOLDOWN_SECONDS = 3;
+
 const PlayBingo: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [continueWithIncompleteGrid, setContinueWithIncompleteGrid] =
     useState(false);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
   const { bingoStatus, refetch } = useBingoPlay(id);
 
   // 初期ロード中はグローバルローディングを表示
   useInitialLoading({ isLoading: !bingoStatus });
+
+  // グリッド未完成の場合はセットアップページにリダイレクト
+  useEffect(() => {
+    if (bingoStatus && !bingoStatus.participant.isGridComplete) {
+      void router.push(`/game/${id}/setup`);
+    }
+  }, [bingoStatus, id, router]);
+
+  // クールダウンタイマー
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldownRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldownRemaining]);
+
+  const handleRefetch = () => {
+    refetch();
+    setCooldownRemaining(COOLDOWN_SECONDS);
+  };
 
   if (!bingoStatus) {
     return null; // グローバルローディングオーバーレイが表示される
@@ -58,10 +90,6 @@ const PlayBingo: NextPage = () => {
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               {/* Bingo Grid */}
               <div className="space-y-4 lg:col-span-2">
-                <h3 className="text-center text-lg font-semibold text-gray-900">
-                  ビンゴグリッド
-                </h3>
-
                 <IncompleteGridWarning
                   isGridComplete={participant.isGridComplete}
                   gameStatus={participant.bingoGame.status}
@@ -89,8 +117,9 @@ const PlayBingo: NextPage = () => {
 
             <div className="mt-8 text-center">
               <button
-                onClick={() => refetch()}
-                className="cursor-pointer rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
+                onClick={handleRefetch}
+                disabled={cooldownRemaining > 0}
+                className="cursor-pointer rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 状態を更新
               </button>

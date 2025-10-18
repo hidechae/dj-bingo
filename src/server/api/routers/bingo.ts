@@ -426,11 +426,21 @@ export const bingoRouter = createTRPCRouter({
         newStatus === GameStatus.EDITING &&
         currentStatus === GameStatus.ENTRY
       ) {
-        // Transition from ENTRY to EDITING - optionally clear participants
+        // Transition from ENTRY to EDITING
         if (!preserveParticipants) {
+          // Delete all participants
           await ctx.repositories.participant.deleteMany({
             bingoGameId: input.gameId,
           });
+        } else {
+          // Keep participants but reset their grid completion status
+          // so they can edit their grids again
+          await ctx.repositories.participant.updateMany(
+            { bingoGameId: input.gameId },
+            {
+              isGridComplete: false,
+            }
+          );
         }
       } else if (
         newStatus === GameStatus.ENTRY &&

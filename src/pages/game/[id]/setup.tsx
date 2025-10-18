@@ -1,15 +1,20 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { useBingoSetup } from "~/hooks/useBingoSetup";
 import { SetupHeader } from "~/components/bingo/SetupHeader";
 import { SetupGrid } from "~/components/bingo/SetupGrid";
 import { SongSelectionModal } from "~/components/bingo/SongSelectionModal";
+import { ConfirmModal } from "~/components/bingo/ConfirmModal";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const SetupBingo: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
+  const [confirmAction, setConfirmAction] = useState<
+    "clear" | "auto" | "submit" | null
+  >(null);
 
   const {
     participant,
@@ -31,6 +36,17 @@ const SetupBingo: NextPage = () => {
   // 初期ロード中はグローバルローディングを表示
   useInitialLoading({ isLoading: !participant || !participant?.bingoGame });
 
+  const handleConfirmAction = () => {
+    if (confirmAction === "clear") {
+      handleClearAll();
+    } else if (confirmAction === "auto") {
+      handleAutoSetup();
+    } else if (confirmAction === "submit") {
+      handleSubmit();
+    }
+    setConfirmAction(null);
+  };
+
   if (!participant || !participant.bingoGame) {
     return null; // ローディングオーバーレイが表示されるため、この画面は不要
   }
@@ -38,6 +54,30 @@ const SetupBingo: NextPage = () => {
   const availableSongs = participant.bingoGame.songs;
   const totalPositions = gridSize * gridSize;
   const selectedCount = Object.keys(selectedSongs).length;
+
+  const confirmConfig = {
+    clear: {
+      title: "すべてクリア",
+      message:
+        "設定した楽曲をすべてクリアします。この操作は取り消せません。よろしいですか？",
+      confirmText: "クリアする",
+      confirmButtonColor: "red" as const,
+    },
+    auto: {
+      title: "ランダム設定",
+      message:
+        "利用可能な楽曲からランダムに選択してグリッドを埋めます。現在の設定は上書きされます。よろしいですか？",
+      confirmText: "ランダム設定する",
+      confirmButtonColor: "green" as const,
+    },
+    submit: {
+      title: "ビンゴを開始",
+      message:
+        "この設定でビンゴを開始します。開始後は楽曲の変更ができません。よろしいですか？",
+      confirmText: "ビンゴを開始",
+      confirmButtonColor: "blue" as const,
+    },
+  };
 
   return (
     <>
@@ -55,27 +95,25 @@ const SetupBingo: NextPage = () => {
               selectedPosition={selectedPosition}
             />
 
-            <div className="flex justify-center">
-              <SetupGrid
-                gridSize={gridSize}
-                selectedSongs={selectedSongs}
-                selectedPosition={selectedPosition}
-                availableSongs={availableSongs}
-                onPositionSelect={handlePositionSelect}
-                onClearPosition={handleClearPosition}
-              />
-            </div>
+            <SetupGrid
+              gridSize={gridSize}
+              selectedSongs={selectedSongs}
+              selectedPosition={selectedPosition}
+              availableSongs={availableSongs}
+              onPositionSelect={handlePositionSelect}
+              onClearPosition={handleClearPosition}
+            />
 
-            <div className="mt-8 flex items-center justify-between">
-              <div className="flex items-center gap-4">
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <button
-                  onClick={handleClearAll}
-                  className="cursor-pointer px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
+                  onClick={() => setConfirmAction("clear")}
+                  className="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800"
                 >
                   すべてクリア
                 </button>
                 <button
-                  onClick={handleAutoSetup}
+                  onClick={() => setConfirmAction("auto")}
                   disabled={availableSongs.length < totalPositions}
                   className="cursor-pointer rounded-lg bg-green-600 px-6 py-2 font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                   title={
@@ -89,7 +127,7 @@ const SetupBingo: NextPage = () => {
               </div>
 
               <button
-                onClick={handleSubmit}
+                onClick={() => setConfirmAction("submit")}
                 disabled={
                   selectedCount !== totalPositions ||
                   assignSongsMutation.isPending
@@ -110,6 +148,18 @@ const SetupBingo: NextPage = () => {
           onSongSelect={handleSongAssign}
           onClose={handleModalClose}
         />
+
+        {confirmAction && (
+          <ConfirmModal
+            isOpen={!!confirmAction}
+            title={confirmConfig[confirmAction].title}
+            message={confirmConfig[confirmAction].message}
+            confirmText={confirmConfig[confirmAction].confirmText}
+            confirmButtonColor={confirmConfig[confirmAction].confirmButtonColor}
+            onConfirm={handleConfirmAction}
+            onCancel={() => setConfirmAction(null)}
+          />
+        )}
       </main>
     </>
   );
