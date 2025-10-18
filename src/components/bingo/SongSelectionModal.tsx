@@ -37,7 +37,7 @@ export const SongSelectionModal = ({
 
   return (
     <div
-      className="bg-opacity-50 fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600"
+      className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600/20"
       onClick={handleBackdropClick}
     >
       <div className="relative mx-4 w-full max-w-2xl rounded-md border bg-white p-6 shadow-lg">
