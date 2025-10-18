@@ -5,20 +5,13 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api, type RouterOutputs } from "~/utils/api";
 import { BingoSize } from "~/types";
-import { SongEditMode } from "~/components/admin/SongEditMode";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
-
-interface Song {
-  title: string;
-  artist: string;
-}
 
 const CreateBingo: NextPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [size, setSize] = useState<BingoSize>(BingoSize.THREE_BY_THREE);
-  const [songs, setSongs] = useState<Song[]>([{ title: "", artist: "" }]);
 
   const createBingoMutation = api.bingo.create.useMutation({
     onSuccess: (data: RouterOutputs["bingo"]["create"]) => {
@@ -36,30 +29,13 @@ const CreateBingo: NextPage = () => {
     }
   }, [session, status, router]);
 
-  const addSong = () => {
-    setSongs([...songs, { title: "", artist: "" }]);
-  };
-
-  const removeSong = (index: number) => {
-    setSongs(songs.filter((_, i) => i !== index));
-  };
-
-  const updateSong = (index: number, field: keyof Song, value: string) => {
-    const updatedSongs = songs.map((song, i) =>
-      i === index ? { ...song, [field]: value } : song
-    );
-    setSongs(updatedSongs);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const validSongs = songs.filter((song) => song.title.trim() !== "");
 
     createBingoMutation.mutate({
       title,
       size,
-      songs: validSongs,
+      songs: [],
     });
   };
 
@@ -80,21 +56,34 @@ const CreateBingo: NextPage = () => {
       <main className="min-h-screen bg-gray-50">
         <div className="bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
-              <h1 className="text-xl font-semibold text-gray-900">
-                新しいビンゴを作成
-              </h1>
+            <div className="flex h-16 items-center gap-4">
               <button
                 onClick={() => router.back()}
                 className="cursor-pointer text-gray-500 hover:text-gray-700"
+                title="戻る"
               >
-                戻る
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
               </button>
+              <h1 className="text-xl font-semibold text-gray-900">
+                新しいビンゴを作成
+              </h1>
             </div>
           </div>
         </div>
 
-        <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="rounded-lg bg-white px-6 py-8 shadow-sm">
               <div className="grid grid-cols-1 gap-6">
@@ -127,19 +116,6 @@ const CreateBingo: NextPage = () => {
                   </select>
                 </div>
               </div>
-            </div>
-
-            <div className="rounded-lg bg-white px-6 py-8 shadow-sm">
-              <h3 className="mb-6 text-lg font-medium text-gray-900">
-                楽曲リスト (後で追加・編集可能)
-              </h3>
-              <SongEditMode
-                songs={songs}
-                onUpdateSong={updateSong}
-                onRemoveSong={removeSong}
-                onAddSong={addSong}
-                allowRemoveAll={false}
-              />
             </div>
 
             <div className="flex justify-end">
