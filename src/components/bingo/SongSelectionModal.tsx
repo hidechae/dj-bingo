@@ -1,4 +1,5 @@
 import { type Song } from "~/types";
+import { SongInfo } from "~/components/common/SongInfo";
 
 type SongSelectionModalProps = {
   isOpen: boolean;
@@ -81,9 +82,7 @@ export const SongSelectionModal = ({
                 className="cursor-pointer rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:border-blue-300 hover:bg-blue-50"
                 onClick={() => handleSongClick(song.id)}
               >
-                <div className="font-medium text-gray-900">
-                  {song.artist ? `${song.artist} - ${song.title}` : song.title}
-                </div>
+                <SongInfo title={song.title} artist={song.artist} />
               </div>
             ))}
         </div>
