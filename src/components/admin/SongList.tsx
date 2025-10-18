@@ -37,10 +37,16 @@ export const SongList = ({
 }: SongListProps) => {
   const currentStatus = bingoGame.status as GameStatus;
 
+  const songCount = songEditingMode
+    ? editingSongs.length
+    : bingoGame.songs.length;
+
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900">楽曲リスト</h3>
+        <h3 className="text-lg font-medium text-gray-900">
+          楽曲リスト ({songCount}曲)
+        </h3>
         {currentStatus === GameStatus.EDITING && (
           <div className="flex gap-2">
             <button

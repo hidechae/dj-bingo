@@ -66,6 +66,7 @@ const AdminGameManagement: NextPage = () => {
     startEditing,
     cancelEditing,
     addSong,
+    addMultipleSongs,
     updateSong,
     removeSong,
     getValidSongs,
@@ -254,14 +255,7 @@ const AdminGameManagement: NextPage = () => {
   const handleSpotifyImport = (
     tracks: Array<{ title: string; artist: string }>
   ) => {
-    const startIndex = editingSongs.length;
-    tracks.forEach((track, i) => {
-      addSong();
-      const index = startIndex + i;
-      updateSong(index, "title", track.title);
-      updateSong(index, "artist", track.artist);
-    });
-    setShowSpotifyImportModal(false);
+    addMultipleSongs(tracks);
   };
   if (status === "loading" || !bingoGame) {
     return null; // グローバルローディングオーバーレイが表示される
