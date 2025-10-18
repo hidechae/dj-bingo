@@ -175,6 +175,46 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
   };
 
   /**
+   * ランダムに楽曲を自動設定する
+   * Fisher-Yatesアルゴリズムを使用してランダムに楽曲をシャッフルし、
+   * グリッドの各位置に重複なく割り当てる
+   */
+  const handleAutoSetup = () => {
+    if (!participant?.bingoGame?.songs) return;
+
+    const totalPositions = gridSize * gridSize;
+    const availableSongs = participant.bingoGame.songs;
+
+    // 利用可能な楽曲数がグリッドサイズより少ない場合はエラー
+    if (availableSongs.length < totalPositions) {
+      alert(
+        `グリッドサイズ ${gridSize}x${gridSize} (${totalPositions}マス) に対して楽曲数が不足しています。\n利用可能楽曲: ${availableSongs.length}曲`
+      );
+      return;
+    }
+
+    // Fisher-Yatesシャッフルアルゴリズムで楽曲をランダムに選択
+    const shuffledSongs = [...availableSongs];
+    for (let i = shuffledSongs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledSongs[i], shuffledSongs[j]] = [
+        shuffledSongs[j]!,
+        shuffledSongs[i]!,
+      ];
+    }
+
+    // グリッドの各位置に楽曲を割り当て
+    const autoAssignments: { [position: number]: string } = {};
+    for (let position = 0; position < totalPositions; position++) {
+      autoAssignments[position] = shuffledSongs[position]!.id;
+    }
+
+    setSelectedSongs(autoAssignments);
+    setSelectedPosition(null);
+    setIsModalOpen(false);
+  };
+
+  /**
    * グリッド設定を保存してゲームを開始する
    * すべてのマスが埋まっているかバリデーション
    */
@@ -221,6 +261,7 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
     handleSongAssign,
     handleClearPosition,
     handleClearAll,
+    handleAutoSetup,
     handleSubmit,
     handleModalClose,
     isSongUsed,
