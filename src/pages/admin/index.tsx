@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [showDropdown, setShowDropdown] = useState(false);
   const { data: bingoGames, isLoading } = api.bingo.getAllByUser.useQuery(
     undefined,
     { enabled: !!session }
@@ -26,6 +27,21 @@ const AdminDashboard: NextPage = () => {
       void router.push("/auth/signin");
     }
   }, [session, status, router]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest("[data-dropdown]")) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showDropdown]);
 
   if (status === "loading" || (!!session && isLoading)) {
     return null; // グローバルローディングオーバーレイが表示される
@@ -48,22 +64,50 @@ const AdminDashboard: NextPage = () => {
               <h1 className="text-xl font-semibold text-gray-900">
                 DJ Bingo 管理画面
               </h1>
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">
-                  {session.user?.name}さん
-                </span>
-                <Link
-                  href="/admin/profile"
-                  className="cursor-pointer text-sm text-gray-500 hover:text-gray-700"
-                >
-                  プロフィール
-                </Link>
+              <div className="relative" data-dropdown>
                 <button
-                  onClick={() => signOut()}
-                  className="cursor-pointer text-sm text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="cursor-pointer rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  title="メニュー"
                 >
-                  ログアウト
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                    />
+                  </svg>
                 </button>
+                {showDropdown && (
+                  <div className="ring-opacity-5 absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black">
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          void router.push("/admin/profile");
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        マイページ
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          void signOut();
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        ログアウト
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

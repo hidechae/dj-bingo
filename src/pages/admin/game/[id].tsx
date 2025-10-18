@@ -20,6 +20,7 @@ import { SongList } from "~/components/admin/SongList";
 import { ParticipantTable } from "~/components/admin/ParticipantTable";
 import { StatusChangeModal } from "~/components/admin/StatusChangeModal";
 import { AdminManagement } from "~/components/admin/AdminManagement";
+import { TitleEditModal } from "~/components/admin/TitleEditModal";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const AdminGameManagement: NextPage = () => {
@@ -34,8 +35,7 @@ const AdminGameManagement: NextPage = () => {
   const [showAdminManagement, setShowAdminManagement] = useState(false);
   const [activeTab, setActiveTab] = useState<"songs" | "participants">("songs");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [titleEditingMode, setTitleEditingMode] = useState(false);
-  const [editingTitle, setEditingTitle] = useState("");
+  const [showTitleEditModal, setShowTitleEditModal] = useState(false);
 
   const {
     bingoGame,
@@ -187,35 +187,21 @@ const AdminGameManagement: NextPage = () => {
     }
   };
 
-  const handleTitleEdit = () => {
-    if (titleEditingMode) {
-      // Save title
-      if (editingTitle.trim()) {
-        updateTitleMutation.mutate(
-          {
-            gameId: id as string,
-            title: editingTitle.trim(),
-          },
-          {
-            onSuccess: () => {
-              setTitleEditingMode(false);
-            },
-            onError: (error) => {
-              alert(`タイトルの更新に失敗しました: ${error.message}`);
-            },
-          }
-        );
+  const handleTitleSave = (newTitle: string) => {
+    updateTitleMutation.mutate(
+      {
+        gameId: id as string,
+        title: newTitle,
+      },
+      {
+        onSuccess: () => {
+          setShowTitleEditModal(false);
+        },
+        onError: (error) => {
+          alert(`タイトルの更新に失敗しました: ${error.message}`);
+        },
       }
-    } else {
-      // Start editing
-      setEditingTitle(bingoGame?.title || "");
-      setTitleEditingMode(true);
-    }
-  };
-
-  const handleTitleCancel = () => {
-    setTitleEditingMode(false);
-    setEditingTitle("");
+    );
   };
 
   const handleDuplicate = () => {
@@ -268,68 +254,9 @@ const AdminGameManagement: NextPage = () => {
                     />
                   </svg>
                 </button>
-                {titleEditingMode ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={editingTitle}
-                      onChange={(e) => setEditingTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleTitleEdit();
-                        } else if (e.key === "Escape") {
-                          handleTitleCancel();
-                        }
-                      }}
-                      className="min-w-0 flex-1 border-b-2 border-blue-500 bg-transparent text-xl font-semibold text-gray-900 focus:border-blue-700 focus:outline-none"
-                      autoFocus
-                      required
-                    />
-                    <button
-                      onClick={handleTitleEdit}
-                      disabled={
-                        !editingTitle.trim() || updateTitleMutation.isPending
-                      }
-                      className="text-green-600 hover:text-green-800 disabled:opacity-50"
-                      title="保存"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={handleTitleCancel}
-                      disabled={updateTitleMutation.isPending}
-                      className="text-red-600 hover:text-red-800"
-                      title="キャンセル"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-semibold text-gray-900">
-                      {bingoGame.title} - 管理画面
-                    </h1>
-                    <button
-                      onClick={handleTitleEdit}
-                      className="text-gray-400 hover:text-gray-600"
-                      title="ビンゴ名を編集"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {bingoGame.title} - 管理画面
+                </h1>
               </div>
               <div className="relative" data-dropdown>
                 <button
@@ -354,6 +281,15 @@ const AdminGameManagement: NextPage = () => {
                 {showDropdown && (
                   <div className="ring-opacity-5 absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black">
                     <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          setShowTitleEditModal(true);
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        名前の変更
+                      </button>
                       <button
                         onClick={() => {
                           setShowDropdown(false);
@@ -467,6 +403,14 @@ const AdminGameManagement: NextPage = () => {
           onClose={() => setShowAdminManagement(false)}
         />
       )}
+
+      <TitleEditModal
+        isOpen={showTitleEditModal}
+        currentTitle={bingoGame.title}
+        onSave={handleTitleSave}
+        onCancel={() => setShowTitleEditModal(false)}
+        isSaving={updateTitleMutation.isPending}
+      />
     </>
   );
 };

@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
@@ -17,6 +16,7 @@ const AdminProfile: NextPage = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const utils = api.useUtils();
 
@@ -72,6 +72,21 @@ const AdminProfile: NextPage = () => {
       void router.push("/auth/signin");
     }
   }, [session, status, router]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest("[data-dropdown]")) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showDropdown]);
 
   // Handle URL parameters for success/error messages
   useEffect(() => {
@@ -169,26 +184,70 @@ const AdminProfile: NextPage = () => {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <div className="flex items-center gap-4">
-                <Link
-                  href="/admin"
-                  className="text-gray-600 hover:text-gray-900"
+                <button
+                  onClick={() => router.push("/admin")}
+                  className="cursor-pointer text-gray-500 hover:text-gray-700"
+                  title="ダッシュボードに戻る"
                 >
-                  ← 管理画面に戻る
-                </Link>
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
                 <h1 className="text-xl font-semibold text-gray-900">
                   プロフィール設定
                 </h1>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">
-                  {session.user?.name}さん
-                </span>
+              <div className="relative" data-dropdown>
                 <button
-                  onClick={() => signOut()}
-                  className="cursor-pointer text-sm text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="cursor-pointer rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  title="メニュー"
                 >
-                  ログアウト
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                    />
+                  </svg>
                 </button>
+                {showDropdown && (
+                  <div className="ring-opacity-5 absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black">
+                    <div className="py-1">
+                      <button
+                        disabled
+                        className="block w-full cursor-not-allowed px-4 py-2 text-left text-sm text-gray-400"
+                      >
+                        マイページ
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          void signOut();
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        ログアウト
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
