@@ -8,7 +8,9 @@ import { BingoGrid } from "~/components/bingo/BingoGrid";
 import { IncompleteGridWarning } from "~/components/bingo/IncompleteGridWarning";
 import { WinStatus } from "~/components/bingo/WinStatus";
 import { RecentlyPlayedSongs } from "~/components/bingo/RecentlyPlayedSongs";
+import { SongDetailModal } from "~/components/bingo/SongDetailModal";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
+import { type GridCell } from "~/types";
 
 const COOLDOWN_SECONDS = 3;
 
@@ -18,6 +20,7 @@ const PlayBingo: NextPage = () => {
   const [continueWithIncompleteGrid, setContinueWithIncompleteGrid] =
     useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [selectedCell, setSelectedCell] = useState<GridCell | null>(null);
 
   const { bingoStatus, refetch } = useBingoPlay(id);
 
@@ -98,7 +101,11 @@ const PlayBingo: NextPage = () => {
                   onGoToSetup={() => router.push(`/game/${id}/setup`)}
                 />
 
-                <BingoGrid grid={grid} gridSize={gridSize} />
+                <BingoGrid
+                  grid={grid}
+                  gridSize={gridSize}
+                  onCellClick={setSelectedCell}
+                />
 
                 {/* Win Status */}
                 <div className="mt-6 text-center">
@@ -127,6 +134,12 @@ const PlayBingo: NextPage = () => {
           </div>
         </div>
       </main>
+
+      <SongDetailModal
+        isOpen={!!selectedCell}
+        cell={selectedCell}
+        onClose={() => setSelectedCell(null)}
+      />
     </>
   );
 };

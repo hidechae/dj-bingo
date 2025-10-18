@@ -3,9 +3,10 @@ import { type GridCell } from "~/types";
 type BingoGridProps = {
   grid: (GridCell | null)[];
   gridSize: number;
+  onCellClick?: (cell: GridCell) => void;
 };
 
-export const BingoGrid = ({ grid, gridSize }: BingoGridProps) => {
+export const BingoGrid = ({ grid, gridSize, onCellClick }: BingoGridProps) => {
   return (
     <div
       className="mx-auto grid max-w-md gap-2"
@@ -14,17 +15,18 @@ export const BingoGrid = ({ grid, gridSize }: BingoGridProps) => {
       {grid.map((cell, index: number) => (
         <div
           key={index}
-          className={`aspect-square rounded-lg border-2 p-2 text-xs transition-all duration-300 ${
+          onClick={() => cell && onCellClick?.(cell)}
+          className={`aspect-square overflow-hidden rounded-lg border-2 p-2 text-xs transition-all duration-300 ${
             cell?.isPlayed
               ? "scale-105 transform border-green-600 bg-green-500 text-white shadow-lg"
               : "border-gray-300 bg-white"
-          }`}
+          } ${cell && onCellClick ? "cursor-pointer hover:opacity-90" : ""}`}
         >
           <div className="flex h-full flex-col items-center justify-center text-center">
             {cell ? (
               <>
                 <div
-                  className={`text-xs font-medium ${
+                  className={`line-clamp-2 w-full text-xs font-medium break-words ${
                     cell.isPlayed ? "text-white" : "text-gray-900"
                   }`}
                 >
@@ -32,7 +34,7 @@ export const BingoGrid = ({ grid, gridSize }: BingoGridProps) => {
                 </div>
                 {cell.song.artist && (
                   <div
-                    className={`text-xs ${
+                    className={`w-full truncate text-xs ${
                       cell.isPlayed ? "text-green-100" : "text-gray-600"
                     }`}
                   >

@@ -65,7 +65,7 @@ const GridCell = ({
   return (
     <div
       onClick={() => onSelect(position)}
-      className={`relative aspect-square cursor-pointer rounded-lg border-2 p-2 text-xs transition-all sm:p-3 sm:text-sm md:p-4 md:text-base ${
+      className={`relative aspect-square cursor-pointer overflow-hidden rounded-lg border-2 p-2 text-xs transition-all sm:p-3 sm:text-sm md:p-4 md:text-base ${
         isSelected
           ? "border-solid border-yellow-400 bg-yellow-100 shadow-md"
           : songId
@@ -76,11 +76,11 @@ const GridCell = ({
       {song ? (
         <>
           <div className="flex h-full flex-col items-center justify-center pr-4 text-center">
-            <div className="text-xs font-medium text-gray-900 sm:text-sm md:text-base">
+            <div className="line-clamp-2 w-full text-xs font-medium break-words text-gray-900 sm:text-sm md:text-base">
               {song.title}
             </div>
             {song.artist && (
-              <div className="mt-1 text-xs text-gray-600 sm:text-sm">
+              <div className="mt-1 w-full truncate text-xs text-gray-600 sm:text-sm">
                 {song.artist}
               </div>
             )}

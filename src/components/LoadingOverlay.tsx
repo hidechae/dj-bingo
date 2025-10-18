@@ -41,7 +41,7 @@ export const LoadingOverlay: React.FC = () => {
 
   return (
     <div
-      className="bg-opacity-20 fixed inset-0 z-50 flex items-center justify-center bg-black"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600/20"
       style={{ backdropFilter: "blur(1px)" }}
     >
       <div className="flex flex-col items-center space-y-4 rounded-lg bg-white p-6 shadow-xl">
