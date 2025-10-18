@@ -16,6 +16,7 @@ type SongListProps = {
   onRemoveSong: (index: number) => void;
   onCancelEdit: () => void;
   onToggleSongPlayed: (songId: string, isPlayed: boolean) => void;
+  onSpotifyImport?: () => void;
   isSaving: boolean;
   isMarkingPlayed: boolean;
 };
@@ -30,6 +31,7 @@ export const SongList = ({
   onRemoveSong,
   onCancelEdit,
   onToggleSongPlayed,
+  onSpotifyImport,
   isSaving,
   isMarkingPlayed,
 }: SongListProps) => {
@@ -66,6 +68,7 @@ export const SongList = ({
           onUpdateSong={onUpdateSong}
           onRemoveSong={onRemoveSong}
           onAddSong={onAddSong}
+          onSpotifyImport={onSpotifyImport}
         />
       ) : bingoGame.songs.length > 0 ? (
         <SongDisplayMode

@@ -22,6 +22,7 @@ import { StatusChangeModal } from "~/components/admin/StatusChangeModal";
 import { AdminManagement } from "~/components/admin/AdminManagement";
 import { TitleEditModal } from "~/components/admin/TitleEditModal";
 import { BingoNotificationModal } from "~/components/admin/BingoNotificationModal";
+import { SpotifyImportModal } from "~/components/admin/SpotifyImportModal";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const AdminGameManagement: NextPage = () => {
@@ -37,6 +38,7 @@ const AdminGameManagement: NextPage = () => {
   const [activeTab, setActiveTab] = useState<"songs" | "participants">("songs");
   const [showDropdown, setShowDropdown] = useState(false);
   const [showTitleEditModal, setShowTitleEditModal] = useState(false);
+  const [showSpotifyImportModal, setShowSpotifyImportModal] = useState(false);
   const [newWinners, setNewWinners] = useState<string[]>([]);
   const previousParticipantsRef = useRef<typeof participants>(null);
 
@@ -248,6 +250,19 @@ const AdminGameManagement: NextPage = () => {
       duplicateMutation.mutate({ gameId: id as string });
     }
   };
+
+  const handleSpotifyImport = (
+    tracks: Array<{ title: string; artist: string }>
+  ) => {
+    const startIndex = editingSongs.length;
+    tracks.forEach((track, i) => {
+      addSong();
+      const index = startIndex + i;
+      updateSong(index, "title", track.title);
+      updateSong(index, "artist", track.artist);
+    });
+    setShowSpotifyImportModal(false);
+  };
   if (status === "loading" || !bingoGame) {
     return null; // グローバルローディングオーバーレイが表示される
   }
@@ -401,6 +416,7 @@ const AdminGameManagement: NextPage = () => {
                   onRemoveSong={removeSong}
                   onCancelEdit={cancelEditing}
                   onToggleSongPlayed={toggleSongPlayed}
+                  onSpotifyImport={() => setShowSpotifyImportModal(true)}
                   isSaving={updateSongsMutation.isPending}
                   isMarkingPlayed={markSongMutation.isPending}
                 />
@@ -450,6 +466,12 @@ const AdminGameManagement: NextPage = () => {
         isOpen={newWinners.length > 0}
         winnerNames={newWinners}
         onClose={() => setNewWinners([])}
+      />
+
+      <SpotifyImportModal
+        isOpen={showSpotifyImportModal}
+        onImport={handleSpotifyImport}
+        onClose={() => setShowSpotifyImportModal(false)}
       />
     </>
   );
