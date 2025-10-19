@@ -38,6 +38,8 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 - **Styling**: Tailwind CSS
 - **QR Code**: qrcode library
 - **External APIs**: Spotify Web API (プレイリストインポート)
+- **Testing**: Vitest, React Testing Library
+- **Component Documentation**: Storybook
 
 ## セットアップ
 
@@ -95,6 +97,61 @@ npm run dev
 ```
 
 アプリケーションは http://localhost:3000 で起動します。
+
+## 開発ツール
+
+### テスト
+
+このプロジェクトではVitestとReact Testing Libraryを使用してテストを実施しています。
+
+```bash
+# テストの実行
+npm test
+
+# ウォッチモードでテスト実行
+npm run test:watch
+
+# カバレッジレポート付きでテスト実行
+npm run test:coverage
+```
+
+**テスト対象:**
+
+- ユーティリティ関数（ビンゴ勝利判定ロジックなど）
+- カスタムフック（ソート機能、ゲームロジックなど）
+- コンポーネント（UIコンポーネント、ビジネスロジック含む）
+
+現在のテスト状況: **78 tests passing**
+
+### Storybook
+
+Storybookを使用してコンポーネントのドキュメント化とインタラクティブな開発環境を提供しています。
+
+```bash
+# Storybookの起動（ポート6006で開きます）
+npm run storybook
+
+# Storybookの静的ビルド生成
+npm run build-storybook
+```
+
+**利用可能なストーリー:**
+
+- **UIコンポーネント**: Button（8 stories）
+- **共通コンポーネント**: SongInfo（6 stories）
+- **ビンゴコンポーネント**: BingoGrid（8 stories）、WinnerBanner（3 stories）、WinStatus（4 stories）、RecentlyPlayedSongs（5 stories）
+- **管理コンポーネント**: ParticipantTable（6 stories）
+
+合計: **40 component stories**
+
+Storybookでは以下の機能が利用できます：
+
+- コンポーネントのビジュアルプレビュー
+- プロパティのインタラクティブな変更
+- アクセシビリティ（A11y）テスト
+- 自動生成されたドキュメント
+
+Storybook起動後、ブラウザで http://localhost:6006 を開いてください。
 
 ## 使い方
 
