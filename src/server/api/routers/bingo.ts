@@ -566,6 +566,25 @@ export const bingoRouter = createTRPCRouter({
 
       return participants;
     }),
+
+  delete: gameAdminProcedure
+    .input(z.object({ gameId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Check if game exists
+      const game = await ctx.repositories.bingoGame.findById(input.gameId);
+
+      if (!game) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Game not found",
+        });
+      }
+
+      // Delete the game (cascade will delete related data)
+      await ctx.repositories.bingoGame.delete(input.gameId);
+
+      return { success: true };
+    }),
 });
 
 async function checkForWinners(

@@ -61,6 +61,15 @@ const AdminGameManagement: NextPage = () => {
     },
   });
 
+  const deleteMutation = api.bingo.delete.useMutation({
+    onSuccess: () => {
+      void router.push("/admin");
+    },
+    onError: (error) => {
+      alert(`削除に失敗しました: ${error.message}`);
+    },
+  });
+
   const {
     songEditingMode,
     editingSongs,
@@ -262,6 +271,17 @@ const AdminGameManagement: NextPage = () => {
     }
   };
 
+  const handleDelete = () => {
+    if (!id || deleteMutation.isPending) return;
+    if (
+      confirm(
+        "このビンゴを削除しますか？この操作は取り消せません。\n関連する楽曲、参加者データもすべて削除されます。"
+      )
+    ) {
+      deleteMutation.mutate({ gameId: id as string });
+    }
+  };
+
   const handleSpotifyImport = (
     tracks: Array<{ title: string; artist: string }>
   ) => {
@@ -285,7 +305,7 @@ const AdminGameManagement: NextPage = () => {
         <meta name="description" content="ビンゴゲーム管理" />
       </Head>
       <main className="min-h-screen bg-gray-50 pb-20">
-        <div className="bg-white shadow-sm">
+        <div className="sticky top-0 z-50 bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <div className="flex items-center gap-4">
@@ -362,6 +382,17 @@ const AdminGameManagement: NextPage = () => {
                         className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                       >
                         管理者の管理
+                      </button>
+                      <div className="border-t border-gray-100"></div>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          handleDelete();
+                        }}
+                        disabled={deleteMutation.isPending}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {deleteMutation.isPending ? "削除中..." : "削除"}
                       </button>
                     </div>
                   </div>
