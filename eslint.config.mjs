@@ -12,25 +12,31 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = [{
-  ignores: [
-    ".next/**",
-    "node_modules/**",
-    "out/**",
-    "dist/**",
-    ".vercel/**",
-    "next-env.d.ts",
-  ],
-}, ...compat.extends("next/core-web-vitals", "next/typescript"), {
-  rules: {
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unused-vars": "warn",
+const eslintConfig = [
+  {
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "out/**",
+      "dist/**",
+      ".vercel/**",
+      "next-env.d.ts",
+    ],
   },
-}, ...storybook.configs["flat/recommended"], {
-  files: ["**/*.stories.tsx"],
-  rules: {
-    "storybook/no-renderer-packages": "off",
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
   },
-}];
+  ...storybook.configs["flat/recommended"],
+  {
+    files: ["**/*.stories.tsx"],
+    rules: {
+      "storybook/no-renderer-packages": "off",
+    },
+  },
+];
 
 export default eslintConfig;
