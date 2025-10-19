@@ -1,3 +1,5 @@
+import { SpotifyIcon } from "~/components/common/SpotifyIcon";
+
 type SongEditModeProps = {
   songs: Array<{ title: string; artist: string }>;
   onUpdateSong: (
@@ -7,6 +9,7 @@ type SongEditModeProps = {
   ) => void;
   onRemoveSong: (index: number) => void;
   onAddSong: () => void;
+  onSpotifyImport?: () => void;
   showAddButton?: boolean;
   allowRemoveAll?: boolean;
 };
@@ -16,6 +19,7 @@ export const SongEditMode = ({
   onUpdateSong,
   onRemoveSong,
   onAddSong,
+  onSpotifyImport,
   showAddButton = true,
   allowRemoveAll = true,
 }: SongEditModeProps) => (
@@ -53,7 +57,7 @@ export const SongEditMode = ({
       ))}
     </div>
     {showAddButton && (
-      <div className="flex justify-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
         <button
           type="button"
           onClick={onAddSong}
@@ -61,6 +65,16 @@ export const SongEditMode = ({
         >
           曲を追加
         </button>
+        {onSpotifyImport && (
+          <button
+            type="button"
+            onClick={onSpotifyImport}
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-green-500 px-4 py-2 text-sm text-white hover:bg-green-600"
+          >
+            <SpotifyIcon />
+            Spotifyからインポート
+          </button>
+        )}
       </div>
     )}
   </div>

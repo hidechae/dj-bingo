@@ -57,6 +57,17 @@ export const useSongEditor = () => {
   };
 
   /**
+   * 複数の楽曲を一括で追加する
+   *
+   * @param songs - 追加する楽曲の配列
+   */
+  const addMultipleSongs = (
+    songs: Array<{ title: string; artist: string }>
+  ) => {
+    setEditingSongs([...editingSongs, ...songs]);
+  };
+
+  /**
    * 指定されたインデックスの楽曲フィールドを更新する
    *
    * @param index - 更新する楽曲のインデックス
@@ -101,6 +112,7 @@ export const useSongEditor = () => {
     startEditing,
     cancelEditing,
     addSong,
+    addMultipleSongs,
     updateSong,
     removeSong,
     getValidSongs,

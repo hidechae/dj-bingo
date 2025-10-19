@@ -1,6 +1,7 @@
 import { GameStatus, type BingoGame, type Song } from "~/types";
 import { type EditingSong } from "~/hooks/useSongEditor";
 import { SongEditMode } from "./SongEditMode";
+import { SongInfo } from "~/components/common/SongInfo";
 
 type SongListProps = {
   bingoGame: BingoGame;
@@ -16,6 +17,7 @@ type SongListProps = {
   onRemoveSong: (index: number) => void;
   onCancelEdit: () => void;
   onToggleSongPlayed: (songId: string, isPlayed: boolean) => void;
+  onSpotifyImport?: () => void;
   isSaving: boolean;
   isMarkingPlayed: boolean;
 };
@@ -30,15 +32,22 @@ export const SongList = ({
   onRemoveSong,
   onCancelEdit,
   onToggleSongPlayed,
+  onSpotifyImport,
   isSaving,
   isMarkingPlayed,
 }: SongListProps) => {
   const currentStatus = bingoGame.status as GameStatus;
 
+  const songCount = songEditingMode
+    ? editingSongs.length
+    : bingoGame.songs.length;
+
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900">楽曲リスト</h3>
+        <h3 className="text-lg font-medium text-gray-900">
+          楽曲リスト ({songCount}曲)
+        </h3>
         {currentStatus === GameStatus.EDITING && (
           <div className="flex gap-2">
             <button
@@ -66,6 +75,7 @@ export const SongList = ({
           onUpdateSong={onUpdateSong}
           onRemoveSong={onRemoveSong}
           onAddSong={onAddSong}
+          onSpotifyImport={onSpotifyImport}
         />
       ) : bingoGame.songs.length > 0 ? (
         <SongDisplayMode
@@ -108,16 +118,16 @@ const SongDisplayMode = ({
               key={song.id}
               className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3"
             >
-              <div className="flex-1">
-                <p className="font-medium text-gray-900">
-                  {song.artist} - {song.title}
-                </p>
-              </div>
+              <SongInfo
+                title={song.title}
+                artist={song.artist}
+                className="flex-1"
+              />
               {currentStatus === GameStatus.PLAYING && (
                 <button
                   onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
                   disabled={isMarkingPlayed}
-                  className="cursor-pointer rounded-sm bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="ml-3 flex-shrink-0 cursor-pointer rounded-sm bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   演奏済みにする
                 </button>
@@ -143,12 +153,10 @@ const SongDisplayMode = ({
               key={song.id}
               className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3"
             >
-              <div className="flex-1">
-                <p className="font-medium text-gray-900">
-                  {song.artist} - {song.title}
-                </p>
+              <div className="min-w-0 flex-1">
+                <SongInfo title={song.title} artist={song.artist} />
                 {song.playedAt && (
-                  <p className="text-xs text-gray-600">
+                  <p className="mt-1 text-xs text-gray-600">
                     演奏時間: {new Date(song.playedAt).toLocaleString()}
                   </p>
                 )}
@@ -157,7 +165,7 @@ const SongDisplayMode = ({
                 <button
                   onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
                   disabled={isMarkingPlayed}
-                  className="cursor-pointer rounded-sm bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="ml-3 flex-shrink-0 cursor-pointer rounded-sm bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   未演奏に戻す
                 </button>

@@ -1,4 +1,5 @@
 import { type Song } from "~/types";
+import { SongInfo } from "~/components/common/SongInfo";
 
 type SongSelectionModalProps = {
   isOpen: boolean;
@@ -36,7 +37,7 @@ export const SongSelectionModal = ({
 
   return (
     <div
-      className="bg-opacity-50 fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600"
+      className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600/20"
       onClick={handleBackdropClick}
     >
       <div className="relative mx-4 w-full max-w-2xl rounded-md border bg-white p-6 shadow-lg">
@@ -81,9 +82,7 @@ export const SongSelectionModal = ({
                 className="cursor-pointer rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:border-blue-300 hover:bg-blue-50"
                 onClick={() => handleSongClick(song.id)}
               >
-                <div className="font-medium text-gray-900">
-                  {song.artist ? `${song.artist} - ${song.title}` : song.title}
-                </div>
+                <SongInfo title={song.title} artist={song.artist} />
               </div>
             ))}
         </div>
