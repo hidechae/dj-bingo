@@ -9,6 +9,17 @@ import {
 
 export const spotifyRouter = createTRPCRouter({
   /**
+   * Spotify連携が有効かどうかを確認
+   */
+  isSpotifyEnabled: protectedProcedure.query(() => {
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    return {
+      enabled: Boolean(clientId && clientSecret),
+    };
+  }),
+
+  /**
    * Spotifyプレイリストの情報を取得
    */
   getPlaylistInfo: protectedProcedure

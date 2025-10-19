@@ -75,6 +75,14 @@ const AdminGameManagement: NextPage = () => {
   const { sortField, sortDirection, handleSort, sortParticipants } =
     useParticipantSort();
 
+  // Spotify連携が有効かどうかを確認
+  const { data: spotifyStatus } = api.spotify.isSpotifyEnabled.useQuery(
+    undefined,
+    {
+      enabled: !!session,
+    }
+  );
+
   // 認証とゲームデータロード中はグローバルローディングを表示
   useInitialLoading({
     isLoading: status === "loading" || (!!session && !bingoGame),
@@ -410,7 +418,11 @@ const AdminGameManagement: NextPage = () => {
                   onRemoveSong={removeSong}
                   onCancelEdit={cancelEditing}
                   onToggleSongPlayed={toggleSongPlayed}
-                  onSpotifyImport={() => setShowSpotifyImportModal(true)}
+                  onSpotifyImport={
+                    spotifyStatus?.enabled
+                      ? () => setShowSpotifyImportModal(true)
+                      : undefined
+                  }
                   isSaving={updateSongsMutation.isPending}
                   isMarkingPlayed={markSongMutation.isPending}
                 />
