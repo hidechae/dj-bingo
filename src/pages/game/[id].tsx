@@ -171,7 +171,7 @@ const ParticipantGame: NextPage = () => {
         <title>{bingoGame.title} - DJ Bingo参加</title>
         <meta name="description" content="DJ Bingoゲームに参加" />
       </Head>
-      <main className="flex min-h-screen items-center justify-center bg-linear-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="mx-4 w-full max-w-md">
           <div className="rounded-lg bg-white p-8 shadow-xl">
             <div className="mb-8 text-center">
