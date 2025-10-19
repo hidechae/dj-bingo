@@ -80,7 +80,7 @@ const Register: NextPage = () => {
           <title>登録完了 - DJ Bingo</title>
           <meta name="description" content="DJ Bingo 管理者登録完了" />
         </Head>
-        <main className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-[#2e026d] to-[#15162c]">
+        <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
           <div className="container flex max-w-md flex-col items-center justify-center gap-8 px-4 py-16">
             <div className="rounded-full bg-green-600 p-3">
               <svg
@@ -115,7 +115,7 @@ const Register: NextPage = () => {
         <title>新規登録 - DJ Bingo</title>
         <meta name="description" content="DJ Bingo 管理者新規登録" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex max-w-md flex-col items-center justify-center gap-8 px-4 py-16">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-[3rem]">
             新規登録

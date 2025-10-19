@@ -11,10 +11,24 @@ const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [activeGameDropdown, setActiveGameDropdown] = useState<string | null>(
+    null
+  );
+  const utils = api.useUtils();
   const { data: bingoGames, isLoading } = api.bingo.getAllByUser.useQuery(
     undefined,
     { enabled: !!session }
   );
+
+  const deleteMutation = api.bingo.delete.useMutation({
+    onSuccess: () => {
+      // Refetch the games list after deletion
+      void utils.bingo.getAllByUser.invalidate();
+    },
+    onError: (error) => {
+      alert(`削除に失敗しました: ${error.message}`);
+    },
+  });
 
   // 重要な初期データロード中はグローバルローディングを表示
   useInitialLoading({
@@ -33,15 +47,27 @@ const AdminDashboard: NextPage = () => {
       const target = event.target as HTMLElement;
       if (!target.closest("[data-dropdown]")) {
         setShowDropdown(false);
+        setActiveGameDropdown(null);
       }
     };
 
-    if (showDropdown) {
+    if (showDropdown || activeGameDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [showDropdown]);
+  }, [showDropdown, activeGameDropdown]);
+
+  const handleDeleteGame = (gameId: string, gameTitle: string) => {
+    if (deleteMutation.isPending) return;
+    if (
+      confirm(
+        `「${gameTitle}」を削除しますか？この操作は取り消せません。\n関連する楽曲、参加者データもすべて削除されます。`
+      )
+    ) {
+      deleteMutation.mutate({ gameId });
+    }
+  };
 
   if (status === "loading" || (!!session && isLoading)) {
     return null; // グローバルローディングオーバーレイが表示される
@@ -58,7 +84,7 @@ const AdminDashboard: NextPage = () => {
         <meta name="description" content="DJ Bingo 管理者ダッシュボード" />
       </Head>
       <main className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm">
+        <div className="sticky top-0 z-50 bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <h1 className="text-xl font-semibold text-gray-900">
@@ -129,12 +155,14 @@ const AdminDashboard: NextPage = () => {
           {bingoGames && bingoGames.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {bingoGames.map((game) => (
-                <Link
+                <div
                   key={game.id}
-                  href={`/admin/game/${game.id}`}
-                  className="block cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md"
+                  className="relative overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md"
                 >
-                  <div className="p-6">
+                  <Link
+                    href={`/admin/game/${game.id}`}
+                    className="block cursor-pointer p-6"
+                  >
                     <h3 className="mb-2 text-lg font-medium text-gray-900">
                       {game.title}
                     </h3>
@@ -157,8 +185,53 @@ const AdminDashboard: NextPage = () => {
                         )}
                       </div>
                     </div>
+                  </Link>
+                  <div className="absolute top-2 right-2" data-dropdown>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveGameDropdown(
+                          activeGameDropdown === game.id ? null : game.id
+                        );
+                      }}
+                      className="cursor-pointer rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                      title="メニュー"
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                        />
+                      </svg>
+                    </button>
+                    {activeGameDropdown === game.id && (
+                      <div className="ring-opacity-5 absolute right-0 z-10 mt-2 w-32 rounded-md bg-white shadow-lg ring-1 ring-black">
+                        <div className="py-1">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setActiveGameDropdown(null);
+                              handleDeleteGame(game.id, game.title);
+                            }}
+                            disabled={deleteMutation.isPending}
+                            className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {deleteMutation.isPending ? "削除中..." : "削除"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           ) : (

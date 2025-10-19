@@ -13,6 +13,7 @@ import {
 import { BingoSize, GameStatus } from "~/domain/models";
 import { BingoSizeValues, GameStatusValues } from "~/types";
 import { type Repositories } from "~/server/repositories";
+import { checkWinCondition } from "~/utils/bingoWinChecker";
 
 // Helper function to check if user is admin for a game
 async function checkGameAdminPermission(
@@ -566,6 +567,25 @@ export const bingoRouter = createTRPCRouter({
 
       return participants;
     }),
+
+  delete: gameAdminProcedure
+    .input(z.object({ gameId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Check if game exists
+      const game = await ctx.repositories.bingoGame.findById(input.gameId);
+
+      if (!game) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Game not found",
+        });
+      }
+
+      // Delete the game (cascade will delete related data)
+      await ctx.repositories.bingoGame.delete(input.gameId);
+
+      return { success: true };
+    }),
 });
 
 async function checkForWinners(
@@ -585,14 +605,14 @@ async function checkForWinners(
   for (const participant of participants) {
     if (!participant.isGridComplete) continue;
 
-    const grid = Array(gridSize * gridSize).fill(null);
+    const grid = Array(gridSize * gridSize).fill(false);
 
     // Fill the grid with played status
     participant.participantSongs.forEach((ps) => {
       grid[ps.position] = ps.song.isPlayed;
     });
 
-    const currentlyHasWon = hasWon(grid, gridSize);
+    const currentlyHasWon = checkWinCondition(grid, gridSize);
 
     // Update win status if it has changed
     if (currentlyHasWon && !participant.hasWon) {
@@ -609,40 +629,4 @@ async function checkForWinners(
       });
     }
   }
-}
-
-function hasWon(grid: boolean[], size: number): boolean {
-  // Check rows
-  for (let i = 0; i < size; i++) {
-    let rowWin = true;
-    for (let j = 0; j < size; j++) {
-      if (!grid[i * size + j]) {
-        rowWin = false;
-        break;
-      }
-    }
-    if (rowWin) return true;
-  }
-
-  // Check columns
-  for (let j = 0; j < size; j++) {
-    let colWin = true;
-    for (let i = 0; i < size; i++) {
-      if (!grid[i * size + j]) {
-        colWin = false;
-        break;
-      }
-    }
-    if (colWin) return true;
-  }
-
-  // Check diagonals
-  let diagWin1 = true;
-  let diagWin2 = true;
-  for (let i = 0; i < size; i++) {
-    if (!grid[i * size + i]) diagWin1 = false;
-    if (!grid[i * size + (size - 1 - i)]) diagWin2 = false;
-  }
-
-  return diagWin1 || diagWin2;
 }

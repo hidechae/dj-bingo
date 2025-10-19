@@ -25,7 +25,7 @@ export const StatusChangeModal = ({
   }
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
+    <div className="fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600/20">
       <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
         <div className="mt-3 text-center">
           <h3 className="text-lg font-medium text-gray-900">

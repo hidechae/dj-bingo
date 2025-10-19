@@ -23,7 +23,9 @@ import { AdminManagement } from "~/components/admin/AdminManagement";
 import { TitleEditModal } from "~/components/admin/TitleEditModal";
 import { BingoNotificationModal } from "~/components/admin/BingoNotificationModal";
 import { SpotifyImportModal } from "~/components/admin/SpotifyImportModal";
+import { StatusStepper } from "~/components/admin/StatusStepper";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
+import { Button, type ButtonColor } from "~/components/ui/Button";
 
 const AdminGameManagement: NextPage = () => {
   const { data: session, status } = useSession();
@@ -56,6 +58,15 @@ const AdminGameManagement: NextPage = () => {
   const duplicateMutation = api.bingo.duplicate.useMutation({
     onSuccess: (data) => {
       void router.push(`/admin/game/${data.id}`);
+    },
+  });
+
+  const deleteMutation = api.bingo.delete.useMutation({
+    onSuccess: () => {
+      void router.push("/admin");
+    },
+    onError: (error) => {
+      alert(`削除に失敗しました: ${error.message}`);
     },
   });
 
@@ -260,6 +271,17 @@ const AdminGameManagement: NextPage = () => {
     }
   };
 
+  const handleDelete = () => {
+    if (!id || deleteMutation.isPending) return;
+    if (
+      confirm(
+        "このビンゴを削除しますか？この操作は取り消せません。\n関連する楽曲、参加者データもすべて削除されます。"
+      )
+    ) {
+      deleteMutation.mutate({ gameId: id as string });
+    }
+  };
+
   const handleSpotifyImport = (
     tracks: Array<{ title: string; artist: string }>
   ) => {
@@ -274,6 +296,7 @@ const AdminGameManagement: NextPage = () => {
   }
 
   const sortedParticipants = participants ? sortParticipants(participants) : [];
+  const currentStatus = bingoGame.status as GameStatus;
 
   return (
     <>
@@ -281,8 +304,8 @@ const AdminGameManagement: NextPage = () => {
         <title>{bingoGame.title} - 管理画面</title>
         <meta name="description" content="ビンゴゲーム管理" />
       </Head>
-      <main className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm">
+      <main className="min-h-screen bg-gray-50 pb-20">
+        <div className="sticky top-0 z-50 bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <div className="flex items-center gap-4">
@@ -360,6 +383,17 @@ const AdminGameManagement: NextPage = () => {
                       >
                         管理者の管理
                       </button>
+                      <div className="border-t border-gray-100"></div>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          handleDelete();
+                        }}
+                        disabled={deleteMutation.isPending}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {deleteMutation.isPending ? "削除中..." : "削除"}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -367,6 +401,9 @@ const AdminGameManagement: NextPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Status Stepper */}
+        <StatusStepper currentStatus={currentStatus} />
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -376,8 +413,6 @@ const AdminGameManagement: NextPage = () => {
               qrCodeDataUrl={qrCodeDataUrl}
               gameUrl={`${window.location.origin}/game/${id}`}
               gameId={id as string}
-              onStatusChange={handleStatusChange}
-              isChangingStatus={changeStatusMutation.isPending}
             />
 
             <div className="lg:col-span-2">
@@ -480,8 +515,82 @@ const AdminGameManagement: NextPage = () => {
         onImport={handleSpotifyImport}
         onClose={() => setShowSpotifyImportModal(false)}
       />
+
+      {/* Status Change Footer */}
+      <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white shadow-lg">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-end gap-3">
+            {[
+              {
+                status: GameStatus.EDITING,
+                forwardLabel: "編集中に変更",
+                backLabel: "編集中に戻す",
+              },
+              {
+                status: GameStatus.ENTRY,
+                forwardLabel: "エントリー開始",
+                backLabel: "エントリー中に戻す",
+              },
+              {
+                status: GameStatus.PLAYING,
+                forwardLabel: "ゲーム開始",
+                backLabel: "ゲーム中に戻す",
+              },
+              {
+                status: GameStatus.FINISHED,
+                forwardLabel: "ゲーム終了",
+                backLabel: "終了に戻す",
+              },
+            ]
+              .filter(
+                ({ status }) =>
+                  status !== currentStatus &&
+                  isValidStatusTransition(currentStatus, status)
+              )
+              .map(({ status, forwardLabel, backLabel }) => {
+                const statusOrder = [
+                  GameStatus.EDITING,
+                  GameStatus.ENTRY,
+                  GameStatus.PLAYING,
+                  GameStatus.FINISHED,
+                ];
+                const currentIndex = statusOrder.indexOf(currentStatus);
+                const targetIndex = statusOrder.indexOf(status);
+                const isForward = targetIndex > currentIndex;
+                const label = isForward ? forwardLabel : backLabel;
+
+                return (
+                  <Button
+                    key={status}
+                    onClick={() => handleStatusChange(status)}
+                    disabled={changeStatusMutation.isPending}
+                    variant={isForward ? "primary" : "outline"}
+                    color={getStatusColor(status)}
+                  >
+                    {label}
+                  </Button>
+                );
+              })}
+          </div>
+        </div>
+      </div>
     </>
   );
+};
+
+const getStatusColor = (status: GameStatus): ButtonColor => {
+  switch (status) {
+    case GameStatus.EDITING:
+      return "gray";
+    case GameStatus.ENTRY:
+      return "blue";
+    case GameStatus.PLAYING:
+      return "green";
+    case GameStatus.FINISHED:
+      return "red";
+    default:
+      return "gray";
+  }
 };
 
 export default AdminGameManagement;
