@@ -23,6 +23,7 @@ import { AdminManagement } from "~/components/admin/AdminManagement";
 import { TitleEditModal } from "~/components/admin/TitleEditModal";
 import { BingoNotificationModal } from "~/components/admin/BingoNotificationModal";
 import { SpotifyImportModal } from "~/components/admin/SpotifyImportModal";
+import { StatusStepper } from "~/components/admin/StatusStepper";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 
 const AdminGameManagement: NextPage = () => {
@@ -274,6 +275,7 @@ const AdminGameManagement: NextPage = () => {
   }
 
   const sortedParticipants = participants ? sortParticipants(participants) : [];
+  const currentStatus = bingoGame.status as GameStatus;
 
   return (
     <>
@@ -281,7 +283,7 @@ const AdminGameManagement: NextPage = () => {
         <title>{bingoGame.title} - 管理画面</title>
         <meta name="description" content="ビンゴゲーム管理" />
       </Head>
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-gray-50 pb-20">
         <div className="bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
@@ -368,6 +370,9 @@ const AdminGameManagement: NextPage = () => {
           </div>
         </div>
 
+        {/* Status Stepper */}
+        <StatusStepper currentStatus={currentStatus} />
+
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <GameInfoSidebar
@@ -376,8 +381,6 @@ const AdminGameManagement: NextPage = () => {
               qrCodeDataUrl={qrCodeDataUrl}
               gameUrl={`${window.location.origin}/game/${id}`}
               gameId={id as string}
-              onStatusChange={handleStatusChange}
-              isChangingStatus={changeStatusMutation.isPending}
             />
 
             <div className="lg:col-span-2">
@@ -480,8 +483,100 @@ const AdminGameManagement: NextPage = () => {
         onImport={handleSpotifyImport}
         onClose={() => setShowSpotifyImportModal(false)}
       />
+
+      {/* Status Change Footer */}
+      <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white shadow-lg">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-end gap-3">
+            {[
+              {
+                status: GameStatus.EDITING,
+                forwardLabel: "編集中に変更",
+                backLabel: "編集中に戻す",
+              },
+              {
+                status: GameStatus.ENTRY,
+                forwardLabel: "エントリー開始",
+                backLabel: "エントリー中に戻す",
+              },
+              {
+                status: GameStatus.PLAYING,
+                forwardLabel: "ゲーム開始",
+                backLabel: "ゲーム中に戻す",
+              },
+              {
+                status: GameStatus.FINISHED,
+                forwardLabel: "ゲーム終了",
+                backLabel: "終了に戻す",
+              },
+            ]
+              .filter(
+                ({ status }) =>
+                  status !== currentStatus &&
+                  isValidStatusTransition(currentStatus, status)
+              )
+              .map(({ status, forwardLabel, backLabel }) => {
+                const statusOrder = [
+                  GameStatus.EDITING,
+                  GameStatus.ENTRY,
+                  GameStatus.PLAYING,
+                  GameStatus.FINISHED,
+                ];
+                const currentIndex = statusOrder.indexOf(currentStatus);
+                const targetIndex = statusOrder.indexOf(status);
+                const isForward = targetIndex > currentIndex;
+                const label = isForward ? forwardLabel : backLabel;
+
+                return (
+                  <button
+                    key={status}
+                    onClick={() => handleStatusChange(status)}
+                    disabled={changeStatusMutation.isPending}
+                    className={`cursor-pointer rounded-md border-2 px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      isForward
+                        ? `text-white ${getStatusButtonColor(status)}`
+                        : `bg-white ${getStatusButtonOutlineColor(status)}`
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      </div>
     </>
   );
+};
+
+const getStatusButtonColor = (status: GameStatus) => {
+  switch (status) {
+    case GameStatus.EDITING:
+      return "bg-gray-600 border-gray-600 hover:bg-gray-700 hover:border-gray-700";
+    case GameStatus.ENTRY:
+      return "bg-blue-600 border-blue-600 hover:bg-blue-700 hover:border-blue-700";
+    case GameStatus.PLAYING:
+      return "bg-green-600 border-green-600 hover:bg-green-700 hover:border-green-700";
+    case GameStatus.FINISHED:
+      return "bg-red-600 border-red-600 hover:bg-red-700 hover:border-red-700";
+    default:
+      return "bg-gray-600 border-gray-600 hover:bg-gray-700 hover:border-gray-700";
+  }
+};
+
+const getStatusButtonOutlineColor = (status: GameStatus) => {
+  switch (status) {
+    case GameStatus.EDITING:
+      return "border-gray-600 text-gray-600 hover:bg-gray-50";
+    case GameStatus.ENTRY:
+      return "border-blue-600 text-blue-600 hover:bg-blue-50";
+    case GameStatus.PLAYING:
+      return "border-green-600 text-green-600 hover:bg-green-50";
+    case GameStatus.FINISHED:
+      return "border-red-600 text-red-600 hover:bg-red-50";
+    default:
+      return "border-gray-600 text-gray-600 hover:bg-gray-50";
+  }
 };
 
 export default AdminGameManagement;

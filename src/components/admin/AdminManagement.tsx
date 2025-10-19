@@ -95,7 +95,7 @@ ${baseUrl}/admin
 
   if (!adminData) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600/20">
         <div className="mx-4 w-full max-w-2xl rounded-lg bg-white p-6">
           <div className="text-center">読み込み中...</div>
         </div>
@@ -104,7 +104,7 @@ ${baseUrl}/admin
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600/20">
       <div className="mx-4 max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">管理者の管理</h2>
@@ -214,7 +214,7 @@ ${baseUrl}/admin
 
         {/* Copy Message Modal */}
         {showCopyMessage && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50">
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-gray-600/20">
             <div className="mx-4 w-full max-w-lg rounded-lg bg-white p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
