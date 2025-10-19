@@ -375,6 +375,7 @@ const AdminGameManagement: NextPage = () => {
               participants={participants || []}
               qrCodeDataUrl={qrCodeDataUrl}
               gameUrl={`${window.location.origin}/game/${id}`}
+              gameId={id as string}
               onStatusChange={handleStatusChange}
               isChangingStatus={changeStatusMutation.isPending}
             />
