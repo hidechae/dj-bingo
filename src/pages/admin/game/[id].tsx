@@ -25,6 +25,7 @@ import { BingoNotificationModal } from "~/components/admin/BingoNotificationModa
 import { SpotifyImportModal } from "~/components/admin/SpotifyImportModal";
 import { StatusStepper } from "~/components/admin/StatusStepper";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
+import { Button, type ButtonColor } from "~/components/ui/Button";
 
 const AdminGameManagement: NextPage = () => {
   const { data: session, status } = useSession();
@@ -528,18 +529,15 @@ const AdminGameManagement: NextPage = () => {
                 const label = isForward ? forwardLabel : backLabel;
 
                 return (
-                  <button
+                  <Button
                     key={status}
                     onClick={() => handleStatusChange(status)}
                     disabled={changeStatusMutation.isPending}
-                    className={`cursor-pointer rounded-md border-2 px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                      isForward
-                        ? `text-white ${getStatusButtonColor(status)}`
-                        : `bg-white ${getStatusButtonOutlineColor(status)}`
-                    }`}
+                    variant={isForward ? "primary" : "outline"}
+                    color={getStatusColor(status)}
                   >
                     {label}
-                  </button>
+                  </Button>
                 );
               })}
           </div>
@@ -549,33 +547,18 @@ const AdminGameManagement: NextPage = () => {
   );
 };
 
-const getStatusButtonColor = (status: GameStatus) => {
+const getStatusColor = (status: GameStatus): ButtonColor => {
   switch (status) {
     case GameStatus.EDITING:
-      return "bg-gray-600 border-gray-600 hover:bg-gray-700 hover:border-gray-700";
+      return "gray";
     case GameStatus.ENTRY:
-      return "bg-blue-600 border-blue-600 hover:bg-blue-700 hover:border-blue-700";
+      return "blue";
     case GameStatus.PLAYING:
-      return "bg-green-600 border-green-600 hover:bg-green-700 hover:border-green-700";
+      return "green";
     case GameStatus.FINISHED:
-      return "bg-red-600 border-red-600 hover:bg-red-700 hover:border-red-700";
+      return "red";
     default:
-      return "bg-gray-600 border-gray-600 hover:bg-gray-700 hover:border-gray-700";
-  }
-};
-
-const getStatusButtonOutlineColor = (status: GameStatus) => {
-  switch (status) {
-    case GameStatus.EDITING:
-      return "border-gray-600 text-gray-600 hover:bg-gray-50";
-    case GameStatus.ENTRY:
-      return "border-blue-600 text-blue-600 hover:bg-blue-50";
-    case GameStatus.PLAYING:
-      return "border-green-600 text-green-600 hover:bg-green-50";
-    case GameStatus.FINISHED:
-      return "border-red-600 text-red-600 hover:bg-red-50";
-    default:
-      return "border-gray-600 text-gray-600 hover:bg-gray-50";
+      return "gray";
   }
 };
 
