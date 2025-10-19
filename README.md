@@ -105,7 +105,7 @@ npm run dev
 このプロジェクトではVitestとReact Testing Libraryを使用してテストを実施しています。
 
 ```bash
-# テストの実行
+# ユニットテストの実行
 npm test
 
 # ウォッチモードでテスト実行
@@ -113,6 +113,9 @@ npm run test:watch
 
 # カバレッジレポート付きでテスト実行
 npm run test:coverage
+
+# Storybookコンポーネントテストの実行（ブラウザ使用）
+npm run test:storybook
 ```
 
 **テスト対象:**
@@ -121,7 +124,9 @@ npm run test:coverage
 - カスタムフック（ソート機能、ゲームロジックなど）
 - コンポーネント（UIコンポーネント、ビジネスロジック含む）
 
-現在のテスト状況: **78 tests passing**
+現在のテスト状況: **78 unit tests passing**
+
+**注意:** ユニットテストとStorybookテストは分離されています。`npm test`ではユニットテストのみ実行され、Storybookコンポーネントテストは`npm run test:storybook`で明示的に実行する必要があります。
 
 ### Storybook
 
