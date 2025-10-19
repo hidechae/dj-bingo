@@ -44,6 +44,9 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    env:
+      # Skip env validation for Storybook vitest plugin
+      SKIP_ENV_VALIDATION: true
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
@@ -60,7 +63,6 @@ jobs:
     env:
       # Dummy values for build-time environment variables
       DATABASE_URL: postgresql://user:password@localhost:5432/db
-      DIRECT_DATABASE_URL: postgresql://user:password@localhost:5432/db
       NEXTAUTH_SECRET: dummy-secret-for-ci-build-only
       NEXTAUTH_URL: http://localhost:3000
       GOOGLE_CLIENT_ID: dummy-client-id
