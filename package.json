@@ -18,6 +18,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "test:storybook": "vitest run --config vitest.storybook.config.ts",
     "type-check": "tsc --noEmit",
     "vercel-build": "prisma migrate deploy && next build",
     "prepare": "husky",
