@@ -105,6 +105,38 @@ export const useSongEditor = () => {
     return editingSongs.filter((song) => song.title.trim() !== "");
   };
 
+  /**
+   * 重複する楽曲があるかチェックする
+   * タイトルとアーティストの組み合わせで判定（大文字小文字、前後の空白を無視）
+   *
+   * @returns 重複がある場合、最初に見つかった重複楽曲の情報を返す
+   */
+  const checkDuplicates = (): {
+    title: string;
+    artist: string;
+    index: number;
+  } | null => {
+    const validSongs = getValidSongs();
+    const seen = new Map<string, number>();
+
+    for (let i = 0; i < validSongs.length; i++) {
+      const song = validSongs[i]!;
+      const key = `${song.title.trim().toLowerCase()}|||${song.artist.trim().toLowerCase()}`;
+
+      if (seen.has(key)) {
+        return {
+          title: song.title,
+          artist: song.artist,
+          index: i,
+        };
+      }
+
+      seen.set(key, i);
+    }
+
+    return null;
+  };
+
   return {
     songEditingMode,
     editingSongs,
@@ -116,5 +148,6 @@ export const useSongEditor = () => {
     updateSong,
     removeSong,
     getValidSongs,
+    checkDuplicates,
   };
 };

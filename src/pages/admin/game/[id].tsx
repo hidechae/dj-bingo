@@ -81,6 +81,7 @@ const AdminGameManagement: NextPage = () => {
     updateSong,
     removeSong,
     getValidSongs,
+    checkDuplicates,
   } = useSongEditor();
 
   const { sortField, sortDirection, handleSort, sortParticipants } =
@@ -227,6 +228,15 @@ const AdminGameManagement: NextPage = () => {
 
   const handleSongEdit = () => {
     if (songEditingMode) {
+      // 保存前に重複チェック
+      const duplicate = checkDuplicates();
+      if (duplicate) {
+        alert(
+          `重複する楽曲があります: "${duplicate.title}"${duplicate.artist ? ` - ${duplicate.artist}` : ""}\n\n同じタイトルとアーティストの組み合わせは登録できません。`
+        );
+        return;
+      }
+
       updateSongsMutation.mutate(
         {
           gameId: id as string,
