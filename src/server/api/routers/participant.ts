@@ -156,6 +156,26 @@ export const participantRouter = createTRPCRouter({
         });
       }
 
+      // Validate: Check for duplicate songs
+      const songIds = input.songAssignments.map((a) => a.songId);
+      const uniqueSongIds = new Set(songIds);
+      if (songIds.length !== uniqueSongIds.size) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Duplicate songs are not allowed in the grid",
+        });
+      }
+
+      // Validate: Check for duplicate positions
+      const positions = input.songAssignments.map((a) => a.position);
+      const uniquePositions = new Set(positions);
+      if (positions.length !== uniquePositions.size) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Duplicate positions are not allowed",
+        });
+      }
+
       // Delete existing assignments
       await ctx.repositories.participantSong.deleteMany({
         participantId: participant.id,

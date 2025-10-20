@@ -133,6 +133,7 @@ model ParticipantSong {
     position      Int // Position in bingo grid (0-8 for 3x3, 0-15 for 4x4, 0-24 for 5x5)
 
     @@unique([participantId, position])
+    @@unique([participantId, songId])
     @@map("participant_songs")
 }
 
