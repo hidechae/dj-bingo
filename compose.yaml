@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:18
     container_name: dj-bingo-postgres
-    restart: always
+    restart: no
     environment:
       POSTGRES_DB: djbingo
       POSTGRES_USER: username

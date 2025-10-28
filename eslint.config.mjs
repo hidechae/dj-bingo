@@ -1,16 +1,7 @@
-// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
-
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 
 const eslintConfig = [
   {
@@ -20,21 +11,52 @@ const eslintConfig = [
       "out/**",
       "dist/**",
       ".vercel/**",
+      "storybook-static/**",
       "next-env.d.ts",
+      "**/*.stories.tsx",
     ],
   },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        React: "readonly",
+        JSX: "readonly",
+        process: "readonly",
+        console: "readonly",
+        module: "readonly",
+        require: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+      },
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    plugins: {
+      react,
+      "react-hooks": reactHooks,
+    },
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
-    },
-  },
-  ...storybook.configs["flat/recommended"],
-  {
-    files: ["**/*.stories.tsx"],
-    rules: {
-      "storybook/no-renderer-packages": "off",
+      "react/react-in-jsx-scope": "off",
+      "react/prop-types": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "@next/next/no-img-element": "off",
+      "@next/next/no-html-link-for-pages": "off",
     },
   },
 ];

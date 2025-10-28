@@ -63,7 +63,6 @@ const QRCodePrintPage: NextPage = () => {
           {/* QRコード */}
           <div className="rounded-lg border-4 border-gray-300 bg-white p-8 shadow-lg">
             {qrCodeDataUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={qrCodeDataUrl}
                 alt="参加用QRコード"

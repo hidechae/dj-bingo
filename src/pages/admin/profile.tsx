@@ -488,7 +488,6 @@ const AdminProfile: NextPage = () => {
                     <p className="mb-4 text-sm text-gray-600">
                       Googleアカウントを関連付けると、Googleアカウントでもログインできるようになります。
                     </p>
-                    {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                     <a
                       href="/api/auth/link-google-oauth"
                       className="inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
