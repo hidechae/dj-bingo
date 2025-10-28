@@ -35,6 +35,22 @@ export const SongSelectionModal = ({
     }
   };
 
+  // Sort songs by artist name (ascending), then by title (ascending)
+  const sortedAvailableSongs = songs
+    .filter((song) => !isSongUsed(song.id))
+    .sort((a, b) => {
+      const artistA = (a.artist || "").toLowerCase();
+      const artistB = (b.artist || "").toLowerCase();
+
+      // Compare by artist first
+      if (artistA !== artistB) {
+        return artistA.localeCompare(artistB, "ja");
+      }
+
+      // If artists are the same, compare by title
+      return a.title.toLowerCase().localeCompare(b.title.toLowerCase(), "ja");
+    });
+
   return (
     <div
       className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600/20"
@@ -74,17 +90,15 @@ export const SongSelectionModal = ({
         </div>
 
         <div className="max-h-96 space-y-2 overflow-y-auto">
-          {songs
-            .filter((song) => !isSongUsed(song.id))
-            .map((song) => (
-              <div
-                key={song.id}
-                className="cursor-pointer rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:border-blue-300 hover:bg-blue-50"
-                onClick={() => handleSongClick(song.id)}
-              >
-                <SongInfo title={song.title} artist={song.artist} />
-              </div>
-            ))}
+          {sortedAvailableSongs.map((song) => (
+            <div
+              key={song.id}
+              className="cursor-pointer rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:border-blue-300 hover:bg-blue-50"
+              onClick={() => handleSongClick(song.id)}
+            >
+              <SongInfo title={song.title} artist={song.artist} />
+            </div>
+          ))}
         </div>
 
         <div className="mt-6 flex justify-end">

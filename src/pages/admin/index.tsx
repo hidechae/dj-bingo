@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
+import { useAlert } from "~/hooks/useAlert";
 
 const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
@@ -20,6 +21,7 @@ const AdminDashboard: NextPage = () => {
     id: string;
     title: string;
   } | null>(null);
+  const { showAlert, AlertComponent } = useAlert();
   const utils = api.useUtils();
   const { data: bingoGames, isLoading } = api.bingo.getAllByUser.useQuery(
     undefined,
@@ -32,7 +34,10 @@ const AdminDashboard: NextPage = () => {
       void utils.bingo.getAllByUser.invalidate();
     },
     onError: (error) => {
-      alert(`削除に失敗しました: ${error.message}`);
+      showAlert(`削除に失敗しました: ${error.message}`, {
+        variant: "error",
+        title: "エラー",
+      });
     },
   });
 
@@ -270,6 +275,8 @@ const AdminDashboard: NextPage = () => {
           setDeletingGame(null);
         }}
       />
+
+      <AlertComponent />
     </>
   );
 };

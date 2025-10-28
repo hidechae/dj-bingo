@@ -25,6 +25,21 @@ export const SongList = ({
 }: SongListProps) => {
   const currentStatus = bingoGame.status as GameStatus;
 
+  // Check for duplicate songs (same title and artist)
+  const findDuplicates = () => {
+    const seen = new Map<string, Song[]>();
+    bingoGame.songs.forEach((song) => {
+      const key = `${song.title.toLowerCase()}:${(song.artist || "").toLowerCase()}`;
+      const existing = seen.get(key) || [];
+      existing.push(song);
+      seen.set(key, existing);
+    });
+
+    return Array.from(seen.values()).filter((songs) => songs.length > 1);
+  };
+
+  const duplicates = findDuplicates();
+
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
@@ -51,6 +66,49 @@ export const SongList = ({
           </div>
         )}
       </div>
+
+      {duplicates.length > 0 && (
+        <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-4">
+          <div className="flex items-start">
+            <svg
+              className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <div className="ml-3 flex-1">
+              <h4 className="text-sm font-medium text-yellow-800">
+                重複する楽曲があります
+              </h4>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p className="mb-2">
+                  以下の楽曲が重複しています。同じタイトルとアーティストの組み合わせは推奨されません。
+                </p>
+                <ul className="list-inside list-disc space-y-1">
+                  {duplicates.map((songs, index) => {
+                    const firstSong = songs[0];
+                    if (!firstSong) return null;
+                    return (
+                      <li key={index}>
+                        {firstSong.title}
+                        {firstSong.artist && ` - ${firstSong.artist}`} (
+                        {songs.length}件)
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {bingoGame.songs.length > 0 ? (
         <SongDisplayMode
@@ -86,8 +144,24 @@ const SongDisplayMode = ({
   isMarkingPlayed: boolean;
   isDeletingSong: boolean;
 }) => {
-  const unplayedSongs = songs.filter((s) => !s.isPlayed);
-  const playedSongs = songs.filter((s) => s.isPlayed);
+  // Sort songs by artist name (ascending), then by title (ascending)
+  const sortSongs = (songList: Song[]) => {
+    return [...songList].sort((a, b) => {
+      const artistA = (a.artist || "").toLowerCase();
+      const artistB = (b.artist || "").toLowerCase();
+
+      // Compare by artist first
+      if (artistA !== artistB) {
+        return artistA.localeCompare(artistB, "ja");
+      }
+
+      // If artists are the same, compare by title
+      return a.title.toLowerCase().localeCompare(b.title.toLowerCase(), "ja");
+    });
+  };
+
+  const unplayedSongs = sortSongs(songs.filter((s) => !s.isPlayed));
+  const playedSongs = sortSongs(songs.filter((s) => s.isPlayed));
 
   return (
     <div>
