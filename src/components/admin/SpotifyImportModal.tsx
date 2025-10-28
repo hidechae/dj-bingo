@@ -75,6 +75,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
   const [searchTab, setSearchTab] = useState<"tracks" | "albums" | "playlists">(
     "tracks"
   );
+  const [hasSearched, setHasSearched] = useState(false);
 
   const hasSpotifyAuth = !!session?.accessToken;
 
@@ -168,6 +169,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
       setHasMorePlaylists(true);
       setSearchQuery("");
       setSearchResults({});
+      setHasSearched(false);
     }
   }, [isOpen]);
 
@@ -239,9 +241,20 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
       return;
     }
     setError("");
+    setHasSearched(false);
     const result = await searchMutation.refetch();
+    setHasSearched(true);
     if (result.data) {
       setSearchResults(result.data);
+    } else if (result.error) {
+      setError(result.error.message);
+    } else {
+      // データがない場合は空の結果を設定
+      setSearchResults({
+        tracks: [],
+        albums: [],
+        playlists: [],
+      });
     }
   };
 
@@ -597,173 +610,202 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                     </div>
                   )}
 
+                  {/* 検索前のメッセージ */}
+                  {!hasSearched && !searchMutation.isFetching && (
+                    <div className="py-12 text-center text-sm text-gray-500">
+                      キーワードを入力して検索してください
+                    </div>
+                  )}
+
                   {/* 検索結果のタブ */}
-                  {(searchResults.tracks ||
-                    searchResults.albums ||
-                    searchResults.playlists) && (
+                  {hasSearched && (
                     <>
-                      <div className="mb-4 border-b border-gray-200">
-                        <nav className="-mb-px flex space-x-6">
-                          <button
-                            onClick={() => setSearchTab("tracks")}
-                            className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
-                              searchTab === "tracks"
-                                ? "border-green-500 text-green-600"
-                                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                            }`}
-                          >
-                            トラック ({searchResults.tracks?.length ?? 0})
-                          </button>
-                          <button
-                            onClick={() => setSearchTab("albums")}
-                            className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
-                              searchTab === "albums"
-                                ? "border-green-500 text-green-600"
-                                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                            }`}
-                          >
-                            アルバム ({searchResults.albums?.length ?? 0})
-                          </button>
-                          <button
-                            onClick={() => setSearchTab("playlists")}
-                            className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
-                              searchTab === "playlists"
-                                ? "border-green-500 text-green-600"
-                                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                            }`}
-                          >
-                            プレイリスト ({searchResults.playlists?.length ?? 0}
-                            )
-                          </button>
-                        </nav>
-                      </div>
-
-                      <div className="max-h-80 overflow-y-auto">
-                        {/* トラック検索結果 */}
-                        {searchTab === "tracks" && searchResults.tracks && (
-                          <div className="space-y-2">
-                            {searchResults.tracks.length === 0 ? (
-                              <p className="py-8 text-center text-sm text-gray-500">
-                                トラックが見つかりませんでした
-                              </p>
-                            ) : (
-                              <>
-                                <button
-                                  onClick={() =>
-                                    handleSearchTrackSelect(
-                                      searchResults.tracks!
-                                    )
-                                  }
-                                  className="w-full cursor-pointer rounded-lg border border-green-600 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition-colors hover:bg-green-100"
-                                >
-                                  すべてのトラックを選択 (
-                                  {searchResults.tracks.length}曲)
-                                </button>
-                                {searchResults.tracks.map((track, index) => (
-                                  <div
-                                    key={index}
-                                    className="rounded-lg border border-gray-200 p-3"
-                                  >
-                                    <p className="text-sm font-medium text-gray-900">
-                                      {track.title}
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                      {track.artist}
-                                      {track.album && ` • ${track.album}`}
-                                    </p>
-                                  </div>
-                                ))}
-                              </>
-                            )}
+                      {/* 全体で結果が0件の場合 */}
+                      {(searchResults.tracks?.length ?? 0) === 0 &&
+                      (searchResults.albums?.length ?? 0) === 0 &&
+                      (searchResults.playlists?.length ?? 0) === 0 ? (
+                        <div className="py-12 text-center">
+                          <p className="text-sm text-gray-500">
+                            「{searchQuery}」の検索結果が見つかりませんでした
+                          </p>
+                          <p className="mt-2 text-xs text-gray-400">
+                            別のキーワードで検索してみてください
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="mb-4 border-b border-gray-200">
+                            <nav className="-mb-px flex space-x-6">
+                              <button
+                                onClick={() => setSearchTab("tracks")}
+                                className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
+                                  searchTab === "tracks"
+                                    ? "border-green-500 text-green-600"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                }`}
+                              >
+                                トラック ({searchResults.tracks?.length ?? 0})
+                              </button>
+                              <button
+                                onClick={() => setSearchTab("albums")}
+                                className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
+                                  searchTab === "albums"
+                                    ? "border-green-500 text-green-600"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                }`}
+                              >
+                                アルバム ({searchResults.albums?.length ?? 0})
+                              </button>
+                              <button
+                                onClick={() => setSearchTab("playlists")}
+                                className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
+                                  searchTab === "playlists"
+                                    ? "border-green-500 text-green-600"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                }`}
+                              >
+                                プレイリスト (
+                                {searchResults.playlists?.length ?? 0})
+                              </button>
+                            </nav>
                           </div>
-                        )}
 
-                        {/* アルバム検索結果 */}
-                        {searchTab === "albums" && searchResults.albums && (
-                          <div className="space-y-2">
-                            {searchResults.albums.length === 0 ? (
-                              <p className="py-8 text-center text-sm text-gray-500">
-                                アルバムが見つかりませんでした
-                              </p>
-                            ) : (
-                              searchResults.albums.map((album) => (
-                                <button
-                                  key={album.id}
-                                  onClick={() => handleAlbumSelect(album.id)}
-                                  disabled={getAlbumTracksMutation.isPending}
-                                  className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  {album.imageUrl ? (
-                                    <img
-                                      src={album.imageUrl}
-                                      alt={album.name}
-                                      className="h-12 w-12 flex-shrink-0 rounded object-cover"
-                                    />
-                                  ) : (
-                                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
-                                      <SpotifyIcon className="h-6 w-6 text-gray-400" />
-                                    </div>
-                                  )}
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-medium text-gray-900">
-                                      {album.name}
-                                    </p>
-                                    <p className="truncate text-xs text-gray-500">
-                                      {album.artist} • {album.trackCount}曲
-                                    </p>
-                                  </div>
-                                </button>
-                              ))
-                            )}
-                          </div>
-                        )}
-
-                        {/* プレイリスト検索結果 */}
-                        {searchTab === "playlists" &&
-                          searchResults.playlists && (
-                            <div className="space-y-2">
-                              {searchResults.playlists.length === 0 ? (
-                                <p className="py-8 text-center text-sm text-gray-500">
-                                  プレイリストが見つかりませんでした
-                                </p>
-                              ) : (
-                                searchResults.playlists.map((playlist) => (
-                                  <button
-                                    key={playlist.id}
-                                    onClick={() =>
-                                      handleSearchPlaylistSelect(playlist.id)
-                                    }
-                                    disabled={
-                                      getUserPlaylistTracksMutation.isPending
-                                    }
-                                    className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                  >
-                                    {playlist.imageUrl ? (
-                                      <img
-                                        src={playlist.imageUrl}
-                                        alt={playlist.name}
-                                        className="h-12 w-12 flex-shrink-0 rounded object-cover"
-                                      />
-                                    ) : (
-                                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
-                                        <SpotifyIcon className="h-6 w-6 text-gray-400" />
-                                      </div>
+                          <div className="max-h-80 overflow-y-auto">
+                            {/* トラック検索結果 */}
+                            {searchTab === "tracks" && searchResults.tracks && (
+                              <div className="space-y-2">
+                                {searchResults.tracks.length === 0 ? (
+                                  <p className="py-8 text-center text-sm text-gray-500">
+                                    トラックが見つかりませんでした
+                                  </p>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={() =>
+                                        handleSearchTrackSelect(
+                                          searchResults.tracks!
+                                        )
+                                      }
+                                      className="w-full cursor-pointer rounded-lg border border-green-600 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition-colors hover:bg-green-100"
+                                    >
+                                      すべてのトラックを選択 (
+                                      {searchResults.tracks.length}曲)
+                                    </button>
+                                    {searchResults.tracks.map(
+                                      (track, index) => (
+                                        <div
+                                          key={index}
+                                          className="rounded-lg border border-gray-200 p-3"
+                                        >
+                                          <p className="text-sm font-medium text-gray-900">
+                                            {track.title}
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            {track.artist}
+                                            {track.album && ` • ${track.album}`}
+                                          </p>
+                                        </div>
+                                      )
                                     )}
-                                    <div className="min-w-0 flex-1">
-                                      <p className="truncate text-sm font-medium text-gray-900">
-                                        {playlist.name}
-                                      </p>
-                                      <p className="truncate text-xs text-gray-500">
-                                        {playlist.owner} • {playlist.trackCount}
-                                        曲
-                                      </p>
-                                    </div>
-                                  </button>
-                                ))
+                                  </>
+                                )}
+                              </div>
+                            )}
+
+                            {/* アルバム検索結果 */}
+                            {searchTab === "albums" && searchResults.albums && (
+                              <div className="space-y-2">
+                                {searchResults.albums.length === 0 ? (
+                                  <p className="py-8 text-center text-sm text-gray-500">
+                                    アルバムが見つかりませんでした
+                                  </p>
+                                ) : (
+                                  searchResults.albums.map((album) => (
+                                    <button
+                                      key={album.id}
+                                      onClick={() =>
+                                        handleAlbumSelect(album.id)
+                                      }
+                                      disabled={
+                                        getAlbumTracksMutation.isPending
+                                      }
+                                      className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      {album.imageUrl ? (
+                                        <img
+                                          src={album.imageUrl}
+                                          alt={album.name}
+                                          className="h-12 w-12 flex-shrink-0 rounded object-cover"
+                                        />
+                                      ) : (
+                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
+                                          <SpotifyIcon className="h-6 w-6 text-gray-400" />
+                                        </div>
+                                      )}
+                                      <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-medium text-gray-900">
+                                          {album.name}
+                                        </p>
+                                        <p className="truncate text-xs text-gray-500">
+                                          {album.artist} • {album.trackCount}曲
+                                        </p>
+                                      </div>
+                                    </button>
+                                  ))
+                                )}
+                              </div>
+                            )}
+
+                            {/* プレイリスト検索結果 */}
+                            {searchTab === "playlists" &&
+                              searchResults.playlists && (
+                                <div className="space-y-2">
+                                  {searchResults.playlists.length === 0 ? (
+                                    <p className="py-8 text-center text-sm text-gray-500">
+                                      プレイリストが見つかりませんでした
+                                    </p>
+                                  ) : (
+                                    searchResults.playlists.map((playlist) => (
+                                      <button
+                                        key={playlist.id}
+                                        onClick={() =>
+                                          handleSearchPlaylistSelect(
+                                            playlist.id
+                                          )
+                                        }
+                                        disabled={
+                                          getUserPlaylistTracksMutation.isPending
+                                        }
+                                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                      >
+                                        {playlist.imageUrl ? (
+                                          <img
+                                            src={playlist.imageUrl}
+                                            alt={playlist.name}
+                                            className="h-12 w-12 flex-shrink-0 rounded object-cover"
+                                          />
+                                        ) : (
+                                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
+                                            <SpotifyIcon className="h-6 w-6 text-gray-400" />
+                                          </div>
+                                        )}
+                                        <div className="min-w-0 flex-1">
+                                          <p className="truncate text-sm font-medium text-gray-900">
+                                            {playlist.name}
+                                          </p>
+                                          <p className="truncate text-xs text-gray-500">
+                                            {playlist.owner} •{" "}
+                                            {playlist.trackCount}曲
+                                          </p>
+                                        </div>
+                                      </button>
+                                    ))
+                                  )}
+                                </div>
                               )}
-                            </div>
-                          )}
-                      </div>
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
 
