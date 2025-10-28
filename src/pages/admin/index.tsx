@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
+import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 
 const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
@@ -14,6 +15,11 @@ const AdminDashboard: NextPage = () => {
   const [activeGameDropdown, setActiveGameDropdown] = useState<string | null>(
     null
   );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingGame, setDeletingGame] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
   const utils = api.useUtils();
   const { data: bingoGames, isLoading } = api.bingo.getAllByUser.useQuery(
     undefined,
@@ -60,13 +66,15 @@ const AdminDashboard: NextPage = () => {
 
   const handleDeleteGame = (gameId: string, gameTitle: string) => {
     if (deleteMutation.isPending) return;
-    if (
-      confirm(
-        `「${gameTitle}」を削除しますか？この操作は取り消せません。\n関連する楽曲、参加者データもすべて削除されます。`
-      )
-    ) {
-      deleteMutation.mutate({ gameId });
-    }
+    setDeletingGame({ id: gameId, title: gameTitle });
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteGame = () => {
+    if (!deletingGame) return;
+    deleteMutation.mutate({ gameId: deletingGame.id });
+    setShowDeleteConfirm(false);
+    setDeletingGame(null);
   };
 
   if (status === "loading" || (!!session && isLoading)) {
@@ -249,6 +257,19 @@ const AdminDashboard: NextPage = () => {
           )}
         </div>
       </main>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="ビンゴの削除"
+        message={`「${deletingGame?.title}」を削除しますか？この操作は取り消せません。\n関連する楽曲、参加者データもすべて削除されます。`}
+        confirmLabel="削除"
+        confirmVariant="danger"
+        onConfirm={confirmDeleteGame}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setDeletingGame(null);
+        }}
+      />
     </>
   );
 };

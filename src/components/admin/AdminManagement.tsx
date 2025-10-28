@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "~/utils/api";
+import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 
 type AdminManagementProps = {
   gameId: string;
@@ -9,6 +10,8 @@ type AdminManagementProps = {
 export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
   const [email, setEmail] = useState("");
   const [showCopyMessage, setShowCopyMessage] = useState<string | null>(null);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [removingAdminId, setRemovingAdminId] = useState<string | null>(null);
 
   const { data: adminData, refetch } = api.bingo.getGameAdmins.useQuery({
     gameId,
@@ -59,13 +62,19 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
   };
 
   const handleRemoveAdmin = (adminId: string) => {
-    if (!confirm("このユーザーを管理者から削除しますか？")) return;
+    setRemovingAdminId(adminId);
+    setShowRemoveConfirm(true);
+  };
 
+  const confirmRemoveAdmin = () => {
+    if (!removingAdminId) return;
     // Use mutate instead of mutateAsync to avoid unhandled promise rejections
     removeAdminMutation.mutate({
       gameId,
-      adminId,
+      adminId: removingAdminId,
     });
+    setShowRemoveConfirm(false);
+    setRemovingAdminId(null);
   };
 
   const generateInviteMessage = (adminName: string) => {
@@ -251,6 +260,19 @@ ${baseUrl}/admin
             </div>
           </div>
         )}
+
+        <ConfirmDialog
+          isOpen={showRemoveConfirm}
+          title="管理者の削除"
+          message="このユーザーを管理者から削除しますか？"
+          confirmLabel="削除"
+          confirmVariant="danger"
+          onConfirm={confirmRemoveAdmin}
+          onCancel={() => {
+            setShowRemoveConfirm(false);
+            setRemovingAdminId(null);
+          }}
+        />
       </div>
     </div>
   );

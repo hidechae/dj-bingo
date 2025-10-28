@@ -27,6 +27,7 @@ import { SongFormModal } from "~/components/admin/SongFormModal";
 import { StatusStepper } from "~/components/admin/StatusStepper";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { Button, type ButtonColor } from "~/components/ui/Button";
+import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import type { Song } from "~/types";
 
 const AdminGameManagement: NextPage = () => {
@@ -48,6 +49,12 @@ const AdminGameManagement: NextPage = () => {
   const [editingSongData, setEditingSongData] = useState<Song | null>(null);
   const [newWinners, setNewWinners] = useState<string[]>([]);
   const previousParticipantsRef = useRef<typeof participants>(null);
+
+  // Confirm dialog states
+  const [showDeleteSongConfirm, setShowDeleteSongConfirm] = useState(false);
+  const [deletingSongId, setDeletingSongId] = useState<string | null>(null);
+  const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const utils = api.useUtils();
 
@@ -235,15 +242,21 @@ const AdminGameManagement: NextPage = () => {
 
   const handleDeleteSong = (songId: string) => {
     if (songMutation.isPending) return;
-    if (confirm("この楽曲を削除しますか？")) {
-      const updatedSongs = bingoGame!.songs
-        .filter((song) => song.id !== songId)
-        .map((song) => ({ title: song.title, artist: song.artist || "" }));
-      songMutation.mutate({
-        gameId: id as string,
-        songs: updatedSongs,
-      });
-    }
+    setDeletingSongId(songId);
+    setShowDeleteSongConfirm(true);
+  };
+
+  const confirmDeleteSong = () => {
+    if (!deletingSongId) return;
+    const updatedSongs = bingoGame!.songs
+      .filter((song) => song.id !== deletingSongId)
+      .map((song) => ({ title: song.title, artist: song.artist || "" }));
+    songMutation.mutate({
+      gameId: id as string,
+      songs: updatedSongs,
+    });
+    setShowDeleteSongConfirm(false);
+    setDeletingSongId(null);
   };
 
   const handleSongFormSave = (data: { title: string; artist: string }) => {
@@ -306,24 +319,22 @@ const AdminGameManagement: NextPage = () => {
 
   const handleDuplicate = () => {
     if (!id || duplicateMutation.isPending) return;
-    if (
-      confirm(
-        "このビンゴを複製しますか？複製されたビンゴは編集状態で作成されます。"
-      )
-    ) {
-      duplicateMutation.mutate({ gameId: id as string });
-    }
+    setShowDuplicateConfirm(true);
+  };
+
+  const confirmDuplicate = () => {
+    duplicateMutation.mutate({ gameId: id as string });
+    setShowDuplicateConfirm(false);
   };
 
   const handleDelete = () => {
     if (!id || deleteMutation.isPending) return;
-    if (
-      confirm(
-        "このビンゴを削除しますか？この操作は取り消せません。\n関連する楽曲、参加者データもすべて削除されます。"
-      )
-    ) {
-      deleteMutation.mutate({ gameId: id as string });
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    deleteMutation.mutate({ gameId: id as string });
+    setShowDeleteConfirm(false);
   };
 
   const handleSpotifyImport = (
@@ -588,6 +599,38 @@ const AdminGameManagement: NextPage = () => {
           setEditingSongData(null);
         }}
         isSaving={songMutation.isPending}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteSongConfirm}
+        title="楽曲の削除"
+        message="この楽曲を削除しますか？"
+        confirmLabel="削除"
+        confirmVariant="danger"
+        onConfirm={confirmDeleteSong}
+        onCancel={() => {
+          setShowDeleteSongConfirm(false);
+          setDeletingSongId(null);
+        }}
+      />
+
+      <ConfirmDialog
+        isOpen={showDuplicateConfirm}
+        title="ビンゴの複製"
+        message="このビンゴを複製しますか？複製されたビンゴは編集状態で作成されます。"
+        confirmLabel="複製"
+        onConfirm={confirmDuplicate}
+        onCancel={() => setShowDuplicateConfirm(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="ビンゴの削除"
+        message="このビンゴを削除しますか？この操作は取り消せません。&#10;関連する楽曲、参加者データもすべて削除されます。"
+        confirmLabel="削除"
+        confirmVariant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
       />
 
       {/* Status Change Footer */}
