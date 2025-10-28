@@ -134,25 +134,11 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
 
   // マイプレイリストのデータ読み込み
   useEffect(() => {
-    console.log("🔄 Playlists useEffect triggered", {
-      hasData: !!getUserPlaylistsQuery.data,
-      dataLength: getUserPlaylistsQuery.data?.items.length,
-      offset: playlistsOffset,
-      currentPlaylistsLength: playlists.length,
-      isOpen,
-      activeTab,
-    });
-
     if (getUserPlaylistsQuery.data) {
       const items = getUserPlaylistsQuery.data.items.map((item) => ({
         ...item,
         owner: item.owner ?? "Unknown",
       }));
-
-      console.log("✅ Setting playlists", {
-        itemsCount: items.length,
-        offset: playlistsOffset,
-      });
 
       if (playlistsOffset === 0) {
         setPlaylists(items);
@@ -161,13 +147,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
       }
       setHasMorePlaylists(getUserPlaylistsQuery.data.hasMore);
     }
-  }, [
-    getUserPlaylistsQuery.data,
-    playlistsOffset,
-    playlists.length,
-    isOpen,
-    activeTab,
-  ]);
+  }, [getUserPlaylistsQuery.data, playlistsOffset]);
 
   // 無限スクロール処理
   const handlePlaylistsScroll = useCallback(() => {
