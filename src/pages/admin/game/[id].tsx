@@ -28,6 +28,7 @@ import { StatusStepper } from "~/components/admin/StatusStepper";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { Button, type ButtonColor } from "~/components/ui/Button";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
+import { useAlert } from "~/hooks/useAlert";
 import type { Song } from "~/types";
 
 const AdminGameManagement: NextPage = () => {
@@ -56,6 +57,7 @@ const AdminGameManagement: NextPage = () => {
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const { showAlert, AlertComponent } = useAlert();
   const utils = api.useUtils();
 
   const {
@@ -80,7 +82,10 @@ const AdminGameManagement: NextPage = () => {
       void router.push("/admin");
     },
     onError: (error) => {
-      alert(`削除に失敗しました: ${error.message}`);
+      showAlert(`削除に失敗しました: ${error.message}`, {
+        variant: "error",
+        title: "エラー",
+      });
     },
   });
 
@@ -168,8 +173,9 @@ const AdminGameManagement: NextPage = () => {
     const currentStatus = bingoGame?.status as GameStatus;
 
     if (!isValidStatusTransition(currentStatus, newStatus)) {
-      alert(
-        `「${getStatusDisplay(currentStatus).text}」から「${getStatusDisplay(newStatus).text}」への変更はできません。`
+      showAlert(
+        `「${getStatusDisplay(currentStatus).text}」から「${getStatusDisplay(newStatus).text}」への変更はできません。`,
+        { variant: "warning", title: "ステータス変更エラー" }
       );
       return;
     }
@@ -177,8 +183,33 @@ const AdminGameManagement: NextPage = () => {
     if (newStatus === GameStatus.ENTRY && bingoGame) {
       const requiredSongs = getRequiredSongCount(bingoGame.size as BingoSize);
       if (bingoGame.songs.length < requiredSongs) {
-        alert(
-          `エントリーを開始するには最低${requiredSongs}曲必要です。現在${bingoGame.songs.length}曲です。`
+        showAlert(
+          `エントリーを開始するには最低${requiredSongs}曲必要です。現在${bingoGame.songs.length}曲です。`,
+          { variant: "warning", title: "楽曲数不足" }
+        );
+        return;
+      }
+
+      // Check for duplicate songs
+      const seen = new Map<string, string[]>();
+      bingoGame.songs.forEach((song) => {
+        const key = `${song.title.toLowerCase()}:${(song.artist || "").toLowerCase()}`;
+        const existing = seen.get(key) || [];
+        existing.push(song.title + (song.artist ? ` - ${song.artist}` : ""));
+        seen.set(key, existing);
+      });
+
+      const duplicates = Array.from(seen.values()).filter(
+        (songs) => songs.length > 1
+      );
+
+      if (duplicates.length > 0) {
+        const duplicateList = duplicates
+          .map((songs) => `「${songs[0]}」(${songs.length}件)`)
+          .join("\n");
+        showAlert(
+          `重複する楽曲があります。エントリーを開始する前に重複を解消してください。\n\n${duplicateList}`,
+          { variant: "warning", title: "重複楽曲エラー" }
         );
         return;
       }
@@ -311,7 +342,10 @@ const AdminGameManagement: NextPage = () => {
           setShowTitleEditModal(false);
         },
         onError: (error) => {
-          alert(`タイトルの更新に失敗しました: ${error.message}`);
+          showAlert(`タイトルの更新に失敗しました: ${error.message}`, {
+            variant: "error",
+            title: "エラー",
+          });
         },
       }
     );
@@ -599,6 +633,12 @@ const AdminGameManagement: NextPage = () => {
           setEditingSongData(null);
         }}
         isSaving={songMutation.isPending}
+        onAlert={(message) => {
+          showAlert(message, {
+            variant: "warning",
+            title: "入力エラー",
+          });
+        }}
       />
 
       <ConfirmDialog
@@ -632,6 +672,8 @@ const AdminGameManagement: NextPage = () => {
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />
+
+      <AlertComponent />
 
       {/* Status Change Footer */}
       <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white shadow-lg">

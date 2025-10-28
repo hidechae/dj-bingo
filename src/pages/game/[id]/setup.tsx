@@ -8,6 +8,7 @@ import { SetupGrid } from "~/components/bingo/SetupGrid";
 import { SongSelectionModal } from "~/components/bingo/SongSelectionModal";
 import { ConfirmModal } from "~/components/bingo/ConfirmModal";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
+import { useAlert } from "~/hooks/useAlert";
 
 const SetupBingo: NextPage = () => {
   const router = useRouter();
@@ -15,6 +16,7 @@ const SetupBingo: NextPage = () => {
   const [confirmAction, setConfirmAction] = useState<
     "clear" | "auto" | "submit" | null
   >(null);
+  const { showAlert, AlertComponent } = useAlert();
 
   const {
     participant,
@@ -31,7 +33,14 @@ const SetupBingo: NextPage = () => {
     handleSubmit,
     handleModalClose,
     isSongUsed,
-  } = useBingoSetup(id);
+  } = useBingoSetup(id, {
+    onAlert: (message, options) => {
+      showAlert(message, {
+        variant: options?.variant || "info",
+        title: options?.variant === "error" ? "エラー" : "お知らせ",
+      });
+    },
+  });
 
   // 初期ロード中はグローバルローディングを表示
   useInitialLoading({ isLoading: !participant || !participant?.bingoGame });
@@ -81,6 +90,7 @@ const SetupBingo: NextPage = () => {
 
   return (
     <>
+      <AlertComponent />
       <Head>
         <title>ビンゴ設定 - {participant.bingoGame.title}</title>
         <meta name="description" content="ビンゴの楽曲を設定" />

@@ -8,6 +8,7 @@ type SongFormModalProps = {
   onSave: (data: { title: string; artist: string }) => void;
   onCancel: () => void;
   isSaving?: boolean;
+  onAlert?: (message: string) => void;
 };
 
 export const SongFormModal = ({
@@ -17,6 +18,7 @@ export const SongFormModal = ({
   onSave,
   onCancel,
   isSaving = false,
+  onAlert,
 }: SongFormModalProps) => {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
@@ -31,7 +33,11 @@ export const SongFormModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      alert("曲名を入力してください");
+      if (onAlert) {
+        onAlert("曲名を入力してください");
+      } else {
+        alert("曲名を入力してください");
+      }
       return;
     }
     onSave({ title: title.trim(), artist: artist.trim() });
