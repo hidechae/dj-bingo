@@ -58,13 +58,13 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(
     new Set()
   );
-
+  
   // マイプレイリスト用の状態
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [playlistsOffset, setPlaylistsOffset] = useState(0);
   const [hasMorePlaylists, setHasMorePlaylists] = useState(true);
   const playlistsScrollRef = useRef<HTMLDivElement>(null);
-
+  
   // 検索用の状態
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{
@@ -72,10 +72,8 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
     albums?: Album[];
     playlists?: SearchPlaylist[];
   }>({});
-  const [searchTab, setSearchTab] = useState<"tracks" | "albums" | "playlists">(
-    "tracks"
-  );
-
+  const [searchTab, setSearchTab] = useState<"tracks" | "albums" | "playlists">("tracks");
+  
   const hasSpotifyAuth = !!session?.accessToken;
 
   const getPlaylistTracksMutation = api.spotify.getPlaylistTracks.useMutation({
@@ -95,18 +93,17 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
     { enabled: isOpen && activeTab === "playlists" && hasSpotifyAuth }
   );
 
-  const getUserPlaylistTracksMutation =
-    api.spotify.getUserPlaylistTracks.useMutation({
-      onSuccess: (data) => {
-        setTracks(data.tracks);
-        setError("");
-        setSelectedIndices(new Set(data.tracks.map((_, i) => i)));
-        setStep("select");
-      },
-      onError: (error) => {
-        setError(error.message);
-      },
-    });
+  const getUserPlaylistTracksMutation = api.spotify.getUserPlaylistTracks.useMutation({
+    onSuccess: (data) => {
+      setTracks(data.tracks);
+      setError("");
+      setSelectedIndices(new Set(data.tracks.map((_, i) => i)));
+      setStep("select");
+    },
+    onError: (error) => {
+      setError(error.message);
+    },
+  });
 
   const searchMutation = api.spotify.search.useQuery(
     { query: searchQuery, types: ["track", "album", "playlist"], limit: 20 },
@@ -128,14 +125,14 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
   // マイプレイリストのデータ読み込み
   useEffect(() => {
     if (getUserPlaylistsQuery.data) {
-      const items = getUserPlaylistsQuery.data.items.map((item) => ({
+      const items = getUserPlaylistsQuery.data.items.map(item => ({
         ...item,
-        owner: item.owner ?? "Unknown",
+        owner: item.owner ?? "Unknown"
       }));
       if (playlistsOffset === 0) {
         setPlaylists(items);
       } else {
-        setPlaylists((prev) => [...prev, ...items]);
+        setPlaylists(prev => [...prev, ...items]);
       }
       setHasMorePlaylists(getUserPlaylistsQuery.data.hasMore);
     }
@@ -144,12 +141,11 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
   // 無限スクロール処理
   const handlePlaylistsScroll = useCallback(() => {
     const element = playlistsScrollRef.current;
-    if (!element || !hasMorePlaylists || getUserPlaylistsQuery.isFetching)
-      return;
+    if (!element || !hasMorePlaylists || getUserPlaylistsQuery.isFetching) return;
 
     const { scrollTop, scrollHeight, clientHeight } = element;
     if (scrollHeight - scrollTop <= clientHeight * 1.5) {
-      setPlaylistsOffset((prev) => prev + 20);
+      setPlaylistsOffset(prev => prev + 20);
     }
   }, [hasMorePlaylists, getUserPlaylistsQuery.isFetching]);
 

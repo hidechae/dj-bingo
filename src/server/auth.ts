@@ -6,6 +6,7 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
+import SpotifyProvider from "next-auth/providers/spotify";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { type GetServerSidePropsContext } from "next";
 import bcrypt from "bcryptjs";
@@ -20,6 +21,16 @@ declare module "next-auth" {
     user: {
       id: string;
     } & DefaultSession["user"];
+    accessToken?: string;
+    refreshToken?: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    accessToken?: string;
+    refreshToken?: string;
+    accessTokenExpires?: number;
   }
 }
 
@@ -31,6 +42,12 @@ console.log(
 );
 console.log("  - GOOGLE_CLIENT_ID exists:", !!env.GOOGLE_CLIENT_ID);
 console.log("  - GOOGLE_CLIENT_SECRET exists:", !!env.GOOGLE_CLIENT_SECRET);
+console.log(
+  "  - Spotify OAuth configured:",
+  !!(env.SPOTIFY_CLIENT_ID && env.SPOTIFY_CLIENT_SECRET)
+);
+console.log("  - SPOTIFY_CLIENT_ID exists:", !!env.SPOTIFY_CLIENT_ID);
+console.log("  - SPOTIFY_CLIENT_SECRET exists:", !!env.SPOTIFY_CLIENT_SECRET);
 console.log("  - DATABASE_URL exists:", !!process.env.DATABASE_URL);
 console.log("  - NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET);
 console.log("  - NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
@@ -52,6 +69,25 @@ const createProviders = () => {
     );
   } else {
     console.log("  ❌ Google OAuth not configured");
+  }
+
+  // Add Spotify OAuth provider if credentials are available
+  if (env.SPOTIFY_CLIENT_ID && env.SPOTIFY_CLIENT_SECRET) {
+    console.log("  ✅ Adding Spotify OAuth provider");
+    providers.push(
+      SpotifyProvider({
+        clientId: env.SPOTIFY_CLIENT_ID,
+        clientSecret: env.SPOTIFY_CLIENT_SECRET,
+        authorization: {
+          params: {
+            scope:
+              "user-read-email playlist-read-private playlist-read-collaborative user-library-read",
+          },
+        },
+      })
+    );
+  } else {
+    console.log("  ❌ Spotify OAuth not configured");
   }
 
   // Always add credentials provider
@@ -153,6 +189,8 @@ export const authOptions: NextAuthOptions = {
             ...session.user,
             id: user.id,
           },
+          accessToken: token.accessToken,
+          refreshToken: token.refreshToken,
         };
       } else if (token) {
         // Credentials session (JWT)
@@ -162,15 +200,73 @@ export const authOptions: NextAuthOptions = {
             ...session.user,
             id: token.sub!,
           },
+          accessToken: token.accessToken,
+          refreshToken: token.refreshToken,
         };
       }
       return session;
     },
-    jwt: ({ token, user }) => {
+    jwt: async ({ token, user, account }) => {
       // Store user id in token for credentials authentication
       if (user) {
         token.sub = user.id;
       }
+
+      // Store Spotify access token and refresh token
+      if (account) {
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.accessTokenExpires = account.expires_at
+          ? account.expires_at * 1000
+          : undefined;
+      }
+
+      // Return previous token if the access token has not expired yet
+      if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+        return token;
+      }
+
+      // Access token has expired, try to refresh it
+      if (token.refreshToken) {
+        try {
+          const response = await fetch(
+            "https://accounts.spotify.com/api/token",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Basic ${Buffer.from(
+                  `${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`
+                ).toString("base64")}`,
+              },
+              body: new URLSearchParams({
+                grant_type: "refresh_token",
+                refresh_token: token.refreshToken as string,
+              }),
+            }
+          );
+
+          const refreshedTokens = await response.json();
+
+          if (!response.ok) {
+            throw refreshedTokens;
+          }
+
+          return {
+            ...token,
+            accessToken: refreshedTokens.access_token,
+            accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+            refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+          };
+        } catch (error) {
+          console.error("Error refreshing access token", error);
+          return {
+            ...token,
+            error: "RefreshAccessTokenError",
+          };
+        }
+      }
+
       return token;
     },
   },
