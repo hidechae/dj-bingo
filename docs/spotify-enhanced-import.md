@@ -65,9 +65,15 @@ SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 
 1. [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)でアプリを作成
 2. Redirect URIsに以下を追加:
-   - `http://localhost:3000/api/auth/callback/spotify` (開発環境)
+   - `http://127.0.0.1:3000/api/auth/callback/spotify` (開発環境)
    - `https://your-domain.com/api/auth/callback/spotify` (本番環境)
 3. Client IDとClient Secretを環境変数に設定
+
+**⚠️ 重要な注意事項:**
+
+- Spotifyは`localhost`ではなく`127.0.0.1`を使用する必要があります
+- 開発時は必ず`http://127.0.0.1:3000`でアクセスしてください
+- `.env`ファイルの`NEXTAUTH_URL`も`http://127.0.0.1:3000`に設定してください
 
 ## 使用方法
 

@@ -75,9 +75,16 @@ Spotifyプレイリストからの楽曲インポート機能を使用する場�
 2. 新しいアプリケーションを作成
 3. Client IDとClient Secretを取得
 4. Redirect URIsに以下を追加：
-   - 開発環境: `http://localhost:3000/api/auth/callback/spotify`
+   - 開発環境: `http://127.0.0.1:3000/api/auth/callback/spotify`
    - 本番環境: `https://your-domain.com/api/auth/callback/spotify`
-5. `.env`ファイルに認証情報を追加
+5. `.env`ファイルに認証情報を追加し、`NEXTAUTH_URL`も`127.0.0.1`を使用：
+   ```bash
+   NEXTAUTH_URL="http://127.0.0.1:3000"
+   SPOTIFY_CLIENT_ID="your_spotify_client_id"
+   SPOTIFY_CLIENT_SECRET="your_spotify_client_secret"
+   ```
+
+**⚠️ 重要:** Spotifyは`localhost`ではなく`127.0.0.1`を使用する必要があります。開発時は`http://127.0.0.1:3000`でアクセスしてください。
 
 詳細は[Spotify拡張インポート機能のドキュメント](docs/spotify-enhanced-import.md)を参照してください。
 
