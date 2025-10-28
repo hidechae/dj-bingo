@@ -94,7 +94,11 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
 
   const getUserPlaylistsQuery = api.spotify.getUserPlaylists.useQuery(
     { limit: 20, offset: playlistsOffset },
-    { enabled: isOpen && activeTab === "playlists" && hasSpotifyAuth }
+    {
+      enabled: isOpen && activeTab === "playlists" && hasSpotifyAuth,
+      refetchOnMount: true,
+      staleTime: 0,
+    }
   );
 
   const getUserPlaylistTracksMutation =
