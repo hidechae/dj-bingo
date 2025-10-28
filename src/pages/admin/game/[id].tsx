@@ -13,7 +13,6 @@ import {
 } from "~/types";
 import { api } from "~/utils/api";
 import { useGameManagement } from "~/hooks/useGameManagement";
-import { useSongEditor } from "~/hooks/useSongEditor";
 import { useParticipantSort } from "~/hooks/useParticipantSort";
 import { GameInfoSidebar } from "~/components/admin/GameInfoSidebar";
 import { SongList } from "~/components/admin/SongList";
@@ -23,9 +22,13 @@ import { AdminManagement } from "~/components/admin/AdminManagement";
 import { TitleEditModal } from "~/components/admin/TitleEditModal";
 import { BingoNotificationModal } from "~/components/admin/BingoNotificationModal";
 import { SpotifyImportModal } from "~/components/admin/SpotifyImportModal";
+import { SongFormModal } from "~/components/admin/SongFormModal";
 import { StatusStepper } from "~/components/admin/StatusStepper";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { Button, type ButtonColor } from "~/components/ui/Button";
+import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
+import { useAlert } from "~/hooks/useAlert";
+import type { Song } from "~/types";
 
 const AdminGameManagement: NextPage = () => {
   const { data: session, status } = useSession();
@@ -41,8 +44,19 @@ const AdminGameManagement: NextPage = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showTitleEditModal, setShowTitleEditModal] = useState(false);
   const [showSpotifyImportModal, setShowSpotifyImportModal] = useState(false);
+  const [showSongFormModal, setShowSongFormModal] = useState(false);
+  const [songFormMode, setSongFormMode] = useState<"add" | "edit">("add");
+  const [editingSongData, setEditingSongData] = useState<Song | null>(null);
   const [newWinners, setNewWinners] = useState<string[]>([]);
   const previousParticipantsRef = useRef<typeof participants>(null);
+
+  // Confirm dialog states
+  const [showDeleteSongConfirm, setShowDeleteSongConfirm] = useState(false);
+  const [deletingSongId, setDeletingSongId] = useState<string | null>(null);
+  const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const { showAlert, AlertComponent } = useAlert();
 
   const {
     bingoGame,
@@ -66,22 +80,14 @@ const AdminGameManagement: NextPage = () => {
       void router.push("/admin");
     },
     onError: (error) => {
-      alert(`削除に失敗しました: ${error.message}`);
+      showAlert(`削除に失敗しました: ${error.message}`, {
+        variant: "error",
+        title: "エラー",
+      });
     },
   });
 
-  const {
-    songEditingMode,
-    editingSongs,
-    setSongEditingMode,
-    startEditing,
-    cancelEditing,
-    addSong,
-    addMultipleSongs,
-    updateSong,
-    removeSong,
-    getValidSongs,
-  } = useSongEditor();
+  const songMutation = updateSongsMutation;
 
   const { sortField, sortDirection, handleSort, sortParticipants } =
     useParticipantSort();
@@ -165,8 +171,9 @@ const AdminGameManagement: NextPage = () => {
     const currentStatus = bingoGame?.status as GameStatus;
 
     if (!isValidStatusTransition(currentStatus, newStatus)) {
-      alert(
-        `「${getStatusDisplay(currentStatus).text}」から「${getStatusDisplay(newStatus).text}」への変更はできません。`
+      showAlert(
+        `「${getStatusDisplay(currentStatus).text}」から「${getStatusDisplay(newStatus).text}」への変更はできません。`,
+        { variant: "warning", title: "ステータス変更エラー" }
       );
       return;
     }
@@ -174,8 +181,33 @@ const AdminGameManagement: NextPage = () => {
     if (newStatus === GameStatus.ENTRY && bingoGame) {
       const requiredSongs = getRequiredSongCount(bingoGame.size as BingoSize);
       if (bingoGame.songs.length < requiredSongs) {
-        alert(
-          `エントリーを開始するには最低${requiredSongs}曲必要です。現在${bingoGame.songs.length}曲です。`
+        showAlert(
+          `エントリーを開始するには最低${requiredSongs}曲必要です。現在${bingoGame.songs.length}曲です。`,
+          { variant: "warning", title: "楽曲数不足" }
+        );
+        return;
+      }
+
+      // Check for duplicate songs
+      const seen = new Map<string, string[]>();
+      bingoGame.songs.forEach((song) => {
+        const key = `${song.title.toLowerCase()}:${(song.artist || "").toLowerCase()}`;
+        const existing = seen.get(key) || [];
+        existing.push(song.title + (song.artist ? ` - ${song.artist}` : ""));
+        seen.set(key, existing);
+      });
+
+      const duplicates = Array.from(seen.values()).filter(
+        (songs) => songs.length > 1
+      );
+
+      if (duplicates.length > 0) {
+        const duplicateList = duplicates
+          .map((songs) => `「${songs[0]}」(${songs.length}件)`)
+          .join("\n");
+        showAlert(
+          `重複する楽曲があります。エントリーを開始する前に重複を解消してください。\n\n${duplicateList}`,
+          { variant: "warning", title: "重複楽曲エラー" }
         );
         return;
       }
@@ -225,21 +257,75 @@ const AdminGameManagement: NextPage = () => {
     }
   };
 
-  const handleSongEdit = () => {
-    if (songEditingMode) {
-      updateSongsMutation.mutate(
+  const handleAddSong = () => {
+    setSongFormMode("add");
+    setEditingSongData(null);
+    setShowSongFormModal(true);
+  };
+
+  const handleEditSong = (song: Song) => {
+    setSongFormMode("edit");
+    setEditingSongData(song);
+    setShowSongFormModal(true);
+  };
+
+  const handleDeleteSong = (songId: string) => {
+    if (songMutation.isPending) return;
+    setDeletingSongId(songId);
+    setShowDeleteSongConfirm(true);
+  };
+
+  const confirmDeleteSong = () => {
+    if (!deletingSongId) return;
+    const updatedSongs = bingoGame!.songs
+      .filter((song) => song.id !== deletingSongId)
+      .map((song) => ({ title: song.title, artist: song.artist || "" }));
+    songMutation.mutate({
+      gameId: id as string,
+      songs: updatedSongs,
+    });
+    setShowDeleteSongConfirm(false);
+    setDeletingSongId(null);
+  };
+
+  const handleSongFormSave = (data: { title: string; artist: string }) => {
+    if (songFormMode === "add") {
+      const updatedSongs = [
+        ...bingoGame!.songs.map((song) => ({
+          title: song.title,
+          artist: song.artist || "",
+        })),
+        { title: data.title, artist: data.artist },
+      ];
+      songMutation.mutate(
         {
           gameId: id as string,
-          songs: getValidSongs(),
+          songs: updatedSongs,
         },
         {
           onSuccess: () => {
-            setSongEditingMode(false);
+            setShowSongFormModal(false);
           },
         }
       );
-    } else {
-      startEditing(bingoGame?.songs || []);
+    } else if (editingSongData) {
+      const updatedSongs = bingoGame!.songs.map((song) =>
+        song.id === editingSongData.id
+          ? { title: data.title, artist: data.artist }
+          : { title: song.title, artist: song.artist || "" }
+      );
+      songMutation.mutate(
+        {
+          gameId: id as string,
+          songs: updatedSongs,
+        },
+        {
+          onSuccess: () => {
+            setShowSongFormModal(false);
+            setEditingSongData(null);
+          },
+        }
+      );
     }
   };
 
@@ -254,7 +340,10 @@ const AdminGameManagement: NextPage = () => {
           setShowTitleEditModal(false);
         },
         onError: (error) => {
-          alert(`タイトルの更新に失敗しました: ${error.message}`);
+          showAlert(`タイトルの更新に失敗しました: ${error.message}`, {
+            variant: "error",
+            title: "エラー",
+          });
         },
       }
     );
@@ -262,30 +351,43 @@ const AdminGameManagement: NextPage = () => {
 
   const handleDuplicate = () => {
     if (!id || duplicateMutation.isPending) return;
-    if (
-      confirm(
-        "このビンゴを複製しますか？複製されたビンゴは編集状態で作成されます。"
-      )
-    ) {
-      duplicateMutation.mutate({ gameId: id as string });
-    }
+    setShowDuplicateConfirm(true);
+  };
+
+  const confirmDuplicate = () => {
+    duplicateMutation.mutate({ gameId: id as string });
+    setShowDuplicateConfirm(false);
   };
 
   const handleDelete = () => {
     if (!id || deleteMutation.isPending) return;
-    if (
-      confirm(
-        "このビンゴを削除しますか？この操作は取り消せません。\n関連する楽曲、参加者データもすべて削除されます。"
-      )
-    ) {
-      deleteMutation.mutate({ gameId: id as string });
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    deleteMutation.mutate({ gameId: id as string });
+    setShowDeleteConfirm(false);
   };
 
   const handleSpotifyImport = (
     tracks: Array<{ title: string; artist: string }>
   ) => {
-    addMultipleSongs(tracks);
+    // Spotifyからのインポートは一括で楽曲を追加する既存のAPIを使用
+    const existingSongs = bingoGame!.songs.map((song) => ({
+      title: song.title,
+      artist: song.artist || "",
+    }));
+    updateSongsMutation.mutate(
+      {
+        gameId: id as string,
+        songs: [...existingSongs, ...tracks],
+      },
+      {
+        onSuccess: () => {
+          setShowSpotifyImportModal(false);
+        },
+      }
+    );
   };
   if (status === "loading" || !bingoGame) {
     return null; // グローバルローディングオーバーレイが表示される
@@ -446,21 +548,17 @@ const AdminGameManagement: NextPage = () => {
               {activeTab === "songs" && (
                 <SongList
                   bingoGame={bingoGame}
-                  songEditingMode={songEditingMode}
-                  editingSongs={editingSongs}
-                  onSongEdit={handleSongEdit}
-                  onAddSong={addSong}
-                  onUpdateSong={updateSong}
-                  onRemoveSong={removeSong}
-                  onCancelEdit={cancelEditing}
+                  onAddSong={handleAddSong}
+                  onEditSong={handleEditSong}
+                  onDeleteSong={handleDeleteSong}
                   onToggleSongPlayed={toggleSongPlayed}
                   onSpotifyImport={
                     spotifyStatus?.enabled
                       ? () => setShowSpotifyImportModal(true)
                       : undefined
                   }
-                  isSaving={updateSongsMutation.isPending}
                   isMarkingPlayed={markSongMutation.isPending}
+                  isDeletingSong={songMutation.isPending}
                 />
               )}
 
@@ -515,6 +613,65 @@ const AdminGameManagement: NextPage = () => {
         onImport={handleSpotifyImport}
         onClose={() => setShowSpotifyImportModal(false)}
       />
+
+      <SongFormModal
+        isOpen={showSongFormModal}
+        mode={songFormMode}
+        initialData={
+          editingSongData
+            ? {
+                title: editingSongData.title,
+                artist: editingSongData.artist || "",
+              }
+            : undefined
+        }
+        onSave={handleSongFormSave}
+        onCancel={() => {
+          setShowSongFormModal(false);
+          setEditingSongData(null);
+        }}
+        isSaving={songMutation.isPending}
+        onAlert={(message) => {
+          showAlert(message, {
+            variant: "warning",
+            title: "入力エラー",
+          });
+        }}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteSongConfirm}
+        title="楽曲の削除"
+        message="この楽曲を削除しますか？"
+        confirmLabel="削除"
+        confirmVariant="danger"
+        onConfirm={confirmDeleteSong}
+        onCancel={() => {
+          setShowDeleteSongConfirm(false);
+          setDeletingSongId(null);
+        }}
+      />
+
+      <ConfirmDialog
+        isOpen={showDuplicateConfirm}
+        title="ビンゴの複製"
+        message="このビンゴを複製しますか？複製されたビンゴは編集状態で作成されます。"
+        confirmLabel="複製"
+        onConfirm={confirmDuplicate}
+        onCancel={() => setShowDuplicateConfirm(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="ビンゴの削除"
+        message="このビンゴを削除しますか？この操作は取り消せません。&#10;関連する楽曲、参加者データもすべて削除されます。"
+        confirmLabel="削除"
+        confirmVariant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+
+      <AlertComponent />
 
       {/* Status Change Footer */}
       <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white shadow-lg">

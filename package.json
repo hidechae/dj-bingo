@@ -12,7 +12,7 @@
     "dev": "next dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint .",
+    "lint": "eslint ./src",
     "postinstall": "prisma generate",
     "start": "next start",
     "test": "vitest",

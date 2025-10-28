@@ -9,13 +9,24 @@ import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 import { BingoSize, getGridSize } from "~/types";
 
+type UseBingoSetupOptions = {
+  onAlert?: (
+    message: string,
+    options?: { variant?: "error" | "warning" }
+  ) => void;
+};
+
 /**
  * ビンゴグリッド設定画面の状態管理を提供するカスタムフック
  *
  * @param gameId - 設定対象のゲームID
+ * @param options - オプション設定
  * @returns グリッド設定の状態と操作関数
  */
-export const useBingoSetup = (gameId: string | string[] | undefined) => {
+export const useBingoSetup = (
+  gameId: string | string[] | undefined,
+  options?: UseBingoSetupOptions
+) => {
   const router = useRouter();
   const [sessionToken, setSessionToken] = useState<string>("");
   // 各グリッド位置に割り当てられた楽曲ID（position → songId）
@@ -187,9 +198,12 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
 
     // 利用可能な楽曲数がグリッドサイズより少ない場合はエラー
     if (availableSongs.length < totalPositions) {
-      alert(
-        `グリッドサイズ ${gridSize}x${gridSize} (${totalPositions}マス) に対して楽曲数が不足しています。\n利用可能楽曲: ${availableSongs.length}曲`
-      );
+      const message = `グリッドサイズ ${gridSize}x${gridSize} (${totalPositions}マス) に対して楽曲数が不足しています。\n利用可能楽曲: ${availableSongs.length}曲`;
+      if (options?.onAlert) {
+        options.onAlert(message, { variant: "error" });
+      } else {
+        alert(message);
+      }
       return;
     }
 
@@ -229,7 +243,12 @@ export const useBingoSetup = (gameId: string | string[] | undefined) => {
 
     // すべてのマスが埋まっているかチェック
     if (assignments.length !== totalPositions) {
-      alert("すべてのマスに楽曲を選択してください");
+      const message = "すべてのマスに楽曲を選択してください";
+      if (options?.onAlert) {
+        options.onAlert(message, { variant: "warning" });
+      } else {
+        alert(message);
+      }
       return;
     }
 

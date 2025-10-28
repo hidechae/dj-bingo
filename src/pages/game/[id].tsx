@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
+import { useAlert } from "~/hooks/useAlert";
 
 const ParticipantGame: NextPage = () => {
   const router = useRouter();
@@ -11,6 +12,7 @@ const ParticipantGame: NextPage = () => {
   const [sessionToken, setSessionToken] = useState<string>("");
   const [participantName, setParticipantName] = useState("");
   const [isJoining, setIsJoining] = useState(false);
+  const { showAlert, AlertComponent } = useAlert();
 
   const { data: bingoGame, isLoading: bingoGameLoading } =
     api.bingo.getById.useQuery({ id: id as string }, { enabled: !!id });
@@ -35,7 +37,10 @@ const ParticipantGame: NextPage = () => {
       if (error.message === "Already joined this game") {
         // Already joined, continue to game
       } else {
-        alert(`参加に失敗しました: ${error.message}`);
+        showAlert(`参加に失敗しました: ${error.message}`, {
+          variant: "error",
+          title: "エラー",
+        });
         setIsJoining(false);
       }
     },
@@ -167,6 +172,7 @@ const ParticipantGame: NextPage = () => {
 
   return (
     <>
+      <AlertComponent />
       <Head>
         <title>{bingoGame.title} - DJ Bingo参加</title>
         <meta name="description" content="DJ Bingoゲームに参加" />
