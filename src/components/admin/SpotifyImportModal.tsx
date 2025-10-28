@@ -134,7 +134,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
 
   // マイプレイリストのデータ読み込み
   useEffect(() => {
-    if (getUserPlaylistsQuery.data) {
+    if (getUserPlaylistsQuery.data && isOpen) {
       const items = getUserPlaylistsQuery.data.items.map((item) => ({
         ...item,
         owner: item.owner ?? "Unknown",
@@ -147,7 +147,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
       }
       setHasMorePlaylists(getUserPlaylistsQuery.data.hasMore);
     }
-  }, [getUserPlaylistsQuery.data, playlistsOffset]);
+  }, [getUserPlaylistsQuery.data, playlistsOffset, isOpen]);
 
   // 無限スクロール処理
   const handlePlaylistsScroll = useCallback(() => {
@@ -217,13 +217,6 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
   };
 
   const handleCancel = () => {
-    // モーダルを閉じる前に状態をリセット
-    setPlaylists([]);
-    setPlaylistsOffset(0);
-    setHasMorePlaylists(true);
-    setSearchResults({});
-    setHasSearched(false);
-    setSearchError("");
     onClose();
   };
 
