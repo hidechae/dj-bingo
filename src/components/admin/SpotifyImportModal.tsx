@@ -217,6 +217,13 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
   };
 
   const handleCancel = () => {
+    // モーダルを閉じる前に状態をリセット
+    setPlaylists([]);
+    setPlaylistsOffset(0);
+    setHasMorePlaylists(true);
+    setSearchResults({});
+    setHasSearched(false);
+    setSearchError("");
     onClose();
   };
 
