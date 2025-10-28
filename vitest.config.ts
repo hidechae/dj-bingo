@@ -9,12 +9,15 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
+      // Vitest v4: coverage.includeを明示的に指定
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "node_modules/",
         "src/test/",
         "**/*.config.*",
         "**/types/",
         "**/*.d.ts",
+        "**/*.stories.tsx",
       ],
     },
   },
