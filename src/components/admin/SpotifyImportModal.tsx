@@ -78,6 +78,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
 
   const hasSpotifyAuth = !!session?.accessToken;
 
+  // API呼び出し
   const getPlaylistTracksMutation = api.spotify.getPlaylistTracks.useMutation({
     onSuccess: (data) => {
       setTracks(data.tracks);
@@ -235,9 +236,9 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
     }
   };
 
-  const handleSearchTrackSelect = (tracks: Track[]) => {
-    setTracks(tracks);
-    setSelectedIndices(new Set(tracks.map((_, i) => i)));
+  const handleSearchTrackSelect = (selectedTracks: Track[]) => {
+    setTracks(selectedTracks);
+    setSelectedIndices(new Set(selectedTracks.map((_, i) => i)));
     setStep("select");
   };
 
@@ -249,71 +250,18 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
     getUserPlaylistTracksMutation.mutate({ playlistId });
   };
 
-  return (
-    <Modal isOpen={isOpen} size="xl" className="max-w-2xl p-5">
-      <div className="mt-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
-            <SpotifyIcon className="h-6 w-6 text-green-600" />
+  // トラック選択画面
+  if (step === "select") {
+    return (
+      <Modal isOpen={isOpen} size="xl" className="max-w-2xl p-5">
+        <div className="mt-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+              <SpotifyIcon className="h-6 w-6 text-green-600" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900">楽曲を選択</h3>
           </div>
-          <h3 className="text-lg font-medium text-gray-900">
-            Spotifyプレイリストからインポート
-          </h3>
-        </div>
 
-        {step === "input" ? (
-          <form onSubmit={handleFetchTracks} className="mt-4">
-            <div className="mb-4">
-              <label
-                htmlFor="playlistUrl"
-                className="block text-sm font-medium text-gray-700"
-              >
-                プレイリストURLまたはID
-              </label>
-              <input
-                type="text"
-                id="playlistUrl"
-                value={playlistUrl}
-                onChange={(e) => setPlaylistUrl(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                placeholder="https://open.spotify.com/playlist/..."
-                autoFocus
-                disabled={getPlaylistTracksMutation.isPending}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Spotifyプレイリストのリンク、またはプレイリストIDを入力してください
-              </p>
-            </div>
-
-            {error && (
-              <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={getPlaylistTracksMutation.isPending}
-                className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                キャンセル
-              </button>
-              <button
-                type="submit"
-                disabled={
-                  !playlistUrl.trim() || getPlaylistTracksMutation.isPending
-                }
-                className="cursor-pointer rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {getPlaylistTracksMutation.isPending
-                  ? "取得中..."
-                  : "楽曲を取得"}
-              </button>
-            </div>
-          </form>
-        ) : (
           <div className="mt-4">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm text-gray-600">
@@ -354,6 +302,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                     </p>
                     <p className="truncate text-xs text-gray-500">
                       {track.artist}
+                      {track.album && ` • ${track.album}`}
                     </p>
                   </div>
                 </label>
@@ -387,7 +336,442 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
               </div>
             </div>
           </div>
-        )}
+        </div>
+      </Modal>
+    );
+  }
+
+  // メイン画面（タブ形式）
+  return (
+    <Modal isOpen={isOpen} size="xl" className="max-w-3xl p-5">
+      <div className="mt-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+            <SpotifyIcon className="h-6 w-6 text-green-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900">
+            Spotifyからインポート
+          </h3>
+        </div>
+
+        {/* タブナビゲーション */}
+        <div className="mt-4 border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab("url")}
+              className={`border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap ${
+                activeTab === "url"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
+            >
+              URLから
+            </button>
+            <button
+              onClick={() => setActiveTab("playlists")}
+              className={`border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap ${
+                activeTab === "playlists"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
+            >
+              マイプレイリスト
+            </button>
+            <button
+              onClick={() => setActiveTab("search")}
+              className={`border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap ${
+                activeTab === "search"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
+            >
+              検索
+            </button>
+          </nav>
+        </div>
+
+        {/* タブコンテンツ */}
+        <div className="mt-4">
+          {/* URLタブ */}
+          {activeTab === "url" && (
+            <form onSubmit={handleFetchTracks}>
+              <div className="mb-4">
+                <label
+                  htmlFor="playlistUrl"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  プレイリストURLまたはID
+                </label>
+                <input
+                  type="text"
+                  id="playlistUrl"
+                  value={playlistUrl}
+                  onChange={(e) => setPlaylistUrl(e.target.value)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  placeholder="https://open.spotify.com/playlist/..."
+                  autoFocus
+                  disabled={getPlaylistTracksMutation.isPending}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Spotifyプレイリストのリンク、またはプレイリストIDを入力してください
+                </p>
+              </div>
+
+              {error && (
+                <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={getPlaylistTracksMutation.isPending}
+                  className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    !playlistUrl.trim() || getPlaylistTracksMutation.isPending
+                  }
+                  className="cursor-pointer rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {getPlaylistTracksMutation.isPending
+                    ? "取得中..."
+                    : "楽曲を取得"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* マイプレイリストタブ */}
+          {activeTab === "playlists" && (
+            <div>
+              {!hasSpotifyAuth ? (
+                <div className="py-8 text-center">
+                  <p className="mb-4 text-sm text-gray-600">
+                    Spotifyアカウントと連携してプレイリストを表示
+                  </p>
+                  <button
+                    onClick={handleSpotifyConnect}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+                  >
+                    <SpotifyIcon className="h-5 w-5" />
+                    Spotifyと連携
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {error && (
+                    <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
+                      {error}
+                    </div>
+                  )}
+
+                  <div
+                    ref={playlistsScrollRef}
+                    onScroll={handlePlaylistsScroll}
+                    className="max-h-96 overflow-y-auto"
+                  >
+                    {getUserPlaylistsQuery.isLoading &&
+                    playlists.length === 0 ? (
+                      <div className="py-8 text-center text-sm text-gray-500">
+                        読み込み中...
+                      </div>
+                    ) : playlists.length === 0 ? (
+                      <div className="py-8 text-center text-sm text-gray-500">
+                        プレイリストが見つかりませんでした
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {playlists.map((playlist) => (
+                          <button
+                            key={playlist.id}
+                            onClick={() => handlePlaylistSelect(playlist.id)}
+                            disabled={getUserPlaylistTracksMutation.isPending}
+                            className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {playlist.imageUrl ? (
+                              <img
+                                src={playlist.imageUrl}
+                                alt={playlist.name}
+                                className="h-12 w-12 flex-shrink-0 rounded object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
+                                <SpotifyIcon className="h-6 w-6 text-gray-400" />
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-gray-900">
+                                {playlist.name}
+                              </p>
+                              <p className="truncate text-xs text-gray-500">
+                                {playlist.owner} • {playlist.trackCount}曲
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                        {getUserPlaylistsQuery.isFetching && (
+                          <div className="py-4 text-center text-sm text-gray-500">
+                            読み込み中...
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                    >
+                      キャンセル
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* 検索タブ */}
+          {activeTab === "search" && (
+            <div>
+              {!hasSpotifyAuth ? (
+                <div className="py-8 text-center">
+                  <p className="mb-4 text-sm text-gray-600">
+                    Spotifyアカウントと連携して検索機能を使用
+                  </p>
+                  <button
+                    onClick={handleSpotifyConnect}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+                  >
+                    <SpotifyIcon className="h-5 w-5" />
+                    Spotifyと連携
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            void handleSearch();
+                          }
+                        }}
+                        className="block flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                        placeholder="曲名、アーティスト、アルバム、プレイリストを検索..."
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => void handleSearch()}
+                        disabled={searchMutation.isFetching}
+                        className="cursor-pointer rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {searchMutation.isFetching ? "検索中..." : "検索"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
+                      {error}
+                    </div>
+                  )}
+
+                  {/* 検索結果のタブ */}
+                  {(searchResults.tracks ||
+                    searchResults.albums ||
+                    searchResults.playlists) && (
+                    <>
+                      <div className="mb-4 border-b border-gray-200">
+                        <nav className="-mb-px flex space-x-6">
+                          <button
+                            onClick={() => setSearchTab("tracks")}
+                            className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
+                              searchTab === "tracks"
+                                ? "border-green-500 text-green-600"
+                                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                            }`}
+                          >
+                            トラック ({searchResults.tracks?.length ?? 0})
+                          </button>
+                          <button
+                            onClick={() => setSearchTab("albums")}
+                            className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
+                              searchTab === "albums"
+                                ? "border-green-500 text-green-600"
+                                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                            }`}
+                          >
+                            アルバム ({searchResults.albums?.length ?? 0})
+                          </button>
+                          <button
+                            onClick={() => setSearchTab("playlists")}
+                            className={`border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap ${
+                              searchTab === "playlists"
+                                ? "border-green-500 text-green-600"
+                                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                            }`}
+                          >
+                            プレイリスト ({searchResults.playlists?.length ?? 0}
+                            )
+                          </button>
+                        </nav>
+                      </div>
+
+                      <div className="max-h-80 overflow-y-auto">
+                        {/* トラック検索結果 */}
+                        {searchTab === "tracks" && searchResults.tracks && (
+                          <div className="space-y-2">
+                            {searchResults.tracks.length === 0 ? (
+                              <p className="py-8 text-center text-sm text-gray-500">
+                                トラックが見つかりませんでした
+                              </p>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() =>
+                                    handleSearchTrackSelect(
+                                      searchResults.tracks!
+                                    )
+                                  }
+                                  className="w-full cursor-pointer rounded-lg border border-green-600 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition-colors hover:bg-green-100"
+                                >
+                                  すべてのトラックを選択 (
+                                  {searchResults.tracks.length}曲)
+                                </button>
+                                {searchResults.tracks.map((track, index) => (
+                                  <div
+                                    key={index}
+                                    className="rounded-lg border border-gray-200 p-3"
+                                  >
+                                    <p className="text-sm font-medium text-gray-900">
+                                      {track.title}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {track.artist}
+                                      {track.album && ` • ${track.album}`}
+                                    </p>
+                                  </div>
+                                ))}
+                              </>
+                            )}
+                          </div>
+                        )}
+
+                        {/* アルバム検索結果 */}
+                        {searchTab === "albums" && searchResults.albums && (
+                          <div className="space-y-2">
+                            {searchResults.albums.length === 0 ? (
+                              <p className="py-8 text-center text-sm text-gray-500">
+                                アルバムが見つかりませんでした
+                              </p>
+                            ) : (
+                              searchResults.albums.map((album) => (
+                                <button
+                                  key={album.id}
+                                  onClick={() => handleAlbumSelect(album.id)}
+                                  disabled={getAlbumTracksMutation.isPending}
+                                  className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {album.imageUrl ? (
+                                    <img
+                                      src={album.imageUrl}
+                                      alt={album.name}
+                                      className="h-12 w-12 flex-shrink-0 rounded object-cover"
+                                    />
+                                  ) : (
+                                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
+                                      <SpotifyIcon className="h-6 w-6 text-gray-400" />
+                                    </div>
+                                  )}
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium text-gray-900">
+                                      {album.name}
+                                    </p>
+                                    <p className="truncate text-xs text-gray-500">
+                                      {album.artist} • {album.trackCount}曲
+                                    </p>
+                                  </div>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        )}
+
+                        {/* プレイリスト検索結果 */}
+                        {searchTab === "playlists" &&
+                          searchResults.playlists && (
+                            <div className="space-y-2">
+                              {searchResults.playlists.length === 0 ? (
+                                <p className="py-8 text-center text-sm text-gray-500">
+                                  プレイリストが見つかりませんでした
+                                </p>
+                              ) : (
+                                searchResults.playlists.map((playlist) => (
+                                  <button
+                                    key={playlist.id}
+                                    onClick={() =>
+                                      handleSearchPlaylistSelect(playlist.id)
+                                    }
+                                    disabled={
+                                      getUserPlaylistTracksMutation.isPending
+                                    }
+                                    className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {playlist.imageUrl ? (
+                                      <img
+                                        src={playlist.imageUrl}
+                                        alt={playlist.name}
+                                        className="h-12 w-12 flex-shrink-0 rounded object-cover"
+                                      />
+                                    ) : (
+                                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
+                                        <SpotifyIcon className="h-6 w-6 text-gray-400" />
+                                      </div>
+                                    )}
+                                    <div className="min-w-0 flex-1">
+                                      <p className="truncate text-sm font-medium text-gray-900">
+                                        {playlist.name}
+                                      </p>
+                                      <p className="truncate text-xs text-gray-500">
+                                        {playlist.owner} • {playlist.trackCount}
+                                        曲
+                                      </p>
+                                    </div>
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          )}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                    >
+                      キャンセル
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </Modal>
   );
