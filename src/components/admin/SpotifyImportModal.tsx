@@ -54,6 +54,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
   const [step, setStep] = useState<"input" | "select">("input");
   const [playlistUrl, setPlaylistUrl] = useState("");
   const [error, setError] = useState("");
+  const [searchError, setSearchError] = useState("");
   const [tracks, setTracks] = useState<Track[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(
     new Set()
@@ -187,6 +188,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
       setStep("input");
       setPlaylistUrl("");
       setError("");
+      setSearchError("");
       setTracks([]);
       setSelectedIndices(new Set());
       setPlaylists([]);
@@ -253,17 +255,17 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      setError("検索キーワードを入力してください");
+      setSearchError("検索キーワードを入力してください");
       return;
     }
-    setError("");
+    setSearchError("");
     setHasSearched(false);
     const result = await searchMutation.refetch();
     setHasSearched(true);
     if (result.data) {
       setSearchResults(result.data);
     } else if (result.error) {
-      setError(result.error.message);
+      setSearchError(result.error.message);
     } else {
       // データがない場合は空の結果を設定
       setSearchResults({
@@ -620,9 +622,9 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                     </div>
                   </div>
 
-                  {error && (
+                  {searchError && (
                     <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
-                      {error}
+                      {searchError}
                     </div>
                   )}
 

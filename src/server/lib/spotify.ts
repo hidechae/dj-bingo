@@ -267,14 +267,16 @@ export async function searchSpotify(
   }
 
   if (response.body.playlists) {
-    result.playlists = response.body.playlists.items.map((playlist) => ({
-      id: playlist.id,
-      name: playlist.name,
-      description: playlist.description ?? undefined,
-      trackCount: playlist.tracks.total,
-      imageUrl: playlist.images[0]?.url,
-      owner: playlist.owner.display_name ?? "Unknown",
-    }));
+    result.playlists = response.body.playlists.items
+      .filter((playlist) => playlist !== null)
+      .map((playlist) => ({
+        id: playlist.id,
+        name: playlist.name,
+        description: playlist.description ?? undefined,
+        trackCount: playlist.tracks.total,
+        imageUrl: playlist.images[0]?.url,
+        owner: playlist.owner.display_name ?? "Unknown",
+      }));
   }
 
   return result;
