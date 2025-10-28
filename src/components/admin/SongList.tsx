@@ -1,88 +1,66 @@
 import { GameStatus, type BingoGame, type Song } from "~/types";
-import { type EditingSong } from "~/hooks/useSongEditor";
-import { SongEditMode } from "./SongEditMode";
 import { SongInfo } from "~/components/common/SongInfo";
+import { SpotifyIcon } from "~/components/common/SpotifyIcon";
 
 type SongListProps = {
   bingoGame: BingoGame;
-  songEditingMode: boolean;
-  editingSongs: EditingSong[];
-  onSongEdit: () => void;
   onAddSong: () => void;
-  onUpdateSong: (
-    index: number,
-    field: "title" | "artist",
-    value: string
-  ) => void;
-  onRemoveSong: (index: number) => void;
-  onCancelEdit: () => void;
+  onEditSong: (song: Song) => void;
+  onDeleteSong: (songId: string) => void;
   onToggleSongPlayed: (songId: string, isPlayed: boolean) => void;
   onSpotifyImport?: () => void;
-  isSaving: boolean;
   isMarkingPlayed: boolean;
+  isDeletingSong?: boolean;
 };
 
 export const SongList = ({
   bingoGame,
-  songEditingMode,
-  editingSongs,
-  onSongEdit,
   onAddSong,
-  onUpdateSong,
-  onRemoveSong,
-  onCancelEdit,
+  onEditSong,
+  onDeleteSong,
   onToggleSongPlayed,
   onSpotifyImport,
-  isSaving,
   isMarkingPlayed,
+  isDeletingSong = false,
 }: SongListProps) => {
   const currentStatus = bingoGame.status as GameStatus;
-
-  const songCount = songEditingMode
-    ? editingSongs.length
-    : bingoGame.songs.length;
 
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-900">
-          楽曲リスト ({songCount}曲)
+          楽曲リスト ({bingoGame.songs.length}曲)
         </h3>
         {currentStatus === GameStatus.EDITING && (
           <div className="flex gap-2">
             <button
-              onClick={onSongEdit}
-              disabled={isSaving}
-              className="cursor-pointer rounded-sm bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={onAddSong}
+              className="cursor-pointer rounded-sm bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
             >
-              {songEditingMode ? "保存" : "編集"}
+              曲を追加
             </button>
-            {songEditingMode && (
+            {onSpotifyImport && (
               <button
-                onClick={onCancelEdit}
-                className="cursor-pointer rounded-sm bg-gray-600 px-3 py-1 text-sm text-white hover:bg-gray-700"
+                onClick={onSpotifyImport}
+                className="flex cursor-pointer items-center gap-1.5 rounded-sm bg-green-500 px-3 py-1 text-sm text-white hover:bg-green-600"
               >
-                キャンセル
+                <SpotifyIcon className="h-4 w-4" />
+                Spotify
               </button>
             )}
           </div>
         )}
       </div>
 
-      {songEditingMode ? (
-        <SongEditMode
-          songs={editingSongs}
-          onUpdateSong={onUpdateSong}
-          onRemoveSong={onRemoveSong}
-          onAddSong={onAddSong}
-          onSpotifyImport={onSpotifyImport}
-        />
-      ) : bingoGame.songs.length > 0 ? (
+      {bingoGame.songs.length > 0 ? (
         <SongDisplayMode
           songs={bingoGame.songs}
           currentStatus={currentStatus}
+          onEditSong={onEditSong}
+          onDeleteSong={onDeleteSong}
           onToggleSongPlayed={onToggleSongPlayed}
           isMarkingPlayed={isMarkingPlayed}
+          isDeletingSong={isDeletingSong}
         />
       ) : (
         <EmptyState currentStatus={currentStatus} />
@@ -94,13 +72,19 @@ export const SongList = ({
 const SongDisplayMode = ({
   songs,
   currentStatus,
+  onEditSong,
+  onDeleteSong,
   onToggleSongPlayed,
   isMarkingPlayed,
+  isDeletingSong,
 }: {
   songs: Song[];
   currentStatus: GameStatus;
+  onEditSong: (song: Song) => void;
+  onDeleteSong: (songId: string) => void;
   onToggleSongPlayed: (songId: string, isPlayed: boolean) => void;
   isMarkingPlayed: boolean;
+  isDeletingSong: boolean;
 }) => {
   const unplayedSongs = songs.filter((s) => !s.isPlayed);
   const playedSongs = songs.filter((s) => s.isPlayed);
@@ -123,15 +107,34 @@ const SongDisplayMode = ({
                 artist={song.artist}
                 className="flex-1"
               />
-              {currentStatus === GameStatus.PLAYING && (
-                <button
-                  onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
-                  disabled={isMarkingPlayed}
-                  className="ml-3 flex-shrink-0 cursor-pointer rounded-sm bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  演奏済みにする
-                </button>
-              )}
+              <div className="ml-3 flex flex-shrink-0 gap-2">
+                {currentStatus === GameStatus.EDITING && (
+                  <>
+                    <button
+                      onClick={() => onEditSong(song)}
+                      className="cursor-pointer rounded-sm bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
+                    >
+                      編集
+                    </button>
+                    <button
+                      onClick={() => onDeleteSong(song.id)}
+                      disabled={isDeletingSong}
+                      className="cursor-pointer rounded-sm bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      削除
+                    </button>
+                  </>
+                )}
+                {currentStatus === GameStatus.PLAYING && (
+                  <button
+                    onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
+                    disabled={isMarkingPlayed}
+                    className="cursor-pointer rounded-sm bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    演奏済みにする
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -187,7 +190,7 @@ const EmptyState = ({ currentStatus }: { currentStatus: GameStatus }) => (
   <div className="py-8 text-center text-gray-500">
     <p>まだ楽曲が登録されていません</p>
     {currentStatus === GameStatus.EDITING && (
-      <p className="text-sm">「編集」ボタンから楽曲を追加してください</p>
+      <p className="text-sm">「曲を追加」ボタンから楽曲を追加してください</p>
     )}
   </div>
 );

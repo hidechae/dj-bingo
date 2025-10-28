@@ -23,9 +23,11 @@ import { AdminManagement } from "~/components/admin/AdminManagement";
 import { TitleEditModal } from "~/components/admin/TitleEditModal";
 import { BingoNotificationModal } from "~/components/admin/BingoNotificationModal";
 import { SpotifyImportModal } from "~/components/admin/SpotifyImportModal";
+import { SongFormModal } from "~/components/admin/SongFormModal";
 import { StatusStepper } from "~/components/admin/StatusStepper";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { Button, type ButtonColor } from "~/components/ui/Button";
+import type { Song } from "~/types";
 
 const AdminGameManagement: NextPage = () => {
   const { data: session, status } = useSession();
@@ -41,8 +43,13 @@ const AdminGameManagement: NextPage = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showTitleEditModal, setShowTitleEditModal] = useState(false);
   const [showSpotifyImportModal, setShowSpotifyImportModal] = useState(false);
+  const [showSongFormModal, setShowSongFormModal] = useState(false);
+  const [songFormMode, setSongFormMode] = useState<"add" | "edit">("add");
+  const [editingSongData, setEditingSongData] = useState<Song | null>(null);
   const [newWinners, setNewWinners] = useState<string[]>([]);
   const previousParticipantsRef = useRef<typeof participants>(null);
+
+  const utils = api.useUtils();
 
   const {
     bingoGame,
@@ -70,19 +77,7 @@ const AdminGameManagement: NextPage = () => {
     },
   });
 
-  const {
-    songEditingMode,
-    editingSongs,
-    setSongEditingMode,
-    startEditing,
-    cancelEditing,
-    addSong,
-    addMultipleSongs,
-    updateSong,
-    removeSong,
-    getValidSongs,
-    checkDuplicates,
-  } = useSongEditor();
+  const songMutation = updateSongsMutation;
 
   const { sortField, sortDirection, handleSort, sortParticipants } =
     useParticipantSort();
@@ -226,30 +221,69 @@ const AdminGameManagement: NextPage = () => {
     }
   };
 
-  const handleSongEdit = () => {
-    if (songEditingMode) {
-      // 保存前に重複チェック
-      const duplicate = checkDuplicates();
-      if (duplicate) {
-        alert(
-          `重複する楽曲があります: "${duplicate.title}"${duplicate.artist ? ` - ${duplicate.artist}` : ""}\n\n同じタイトルとアーティストの組み合わせは登録できません。`
-        );
-        return;
-      }
+  const handleAddSong = () => {
+    setSongFormMode("add");
+    setEditingSongData(null);
+    setShowSongFormModal(true);
+  };
 
-      updateSongsMutation.mutate(
+  const handleEditSong = (song: Song) => {
+    setSongFormMode("edit");
+    setEditingSongData(song);
+    setShowSongFormModal(true);
+  };
+
+  const handleDeleteSong = (songId: string) => {
+    if (songMutation.isPending) return;
+    if (confirm("この楽曲を削除しますか？")) {
+      const updatedSongs = bingoGame!.songs
+        .filter((song) => song.id !== songId)
+        .map((song) => ({ title: song.title, artist: song.artist || "" }));
+      songMutation.mutate({
+        gameId: id as string,
+        songs: updatedSongs,
+      });
+    }
+  };
+
+  const handleSongFormSave = (data: { title: string; artist: string }) => {
+    if (songFormMode === "add") {
+      const updatedSongs = [
+        ...bingoGame!.songs.map((song) => ({
+          title: song.title,
+          artist: song.artist || "",
+        })),
+        { title: data.title, artist: data.artist },
+      ];
+      songMutation.mutate(
         {
           gameId: id as string,
-          songs: getValidSongs(),
+          songs: updatedSongs,
         },
         {
           onSuccess: () => {
-            setSongEditingMode(false);
+            setShowSongFormModal(false);
           },
         }
       );
-    } else {
-      startEditing(bingoGame?.songs || []);
+    } else if (editingSongData) {
+      const updatedSongs = bingoGame!.songs.map((song) =>
+        song.id === editingSongData.id
+          ? { title: data.title, artist: data.artist }
+          : { title: song.title, artist: song.artist || "" }
+      );
+      songMutation.mutate(
+        {
+          gameId: id as string,
+          songs: updatedSongs,
+        },
+        {
+          onSuccess: () => {
+            setShowSongFormModal(false);
+            setEditingSongData(null);
+          },
+        }
+      );
     }
   };
 
@@ -295,7 +329,22 @@ const AdminGameManagement: NextPage = () => {
   const handleSpotifyImport = (
     tracks: Array<{ title: string; artist: string }>
   ) => {
-    addMultipleSongs(tracks);
+    // Spotifyからのインポートは一括で楽曲を追加する既存のAPIを使用
+    const existingSongs = bingoGame!.songs.map((song) => ({
+      title: song.title,
+      artist: song.artist || "",
+    }));
+    updateSongsMutation.mutate(
+      {
+        gameId: id as string,
+        songs: [...existingSongs, ...tracks],
+      },
+      {
+        onSuccess: () => {
+          setShowSpotifyImportModal(false);
+        },
+      }
+    );
   };
   if (status === "loading" || !bingoGame) {
     return null; // グローバルローディングオーバーレイが表示される
@@ -456,21 +505,17 @@ const AdminGameManagement: NextPage = () => {
               {activeTab === "songs" && (
                 <SongList
                   bingoGame={bingoGame}
-                  songEditingMode={songEditingMode}
-                  editingSongs={editingSongs}
-                  onSongEdit={handleSongEdit}
-                  onAddSong={addSong}
-                  onUpdateSong={updateSong}
-                  onRemoveSong={removeSong}
-                  onCancelEdit={cancelEditing}
+                  onAddSong={handleAddSong}
+                  onEditSong={handleEditSong}
+                  onDeleteSong={handleDeleteSong}
                   onToggleSongPlayed={toggleSongPlayed}
                   onSpotifyImport={
                     spotifyStatus?.enabled
                       ? () => setShowSpotifyImportModal(true)
                       : undefined
                   }
-                  isSaving={updateSongsMutation.isPending}
                   isMarkingPlayed={markSongMutation.isPending}
+                  isDeletingSong={songMutation.isPending}
                 />
               )}
 
@@ -524,6 +569,25 @@ const AdminGameManagement: NextPage = () => {
         isOpen={showSpotifyImportModal}
         onImport={handleSpotifyImport}
         onClose={() => setShowSpotifyImportModal(false)}
+      />
+
+      <SongFormModal
+        isOpen={showSongFormModal}
+        mode={songFormMode}
+        initialData={
+          editingSongData
+            ? {
+                title: editingSongData.title,
+                artist: editingSongData.artist || "",
+              }
+            : undefined
+        }
+        onSave={handleSongFormSave}
+        onCancel={() => {
+          setShowSongFormModal(false);
+          setEditingSongData(null);
+        }}
+        isSaving={songMutation.isPending}
       />
 
       {/* Status Change Footer */}

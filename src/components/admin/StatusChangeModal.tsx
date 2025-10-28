@@ -1,4 +1,5 @@
 import { GameStatus, type IncompleteParticipant } from "~/types";
+import { Modal } from "~/components/ui/Modal";
 
 type StatusChangeModalProps = {
   isOpen: boolean;
@@ -20,47 +21,41 @@ export const StatusChangeModal = ({
   onConfirm,
   onCancel,
 }: StatusChangeModalProps) => {
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600/20">
-      <div className="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
-        <div className="mt-3 text-center">
-          <h3 className="text-lg font-medium text-gray-900">
-            ステータス変更の確認
-          </h3>
-          <div className="mt-2 px-7 py-3">
-            {pendingStatus === GameStatus.ENTRY &&
-              currentStatus === GameStatus.PLAYING && (
-                <PlayingToEntryConfirmation onConfirm={onConfirm} />
-              )}
+    <Modal isOpen={isOpen} size="sm" className="w-96 p-5">
+      <div className="mt-3 text-center">
+        <h3 className="text-lg font-medium text-gray-900">
+          ステータス変更の確認
+        </h3>
+        <div className="mt-2 px-7 py-3">
+          {pendingStatus === GameStatus.ENTRY &&
+            currentStatus === GameStatus.PLAYING && (
+              <PlayingToEntryConfirmation onConfirm={onConfirm} />
+            )}
 
-            {pendingStatus === GameStatus.EDITING &&
-              currentStatus === GameStatus.ENTRY && (
-                <EntryToEditingConfirmation onConfirm={onConfirm} />
-              )}
+          {pendingStatus === GameStatus.EDITING &&
+            currentStatus === GameStatus.ENTRY && (
+              <EntryToEditingConfirmation onConfirm={onConfirm} />
+            )}
 
-            {pendingStatus === GameStatus.PLAYING &&
-              currentStatus === GameStatus.ENTRY && (
-                <EntryToPlayingConfirmation
-                  incompleteParticipants={incompleteParticipants}
-                  onConfirm={onConfirm}
-                />
-              )}
-          </div>
-          <div className="mt-4 flex justify-center gap-2">
-            <button
-              onClick={onCancel}
-              className="cursor-pointer rounded-sm bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400"
-            >
-              キャンセル
-            </button>
-          </div>
+          {pendingStatus === GameStatus.PLAYING &&
+            currentStatus === GameStatus.ENTRY && (
+              <EntryToPlayingConfirmation
+                incompleteParticipants={incompleteParticipants}
+                onConfirm={onConfirm}
+              />
+            )}
+        </div>
+        <div className="mt-4 flex justify-center gap-2">
+          <button
+            onClick={onCancel}
+            className="cursor-pointer rounded-sm bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400"
+          >
+            キャンセル
+          </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 
