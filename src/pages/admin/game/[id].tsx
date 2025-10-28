@@ -13,7 +13,6 @@ import {
 } from "~/types";
 import { api } from "~/utils/api";
 import { useGameManagement } from "~/hooks/useGameManagement";
-import { useSongEditor } from "~/hooks/useSongEditor";
 import { useParticipantSort } from "~/hooks/useParticipantSort";
 import { GameInfoSidebar } from "~/components/admin/GameInfoSidebar";
 import { SongList } from "~/components/admin/SongList";
@@ -58,7 +57,6 @@ const AdminGameManagement: NextPage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { showAlert, AlertComponent } = useAlert();
-  const utils = api.useUtils();
 
   const {
     bingoGame,
