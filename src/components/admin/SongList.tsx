@@ -160,6 +160,43 @@ const SongDisplayMode = ({
     });
   };
 
+  // 編集中は区分なしで表示
+  if (currentStatus === GameStatus.EDITING) {
+    const sortedSongs = sortSongs(songs);
+    return (
+      <div className="space-y-2">
+        {sortedSongs.map((song) => (
+          <div
+            key={song.id}
+            className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3"
+          >
+            <SongInfo
+              title={song.title}
+              artist={song.artist}
+              className="flex-1"
+            />
+            <div className="ml-3 flex flex-shrink-0 gap-2">
+              <button
+                onClick={() => onEditSong(song)}
+                className="cursor-pointer rounded-sm bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
+              >
+                編集
+              </button>
+              <button
+                onClick={() => onDeleteSong(song.id)}
+                disabled={isDeletingSong}
+                className="cursor-pointer rounded-sm bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                削除
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // エントリー開始以降は未演奏/演奏済みで区分表示
   const unplayedSongs = sortSongs(songs.filter((s) => !s.isPlayed));
   const playedSongs = sortSongs(songs.filter((s) => s.isPlayed));
 
@@ -182,23 +219,6 @@ const SongDisplayMode = ({
                 className="flex-1"
               />
               <div className="ml-3 flex flex-shrink-0 gap-2">
-                {currentStatus === GameStatus.EDITING && (
-                  <>
-                    <button
-                      onClick={() => onEditSong(song)}
-                      className="cursor-pointer rounded-sm bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() => onDeleteSong(song.id)}
-                      disabled={isDeletingSong}
-                      className="cursor-pointer rounded-sm bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      削除
-                    </button>
-                  </>
-                )}
                 {currentStatus === GameStatus.PLAYING && (
                   <button
                     onClick={() => onToggleSongPlayed(song.id, song.isPlayed)}
