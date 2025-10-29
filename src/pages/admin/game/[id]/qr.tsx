@@ -55,10 +55,13 @@ const QRCodePrintPage: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-white p-8">
         <div className="flex flex-col items-center space-y-8 text-center">
-          {/* タイトル */}
-          <h1 className="text-4xl font-bold text-gray-900">
-            {bingoGame.title}
-          </h1>
+          {/* DJ Bingo ロゴ */}
+          <div className="space-y-2">
+            <h1 className="text-5xl font-bold text-gray-900">DJ Bingo</h1>
+            <h2 className="text-3xl font-semibold text-gray-700">
+              {bingoGame.title}
+            </h2>
+          </div>
 
           {/* QRコード */}
           <div className="rounded-lg border-4 border-gray-300 bg-white p-8 shadow-lg">
