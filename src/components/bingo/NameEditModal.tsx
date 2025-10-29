@@ -24,10 +24,13 @@ export const NameEditModal: React.FC<NameEditModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingName.trim() && editingName.trim() !== currentName) {
-      onSave(editingName.trim());
-    } else {
-      onCancel();
+    if (editingName.trim()) {
+      if (editingName.trim() !== currentName) {
+        onSave(editingName.trim());
+      } else {
+        // 名前が変更されていない場合はモーダルを閉じる
+        onCancel();
+      }
     }
   };
 

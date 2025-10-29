@@ -25,6 +25,7 @@ const SetupBingo: NextPage = () => {
   const updateNameMutation = api.participant.updateName.useMutation({
     onSuccess: async () => {
       await utils.participant.getBySessionToken.invalidate();
+      setShowNameEditModal(false);
       showAlert("名前を更新しました", {
         variant: "success",
         title: "成功",
@@ -69,18 +70,11 @@ const SetupBingo: NextPage = () => {
     const sessionToken = localStorage.getItem("sessionToken");
     if (!sessionToken || !id) return;
 
-    updateNameMutation.mutate(
-      {
-        sessionToken,
-        bingoGameId: id as string,
-        name: newName,
-      },
-      {
-        onSuccess: () => {
-          setShowNameEditModal(false);
-        },
-      }
-    );
+    updateNameMutation.mutate({
+      sessionToken,
+      bingoGameId: id as string,
+      name: newName,
+    });
   };
 
   const handleConfirmAction = () => {
