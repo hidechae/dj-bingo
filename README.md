@@ -12,7 +12,7 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 - ビンゴゲームの作成（3x3、4x4、5x5のグリッドサイズ対応）
 - 楽曲リストの設定
   - 手動での楽曲追加
-  - Spotifyプレイリストからの一括インポート
+  - Spotifyプレイリストからの一括インポート（URLから/マイプレイリスト/検索）
 - 参加者用QRコードの生成
 - 楽曲の演奏状況管理（演奏済み/未演奏のマーク）
 - 参加者の状態確認（グリッド完成状況、勝利状況）
@@ -74,7 +74,19 @@ Spotifyプレイリストからの楽曲インポート機能を使用する場�
 1. [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)にアクセス
 2. 新しいアプリケーションを作成
 3. Client IDとClient Secretを取得
-4. `.env`ファイルに認証情報を追加
+4. Redirect URIsに以下を追加：
+   - 開発環境: `http://127.0.0.1:3000/api/auth/callback/spotify`
+   - 本番環境: `https://your-domain.com/api/auth/callback/spotify`
+5. `.env`ファイルに認証情報を追加し、`NEXTAUTH_URL`も`127.0.0.1`を使用：
+   ```bash
+   NEXTAUTH_URL="http://127.0.0.1:3000"
+   SPOTIFY_CLIENT_ID="your_spotify_client_id"
+   SPOTIFY_CLIENT_SECRET="your_spotify_client_secret"
+   ```
+
+**⚠️ 重要:** Spotifyは`localhost`ではなく`127.0.0.1`を使用する必要があります。開発時は`http://127.0.0.1:3000`でアクセスしてください。
+
+詳細は[Spotify拡張インポート機能のドキュメント](docs/spotify-enhanced-import.md)を参照してください。
 
 ### 3. データベースの起動
 
@@ -167,7 +179,10 @@ Storybook起動後、ブラウザで http://localhost:6006 を開いてくださ
 3. 管理者ダッシュボードで「新しいビンゴを作成」
 4. ビンゴのタイトル、サイズ、楽曲リストを設定
    - 手動で楽曲を追加、または
-   - 「Spotifyからインポート」でプレイリストURLを入力して一括インポート
+   - 「Spotifyからインポート」で以下の方法から選択：
+     - URLから: プレイリストURLを入力して一括インポート
+     - マイプレイリスト: Spotifyアカウントと連携して自分のプレイリストから選択
+     - 検索: トラック、アルバム、プレイリストを検索してインポート
 5. 作成後、QRコードを参加者に共有
 6. DJが楽曲を演奏したら、管理画面で「演奏済み」をマーク
 7. 参加者がビンゴを達成すると、管理画面に通知が表示される
