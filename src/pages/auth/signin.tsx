@@ -115,6 +115,10 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
                       <p className="text-sm text-white/50">
                         リンクは10分間有効です。
                       </p>
+                      <p className="mt-3 text-sm text-yellow-300/80">
+                        ⚠️
+                        メールが届かない場合は、迷惑メールフォルダもご確認ください。
+                      </p>
                       <button
                         onClick={() => {
                           setEmailSent(false);

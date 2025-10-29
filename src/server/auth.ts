@@ -94,10 +94,12 @@ const createProviders = () => {
   // Add Email provider for passwordless authentication
   if (env.RESEND_API_KEY) {
     console.log("  ✅ Adding Email provider (passwordless)");
+    const emailAddress = env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
+    const fromEmail = `DJ Bingo <${emailAddress}>`;
     providers.push(
       EmailProvider({
         server: "", // Resendを使うので不要
-        from: "DJ Bingo <onboarding@resend.dev>", // 本番環境では検証済みドメインに変更
+        from: fromEmail,
         maxAge: 10 * 60, // 10分間有効
         async sendVerificationRequest({ identifier: email, url, provider }) {
           try {
@@ -132,15 +134,29 @@ const createProviders = () => {
 
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => {
+    async session({ session, user }) {
       // Handle adapter sessions (OAuth and Email)
       // database戦略ではtokenは存在しない
       if (user) {
+        // 初回ログイン時に名前が未設定の場合、メールアドレスの@より前を初期値として設定
+        if (user.email && !user.name) {
+          const nameFromEmail = user.email.split("@")[0];
+          if (nameFromEmail) {
+            await db.user.update({
+              where: { id: user.id },
+              data: { name: nameFromEmail },
+            });
+            // セッションにも反映
+            user.name = nameFromEmail;
+          }
+        }
+
         return {
           ...session,
           user: {
             ...session.user,
             id: user.id,
+            name: user.name,
           },
         };
       }
