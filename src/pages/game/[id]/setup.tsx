@@ -7,6 +7,7 @@ import { SetupHeader } from "~/components/bingo/SetupHeader";
 import { SetupGrid } from "~/components/bingo/SetupGrid";
 import { SongSelectionModal } from "~/components/bingo/SongSelectionModal";
 import { ConfirmModal } from "~/components/bingo/ConfirmModal";
+import { NameEditModal } from "~/components/bingo/NameEditModal";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { useAlert } from "~/hooks/useAlert";
 import { api } from "~/utils/api";
@@ -17,6 +18,7 @@ const SetupBingo: NextPage = () => {
   const [confirmAction, setConfirmAction] = useState<
     "clear" | "auto" | "submit" | null
   >(null);
+  const [showNameEditModal, setShowNameEditModal] = useState(false);
   const { showAlert, AlertComponent } = useAlert();
   const utils = api.useUtils();
 
@@ -63,15 +65,22 @@ const SetupBingo: NextPage = () => {
   // 初期ロード中はグローバルローディングを表示
   useInitialLoading({ isLoading: !participant || !participant?.bingoGame });
 
-  const handleNameChange = (newName: string) => {
+  const handleNameSave = (newName: string) => {
     const sessionToken = localStorage.getItem("sessionToken");
     if (!sessionToken || !id) return;
 
-    updateNameMutation.mutate({
-      sessionToken,
-      bingoGameId: id as string,
-      name: newName,
-    });
+    updateNameMutation.mutate(
+      {
+        sessionToken,
+        bingoGameId: id as string,
+        name: newName,
+      },
+      {
+        onSuccess: () => {
+          setShowNameEditModal(false);
+        },
+      }
+    );
   };
 
   const handleConfirmAction = () => {
@@ -133,8 +142,7 @@ const SetupBingo: NextPage = () => {
               selectedCount={selectedCount}
               totalPositions={totalPositions}
               selectedPosition={selectedPosition}
-              onNameChange={handleNameChange}
-              isUpdatingName={updateNameMutation.isPending}
+              onEditNameClick={() => setShowNameEditModal(true)}
             />
 
             <SetupGrid
@@ -189,6 +197,14 @@ const SetupBingo: NextPage = () => {
           isSongUsed={isSongUsed}
           onSongSelect={handleSongAssign}
           onClose={handleModalClose}
+        />
+
+        <NameEditModal
+          isOpen={showNameEditModal}
+          currentName={participant.name}
+          onSave={handleNameSave}
+          onCancel={() => setShowNameEditModal(false)}
+          isSaving={updateNameMutation.isPending}
         />
 
         {confirmAction && (
