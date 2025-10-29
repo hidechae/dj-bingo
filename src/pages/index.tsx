@@ -1,11 +1,8 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 
 const Home: NextPage = () => {
-  const { data: session } = useSession();
-
   return (
     <>
       <Head>
@@ -24,13 +21,9 @@ const Home: NextPage = () => {
               className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
               href="/auth/signin"
             >
-              <h3 className="text-2xl font-bold">
-                {session ? "管理者画面 →" : "管理者ログイン →"}
-              </h3>
+              <h3 className="text-2xl font-bold">管理者ログイン →</h3>
               <div className="text-lg">
-                {session
-                  ? "ビンゴゲームの作成・管理を行います"
-                  : "メール・パスワードまたはGoogle認証でログイン"}
+                メール・パスワードまたはGoogle認証でログイン
               </div>
             </Link>
 
