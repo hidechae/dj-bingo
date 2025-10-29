@@ -20,27 +20,19 @@ const Home: NextPage = () => {
           </h1>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            {session ? (
-              <Link
-                className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-                href="/admin"
-              >
-                <h3 className="text-2xl font-bold">管理者画面 →</h3>
-                <div className="text-lg">
-                  ビンゴゲームの作成・管理を行います
-                </div>
-              </Link>
-            ) : (
-              <Link
-                className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-                href="/auth/signin"
-              >
-                <h3 className="text-2xl font-bold">管理者ログイン →</h3>
-                <div className="text-lg">
-                  メール・パスワードまたはGoogle認証でログイン
-                </div>
-              </Link>
-            )}
+            <Link
+              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
+              href="/auth/signin"
+            >
+              <h3 className="text-2xl font-bold">
+                {session ? "管理者画面 →" : "管理者ログイン →"}
+              </h3>
+              <div className="text-lg">
+                {session
+                  ? "ビンゴゲームの作成・管理を行います"
+                  : "メール・パスワードまたはGoogle認証でログイン"}
+              </div>
+            </Link>
 
             <div className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white">
               <h3 className="text-2xl font-bold">参加者の方</h3>
