@@ -7,6 +7,7 @@ type SongListProps = {
   onAddSong: () => void;
   onEditSong: (song: Song) => void;
   onDeleteSong: (songId: string) => void;
+  onDeleteAllSongs?: () => void;
   onToggleSongPlayed: (songId: string, isPlayed: boolean) => void;
   onSpotifyImport?: () => void;
   isMarkingPlayed: boolean;
@@ -18,6 +19,7 @@ export const SongList = ({
   onAddSong,
   onEditSong,
   onDeleteSong,
+  onDeleteAllSongs,
   onToggleSongPlayed,
   onSpotifyImport,
   isMarkingPlayed,
@@ -48,6 +50,14 @@ export const SongList = ({
         </h3>
         {currentStatus === GameStatus.EDITING && (
           <div className="flex gap-2">
+            {onDeleteAllSongs && bingoGame.songs.length > 0 && (
+              <button
+                onClick={onDeleteAllSongs}
+                className="cursor-pointer rounded-sm border border-red-600 px-3 py-1 text-sm text-red-600 hover:bg-red-50"
+              >
+                全削除
+              </button>
+            )}
             <button
               onClick={onAddSong}
               className="cursor-pointer rounded-sm bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"

@@ -53,6 +53,8 @@ const AdminGameManagement: NextPage = () => {
   // Confirm dialog states
   const [showDeleteSongConfirm, setShowDeleteSongConfirm] = useState(false);
   const [deletingSongId, setDeletingSongId] = useState<string | null>(null);
+  const [showDeleteAllSongsConfirm, setShowDeleteAllSongsConfirm] =
+    useState(false);
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -286,6 +288,19 @@ const AdminGameManagement: NextPage = () => {
     });
     setShowDeleteSongConfirm(false);
     setDeletingSongId(null);
+  };
+
+  const handleDeleteAllSongs = () => {
+    if (songMutation.isPending) return;
+    setShowDeleteAllSongsConfirm(true);
+  };
+
+  const confirmDeleteAllSongs = () => {
+    songMutation.mutate({
+      gameId: id as string,
+      songs: [],
+    });
+    setShowDeleteAllSongsConfirm(false);
   };
 
   const handleSongFormSave = (data: { title: string; artist: string }) => {
@@ -554,6 +569,7 @@ const AdminGameManagement: NextPage = () => {
                   onAddSong={handleAddSong}
                   onEditSong={handleEditSong}
                   onDeleteSong={handleDeleteSong}
+                  onDeleteAllSongs={handleDeleteAllSongs}
                   onToggleSongPlayed={toggleSongPlayed}
                   onSpotifyImport={
                     spotifyStatus?.enabled
@@ -655,6 +671,16 @@ const AdminGameManagement: NextPage = () => {
           setShowDeleteSongConfirm(false);
           setDeletingSongId(null);
         }}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteAllSongsConfirm}
+        title="楽曲の全削除"
+        message="すべての楽曲を削除しますか？この操作は取り消せません。"
+        confirmLabel="全削除"
+        confirmVariant="danger"
+        onConfirm={confirmDeleteAllSongs}
+        onCancel={() => setShowDeleteAllSongsConfirm(false)}
       />
 
       <ConfirmDialog
