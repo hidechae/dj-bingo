@@ -1,12 +1,10 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { signIn, getProviders } from "next-auth/react";
 import { type GetServerSideProps } from "next";
 import { type LiteralUnion, type ClientSafeProvider } from "next-auth/react";
 import { type BuiltInProviderType } from "next-auth/providers/index";
 import { useState } from "react";
-import { useRouter } from "next/router";
 
 interface SignInProps {
   providers: Record<
@@ -16,11 +14,10 @@ interface SignInProps {
 }
 
 const SignIn: NextPage<SignInProps> = ({ providers }) => {
-  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
 
   // デバッグ用：コンソールに出力
   console.log("Providers:", providers);
@@ -29,14 +26,12 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
     providers ? Object.keys(providers) : "No providers"
   );
 
-  // Filter out credentials provider from OAuth providers for display
+  // Filter out email provider from OAuth providers for display
   const oauthProviders = providers
-    ? Object.values(providers).filter(
-        (provider) => provider.id !== "credentials"
-      )
+    ? Object.values(providers).filter((provider) => provider.id !== "email")
     : [];
-  const hasCredentialsProvider = providers
-    ? Object.values(providers).some((provider) => provider.id === "credentials")
+  const hasEmailProvider = providers
+    ? Object.values(providers).some((provider) => provider.id === "email")
     : false;
 
   // Additional debugging
@@ -44,24 +39,24 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
     "OAuth Providers:",
     oauthProviders.map((p) => p.id)
   );
-  console.log("Has Credentials Provider:", hasCredentialsProvider);
+  console.log("Has Email Provider:", hasEmailProvider);
 
-  const handleCredentialsSignIn = async (e: React.FormEvent) => {
+  const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn("email", {
         email,
-        password,
         redirect: false,
+        callbackUrl: "/admin",
       });
 
       if (result?.error) {
-        setError("メールアドレスまたはパスワードが正しくありません");
+        setError("メール送信に失敗しました。もう一度お試しください。");
       } else if (result?.ok) {
-        await router.push("/admin");
+        setEmailSent(true);
       }
     } catch (err) {
       console.error("Sign in error:", err);
@@ -84,86 +79,105 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
           </h1>
 
           <div className="flex w-full flex-col gap-6">
-            {/* Email/Password Authentication Form - Always show as fallback */}
-            {(hasCredentialsProvider ||
+            {/* Email Authentication Form - Passwordless */}
+            {(hasEmailProvider ||
               !providers ||
               Object.keys(providers).length === 0) && (
               <div>
-                {(!providers || Object.keys(providers).length === 0) && (
-                  <div className="mb-4 text-center text-white">
-                    <p className="text-sm text-white/70">
-                      プロバイダーの読み込み中またはメール認証のみ利用可能
-                    </p>
+                {emailSent ? (
+                  <div className="rounded-lg bg-white/10 p-6">
+                    <div className="text-center">
+                      <div className="mb-4 flex justify-center">
+                        <div className="rounded-full bg-green-600 p-3">
+                          <svg
+                            className="h-8 w-8 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                      <h2 className="mb-2 text-xl font-bold text-white">
+                        メールを送信しました
+                      </h2>
+                      <p className="mb-4 text-white/70">
+                        {email}にログインリンクを送信しました。
+                        <br />
+                        メールをご確認ください。
+                      </p>
+                      <p className="text-sm text-white/50">
+                        リンクは10分間有効です。
+                      </p>
+                      <p className="mt-3 text-sm text-yellow-300/80">
+                        ⚠️
+                        メールが届かない場合は、迷惑メールフォルダもご確認ください。
+                      </p>
+                      <button
+                        onClick={() => {
+                          setEmailSent(false);
+                          setEmail("");
+                        }}
+                        className="mt-4 text-sm text-blue-300 underline hover:text-blue-200"
+                      >
+                        別のメールアドレスでログイン
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg bg-white/10 p-6">
+                    <form
+                      onSubmit={handleEmailSignIn}
+                      className="flex flex-col gap-4"
+                    >
+                      <div>
+                        <label
+                          htmlFor="email"
+                          className="mb-1 block text-sm font-medium text-white"
+                        >
+                          メールアドレス
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          placeholder="example@example.com"
+                        />
+                        <p className="mt-1 text-xs text-white/60">
+                          ログインリンクをメールで送信します
+                        </p>
+                      </div>
+                      {error && (
+                        <div className="text-center text-sm text-red-300">
+                          {error}
+                        </div>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isLoading ? "送信中..." : "ログインリンクを送信"}
+                      </button>
+                    </form>
                   </div>
                 )}
-                <div className="rounded-lg bg-white/10 p-6">
-                  <form
-                    onSubmit={handleCredentialsSignIn}
-                    className="flex flex-col gap-4"
-                  >
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="mb-1 block text-sm font-medium text-white"
-                      >
-                        メールアドレス
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        placeholder="example@example.com"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="password"
-                        className="mb-1 block text-sm font-medium text-white"
-                      >
-                        パスワード
-                      </label>
-                      <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full rounded-md border-2 border-white/30 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        placeholder="パスワードを入力"
-                      />
-                    </div>
-                    {error && (
-                      <div className="text-center text-sm text-red-300">
-                        {error}
-                      </div>
-                    )}
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isLoading ? "ログイン中..." : "ログイン"}
-                    </button>
-                  </form>
-                  <div className="mt-4 text-center">
-                    <Link
-                      href="/auth/register"
-                      className="text-sm text-blue-300 underline hover:text-blue-200"
-                    >
-                      アカウントをお持ちでない方はこちら
-                    </Link>
-                  </div>
-                </div>
               </div>
             )}
 
             {/* OAuth Providers */}
-            {oauthProviders.length > 0 && (
+            {oauthProviders.length > 0 && !emailSent && (
               <div className="flex flex-col gap-3">
-                {(hasCredentialsProvider ||
+                {(hasEmailProvider ||
                   !providers ||
                   Object.keys(providers).length === 0) && (
                   <div className="relative">
@@ -215,9 +229,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
         console.log(`  - ${id}: ${providers[id]?.name}`);
       });
 
-      const hasCredentials = providerIds.includes("credentials");
+      const hasEmail = providerIds.includes("email");
       const hasGoogle = providerIds.includes("google");
-      console.log(`  - Has credentials provider: ${hasCredentials}`);
+      console.log(`  - Has email provider: ${hasEmail}`);
       console.log(`  - Has Google provider: ${hasGoogle}`);
     } else {
       console.log("  - No providers found (null/undefined)");
