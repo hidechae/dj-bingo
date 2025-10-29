@@ -7,14 +7,15 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import SpotifyProvider from "next-auth/providers/spotify";
-import CredentialsProvider from "next-auth/providers/credentials";
+import EmailProvider from "next-auth/providers/email";
 import { type GetServerSidePropsContext } from "next";
-import bcrypt from "bcryptjs";
+import { Resend } from "resend";
+import { MagicLinkEmail } from "~/components/email/MagicLinkEmail";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
-import { createRepositories } from "~/server/repositories";
-import { UserEntity } from "~/domain/models";
+
+const resend = new Resend(env.RESEND_API_KEY);
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -90,87 +91,41 @@ const createProviders = () => {
     console.log("  ❌ Spotify OAuth not configured");
   }
 
-  // Always add credentials provider
-  console.log("  ✅ BEFORE Adding Credentials provider");
-  try {
+  // Add Email provider for passwordless authentication
+  if (env.RESEND_API_KEY) {
+    console.log("  ✅ Adding Email provider (passwordless)");
+    const emailAddress = env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
+    const fromEmail = `DJ Bingo <${emailAddress}>`;
     providers.push(
-      CredentialsProvider({
-        id: "credentials",
-        name: "Email and Password",
-        credentials: {
-          email: { label: "Email", type: "email" },
-          password: { label: "Password", type: "password" },
-        },
-        async authorize(credentials) {
-          console.log("📧 CREDENTIALS AUTH ATTEMPT:", {
-            hasEmail: !!credentials?.email,
-            hasPassword: !!credentials?.password,
-          });
-
-          // Early return for missing credentials to prevent unnecessary DB calls during provider init
-          if (!credentials?.email || !credentials?.password) {
-            console.log("❌ Missing credentials");
-            return null;
-          }
-
+      EmailProvider({
+        server: "", // Resendを使うので不要
+        from: fromEmail,
+        maxAge: 10 * 60, // 10分間有効
+        async sendVerificationRequest({ identifier: email, url, provider }) {
           try {
-            console.log("🔍 Searching for user:", credentials.email);
+            const { host } = new URL(url);
+            const { data, error } = await resend.emails.send({
+              from: provider.from as string,
+              to: [email],
+              subject: `DJ Bingoにログイン`,
+              react: MagicLinkEmail({ url, host }),
+            });
 
-            // Use repository layer instead of direct Prisma access
-            const repositories = createRepositories(db);
-
-            // Add timeout and connection resilience
-            const user = (await Promise.race([
-              repositories.user.findByEmailWithPassword(credentials.email),
-              new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Database timeout")), 10000)
-              ),
-            ])) as UserEntity;
-
-            if (!user) {
-              console.log("❌ User not found");
-              return null;
+            if (error) {
+              console.error("Failed to send magic link email:", error);
+              throw new Error("Failed to send verification email");
             }
 
-            if (!user.password) {
-              console.log("❌ User has no password (OAuth-only user)");
-              return null;
-            }
-
-            const isPasswordValid = await bcrypt.compare(
-              credentials.password,
-              user.password
-            );
-
-            if (!isPasswordValid) {
-              console.log("❌ Invalid password");
-              return null;
-            }
-
-            console.log(
-              "✅ Credentials authentication successful for:",
-              user.email
-            );
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-            };
+            console.log("✅ Magic link email sent to:", email, data);
           } catch (error) {
-            console.error(
-              "❌ Credentials auth error (but provider still available):",
-              error
-            );
-            // Don't throw the error - just return null to keep provider available
-            // This prevents NextAuth from excluding the credentials provider due to DB issues
-            return null;
+            console.error("Error sending magic link:", error);
+            throw error;
           }
         },
       })
     );
-    console.log("  ✅ AFTER Adding Credentials provider");
-  } catch (error) {
-    console.error("  ❌ ERROR Adding Credentials provider:", error);
+  } else {
+    console.log("  ❌ Email provider not configured (RESEND_API_KEY missing)");
   }
 
   console.log(`🚀 TOTAL PROVIDERS CREATED: ${providers.length}`);
@@ -179,39 +134,35 @@ const createProviders = () => {
 
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user, token }) => {
-      // Handle both adapter (OAuth) and credentials sessions
+    async session({ session, user }) {
+      // Handle adapter sessions (OAuth and Email)
+      // database戦略ではtokenは存在しない
       if (user) {
-        // OAuth session (with adapter)
+        // 初回ログイン時に名前が未設定の場合、メールアドレスの@より前を初期値として設定
+        if (user.email && !user.name) {
+          const nameFromEmail = user.email.split("@")[0];
+          if (nameFromEmail) {
+            await db.user.update({
+              where: { id: user.id },
+              data: { name: nameFromEmail },
+            });
+            // セッションにも反映
+            user.name = nameFromEmail;
+          }
+        }
+
         return {
           ...session,
           user: {
             ...session.user,
             id: user.id,
+            name: user.name,
           },
-          accessToken: token.accessToken,
-          refreshToken: token.refreshToken,
-        };
-      } else if (token) {
-        // Credentials session (JWT)
-        return {
-          ...session,
-          user: {
-            ...session.user,
-            id: token.sub!,
-          },
-          accessToken: token.accessToken,
-          refreshToken: token.refreshToken,
         };
       }
       return session;
     },
-    jwt: async ({ token, user, account }) => {
-      // Store user id in token for credentials authentication
-      if (user) {
-        token.sub = user.id;
-      }
-
+    jwt: async ({ token, account }) => {
       // Store Spotify access token and refresh token
       if (account) {
         token.accessToken = account.access_token;
@@ -270,12 +221,10 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
-  // Only use adapter for OAuth providers, not for credentials
-  ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
-    ? { adapter: PrismaAdapter(db) as Adapter }
-    : {}),
+  // Use adapter for OAuth and Email providers
+  adapter: PrismaAdapter(db) as Adapter,
   session: {
-    strategy: "jwt",
+    strategy: "database", // Email providerにはdatabase strategyが必要
   },
   providers: createProviders(),
   pages: {

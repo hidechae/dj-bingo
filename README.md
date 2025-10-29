@@ -8,7 +8,10 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 
 ### 管理者機能
 
-- Google OAuth認証によるログイン
+- パスワードレス認証（Magic Link）またはOAuth認証によるログイン
+  - メールアドレスでのMagic Link認証
+  - Google OAuth認証
+  - Spotify OAuth認証
 - ビンゴゲームの作成（3x3、4x4、5x5のグリッドサイズ対応）
 - 楽曲リストの設定
   - 手動での楽曲追加
@@ -18,8 +21,6 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 - 参加者の状態確認（グリッド完成状況、勝利状況）
 - ビンゴ達成時のリアルタイム通知
 - 管理ダッシュボード
-- 複数管理者の追加・削除機能
-- 管理者追加時の自動招待メール送信（Resend使用）
 
 ### 参加者機能
 
@@ -34,13 +35,13 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 
 - **Frontend**: Next.js 15, TypeScript, Tailwind CSS
 - **Backend**: tRPC, Prisma ORM
-- **Authentication**: NextAuth.js (Google OAuth)
+- **Authentication**: NextAuth.js (Magic Link + OAuth)
+- **Email Service**: Resend (パスワードレス認証用)
 - **Database**: PostgreSQL (ローカル: Docker, 本番: Neon)
 - **State Management**: TanStack Query (React Query)
 - **Styling**: Tailwind CSS
 - **QR Code**: qrcode library
 - **External APIs**: Spotify Web API (プレイリストインポート)
-- **Email Service**: Resend (管理者招待メール送信)
 - **Testing**: Vitest, React Testing Library
 - **Component Documentation**: Storybook
 
@@ -65,28 +66,12 @@ cp .env.example .env
 - `DATABASE_URL`: PostgreSQLの接続URL
 - `NEXTAUTH_SECRET`: NextAuth.jsのシークレット（`openssl rand -base64 32`で生成）
 - `NEXTAUTH_URL`: アプリケーションのURL
-- `GOOGLE_CLIENT_ID`: Google OAuthのクライアントID
-- `GOOGLE_CLIENT_SECRET`: Google OAuthのクライアントシークレット
+- `GOOGLE_CLIENT_ID`: Google OAuthのクライアントID（オプション）
+- `GOOGLE_CLIENT_SECRET`: Google OAuthのクライアントシークレット（オプション）
 - `SPOTIFY_CLIENT_ID`: Spotify APIのクライアントID（オプション）
 - `SPOTIFY_CLIENT_SECRET`: Spotify APIのクライアントシークレット（オプション）
-- `RESEND_API_KEY`: Resend APIキー（オプション、管理者招待メール送信用）
-
-**Resend API設定（オプション）:**
-
-管理者追加時にメール送信機能を使用する場合：
-
-1. [Resend](https://resend.com/)でアカウントを作成
-2. [API Keys](https://resend.com/api-keys)ページでAPIキーを生成
-3. [Domains](https://resend.com/domains)でドメインを検証（本番環境用）
-4. `.env`ファイルにAPIキーを追加：
-   ```bash
-   RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxx"
-   ```
-
-**注意:**
-
-- 開発環境では検証済みドメインがなくてもテスト送信が可能です
-- 本番環境では`src/pages/api/send-admin-invite.ts`の`from`アドレスを検証済みドメインに変更してください
+- `RESEND_API_KEY`: Resend APIキー（パスワードレス認証用）
+- `RESEND_FROM_EMAIL`: メール送信元アドレス（メールアドレスのみ、オプション、検証済みドメイン必要）
 
 **Spotify API設定（オプション）:**
 
@@ -108,6 +93,25 @@ Spotifyプレイリストからの楽曲インポート機能を使用する場�
 **⚠️ 重要:** Spotifyは`localhost`ではなく`127.0.0.1`を使用する必要があります。開発時は`http://127.0.0.1:3000`でアクセスしてください。
 
 詳細は[Spotify拡張インポート機能のドキュメント](docs/spotify-enhanced-import.md)を参照してください。
+
+**Resend設定（パスワードレス認証用）:**
+
+メールアドレスでのMagic Link認証を使用する場合：
+
+1. [Resend](https://resend.com)でアカウントを作成
+2. API Keyを取得（https://resend.com/api-keys）
+3. `.env`ファイルに追加：
+   ```bash
+   RESEND_API_KEY="re_xxxxxxxxxxxxx"
+   ```
+4. **開発環境**: デフォルトの`onboarding@resend.dev`を使用（自分のメールアドレスにのみ送信可能）
+5. **本番環境**: ドメインを検証して独自のメールアドレスを使用：
+   - https://resend.com/domains でドメインを追加
+   - DNSレコード（SPF, DKIM, DMARC）を設定
+   - `.env`に送信元アドレスを追加（メールアドレスのみ、表示名「DJ Bingo」はコード内で設定）：
+     ```bash
+     RESEND_FROM_EMAIL="info@your-domain.com"
+     ```
 
 ### 3. データベースの起動
 
@@ -196,7 +200,10 @@ Storybook起動後、ブラウザで http://localhost:6006 を開いてくださ
 ### 管理者
 
 1. トップページから「管理者ログイン」をクリック
-2. Googleアカウントでログイン
+2. 以下のいずれかの方法でログイン：
+   - **Magic Link**: メールアドレスを入力してログインリンクを受信
+   - **Google OAuth**: Googleアカウントでログイン
+   - **Spotify OAuth**: Spotifyアカウントでログイン
 3. 管理者ダッシュボードで「新しいビンゴを作成」
 4. ビンゴのタイトル、サイズ、楽曲リストを設定
    - 手動で楽曲を追加、または
