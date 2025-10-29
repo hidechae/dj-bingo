@@ -361,13 +361,22 @@ export const bingoRouter = createTRPCRouter({
       z.object({
         gameId: z.string(),
         title: z.string().min(1, "Title cannot be empty"),
+        size: z.nativeEnum(BingoSize).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Update the game title
+      const updateData: { title: string; size?: BingoSize } = {
+        title: input.title,
+      };
+
+      // サイズが指定されている場合は含める
+      if (input.size !== undefined) {
+        updateData.size = input.size;
+      }
+
       const updatedGame = await ctx.repositories.bingoGame.update(
         input.gameId,
-        { title: input.title }
+        updateData
       );
 
       return updatedGame;

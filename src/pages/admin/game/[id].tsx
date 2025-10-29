@@ -19,7 +19,7 @@ import { SongList } from "~/components/admin/SongList";
 import { ParticipantTable } from "~/components/admin/ParticipantTable";
 import { StatusChangeModal } from "~/components/admin/StatusChangeModal";
 import { AdminManagement } from "~/components/admin/AdminManagement";
-import { TitleEditModal } from "~/components/admin/TitleEditModal";
+import { GameInfoEditModal } from "~/components/admin/TitleEditModal";
 import { BingoNotificationModal } from "~/components/admin/BingoNotificationModal";
 import { SpotifyImportModal } from "~/components/admin/SpotifyImportModal";
 import { SongFormModal } from "~/components/admin/SongFormModal";
@@ -42,7 +42,7 @@ const AdminGameManagement: NextPage = () => {
   const [showAdminManagement, setShowAdminManagement] = useState(false);
   const [activeTab, setActiveTab] = useState<"songs" | "participants">("songs");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showTitleEditModal, setShowTitleEditModal] = useState(false);
+  const [showGameInfoEditModal, setShowGameInfoEditModal] = useState(false);
   const [showSpotifyImportModal, setShowSpotifyImportModal] = useState(false);
   const [showSongFormModal, setShowSongFormModal] = useState(false);
   const [songFormMode, setSongFormMode] = useState<"add" | "edit">("add");
@@ -329,18 +329,19 @@ const AdminGameManagement: NextPage = () => {
     }
   };
 
-  const handleTitleSave = (newTitle: string) => {
+  const handleGameInfoSave = (data: { title: string; size?: BingoSize }) => {
     updateTitleMutation.mutate(
       {
         gameId: id as string,
-        title: newTitle,
+        title: data.title,
+        size: data.size,
       },
       {
         onSuccess: () => {
-          setShowTitleEditModal(false);
+          setShowGameInfoEditModal(false);
         },
         onError: (error) => {
-          showAlert(`タイトルの更新に失敗しました: ${error.message}`, {
+          showAlert(`ビンゴ情報の更新に失敗しました: ${error.message}`, {
             variant: "error",
             title: "エラー",
           });
@@ -460,11 +461,13 @@ const AdminGameManagement: NextPage = () => {
                       <button
                         onClick={() => {
                           setShowDropdown(false);
-                          setShowTitleEditModal(true);
+                          setShowGameInfoEditModal(true);
                         }}
                         className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        名前の変更
+                        {currentStatus === GameStatus.EDITING
+                          ? "ビンゴ情報の編集"
+                          : "名前の変更"}
                       </button>
                       <button
                         onClick={() => {
@@ -594,11 +597,13 @@ const AdminGameManagement: NextPage = () => {
         />
       )}
 
-      <TitleEditModal
-        isOpen={showTitleEditModal}
+      <GameInfoEditModal
+        isOpen={showGameInfoEditModal}
         currentTitle={bingoGame.title}
-        onSave={handleTitleSave}
-        onCancel={() => setShowTitleEditModal(false)}
+        currentSize={bingoGame.size}
+        currentStatus={currentStatus}
+        onSave={handleGameInfoSave}
+        onCancel={() => setShowGameInfoEditModal(false)}
         isSaving={updateTitleMutation.isPending}
       />
 
