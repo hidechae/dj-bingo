@@ -65,6 +65,19 @@ export function getRequiredSongCount(size: BingoSize): number {
   return gridSize * gridSize;
 }
 
+export function getBingoSizeDisplay(size: BingoSize): string {
+  switch (size) {
+    case BingoSize.THREE_BY_THREE:
+      return "3x3";
+    case BingoSize.FOUR_BY_FOUR:
+      return "4x4";
+    case BingoSize.FIVE_BY_FIVE:
+      return "5x5";
+    default:
+      return "3x3";
+  }
+}
+
 export function getStatusDisplay(status: GameStatus) {
   switch (status) {
     case GameStatus.EDITING:

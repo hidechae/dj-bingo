@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { GameStatus, type BingoGame, type Participant } from "~/types";
+import {
+  GameStatus,
+  getBingoSizeDisplay,
+  type BingoGame,
+  type Participant,
+} from "~/types";
 
 type GameInfoSidebarProps = {
   bingoGame: BingoGame;
@@ -76,7 +81,8 @@ export const GameInfoSidebar = ({
         <h3 className="mb-4 text-lg font-medium text-gray-900">ゲーム情報</h3>
         <div className="space-y-3 text-sm">
           <p>
-            <span className="font-medium">サイズ:</span> {bingoGame.size}
+            <span className="font-medium">サイズ:</span>{" "}
+            {getBingoSizeDisplay(bingoGame.size)}
           </p>
           <p>
             <span className="font-medium">楽曲数:</span>{" "}

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { useAlert } from "~/hooks/useAlert";
+import { getBingoSizeDisplay } from "~/types";
 
 const ParticipantGame: NextPage = () => {
   const router = useRouter();
@@ -188,7 +189,8 @@ const ParticipantGame: NextPage = () => {
                 {bingoGame.title}
               </h2>
               <p className="mt-2 text-gray-500">
-                サイズ: {bingoGame.size} | 楽曲数: {bingoGame.songs.length}
+                サイズ: {getBingoSizeDisplay(bingoGame.size)} | 楽曲数:{" "}
+                {bingoGame.songs.length}
               </p>
             </div>
 

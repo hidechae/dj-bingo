@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { useAlert } from "~/hooks/useAlert";
+import { getBingoSizeDisplay } from "~/types";
 
 const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
@@ -180,7 +181,7 @@ const AdminDashboard: NextPage = () => {
                       {game.title}
                     </h3>
                     <div className="space-y-1 text-sm text-gray-500">
-                      <p>サイズ: {game.size}</p>
+                      <p>サイズ: {getBingoSizeDisplay(game.size)}</p>
                       <p>楽曲数: {game.songs.length}</p>
                       <p>参加者数: {game.participants.length}</p>
                       <p>
