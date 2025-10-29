@@ -38,7 +38,7 @@
     "@types/qrcode": "^1.5.5",
     "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^3.0.2",
-    "next": "16.0.0",
+    "next": "16.0.1",
     "next-auth": "^4.24.8",
     "prisma": "^6.0.0",
     "qrcode": "^1.5.4",
