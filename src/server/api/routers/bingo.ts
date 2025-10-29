@@ -284,6 +284,7 @@ export const bingoRouter = createTRPCRouter({
       return {
         creator: game.user,
         admins: game.gameAdmins,
+        gameTitle: game.title,
       };
     }),
 

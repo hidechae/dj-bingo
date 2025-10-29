@@ -18,6 +18,8 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 - 参加者の状態確認（グリッド完成状況、勝利状況）
 - ビンゴ達成時のリアルタイム通知
 - 管理ダッシュボード
+- 複数管理者の追加・削除機能
+- 管理者追加時の自動招待メール送信（Resend使用）
 
 ### 参加者機能
 
@@ -38,6 +40,7 @@ DJビンゴは、DJイベントで使用できるインタラクティブなビ�
 - **Styling**: Tailwind CSS
 - **QR Code**: qrcode library
 - **External APIs**: Spotify Web API (プレイリストインポート)
+- **Email Service**: Resend (管理者招待メール送信)
 - **Testing**: Vitest, React Testing Library
 - **Component Documentation**: Storybook
 
@@ -66,6 +69,24 @@ cp .env.example .env
 - `GOOGLE_CLIENT_SECRET`: Google OAuthのクライアントシークレット
 - `SPOTIFY_CLIENT_ID`: Spotify APIのクライアントID（オプション）
 - `SPOTIFY_CLIENT_SECRET`: Spotify APIのクライアントシークレット（オプション）
+- `RESEND_API_KEY`: Resend APIキー（オプション、管理者招待メール送信用）
+
+**Resend API設定（オプション）:**
+
+管理者追加時にメール送信機能を使用する場合：
+
+1. [Resend](https://resend.com/)でアカウントを作成
+2. [API Keys](https://resend.com/api-keys)ページでAPIキーを生成
+3. [Domains](https://resend.com/domains)でドメインを検証（本番環境用）
+4. `.env`ファイルにAPIキーを追加：
+   ```bash
+   RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxx"
+   ```
+
+**注意:**
+
+- 開発環境では検証済みドメインがなくてもテスト送信が可能です
+- 本番環境では`src/pages/api/send-admin-invite.ts`の`from`アドレスを検証済みドメインに変更してください
 
 **Spotify API設定（オプション）:**
 

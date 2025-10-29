@@ -20,6 +20,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string().optional(),
     SPOTIFY_CLIENT_ID: z.string().optional(),
     SPOTIFY_CLIENT_SECRET: z.string().optional(),
+    RESEND_API_KEY: z.string().optional(),
   },
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
@@ -34,6 +35,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID,
     SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,

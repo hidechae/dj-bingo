@@ -23,10 +23,58 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
     onSuccess: async (newAdmin) => {
       await refetch();
       setEmail("");
-      // Show copy message for the newly added admin
-      if (newAdmin) {
+
+      // メール送信処理
+      if (newAdmin && adminData) {
         const adminName = newAdmin.user.name || newAdmin.user.email || "管理者";
-        setShowCopyMessage(generateInviteMessage(adminName));
+        const inviterName =
+          adminData.creator.name || adminData.creator.email || "管理者";
+        const baseUrl = window.location.origin;
+
+        try {
+          // メール送信APIを呼び出し
+          const response = await fetch("/api/send-admin-invite", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              to: newAdmin.user.email,
+              adminName,
+              gameTitle: adminData.gameTitle,
+              inviterName,
+              loginUrl: `${baseUrl}/admin`,
+            }),
+          });
+
+          if (response.ok) {
+            showAlert("管理者を追加し、招待メールを送信しました。", {
+              variant: "success",
+              title: "成功",
+            });
+          } else {
+            // メール送信失敗時もコピーメッセージを表示
+            setShowCopyMessage(generateInviteMessage(adminName));
+            showAlert(
+              "管理者を追加しましたが、メール送信に失敗しました。手動で招待メッセージを送信してください。",
+              {
+                variant: "warning",
+                title: "警告",
+              }
+            );
+          }
+        } catch (error) {
+          // メール送信エラー時もコピーメッセージを表示
+          console.error("Failed to send email:", error);
+          setShowCopyMessage(generateInviteMessage(adminName));
+          showAlert(
+            "管理者を追加しましたが、メール送信に失敗しました。手動で招待メッセージを送信してください。",
+            {
+              variant: "warning",
+              title: "警告",
+            }
+          );
+        }
       }
     },
     onError: () => {
