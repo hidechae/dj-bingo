@@ -9,6 +9,7 @@ import { SongSelectionModal } from "~/components/bingo/SongSelectionModal";
 import { ConfirmModal } from "~/components/bingo/ConfirmModal";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { useAlert } from "~/hooks/useAlert";
+import { api } from "~/utils/api";
 
 const SetupBingo: NextPage = () => {
   const router = useRouter();
@@ -17,6 +18,23 @@ const SetupBingo: NextPage = () => {
     "clear" | "auto" | "submit" | null
   >(null);
   const { showAlert, AlertComponent } = useAlert();
+  const utils = api.useUtils();
+
+  const updateNameMutation = api.participant.updateName.useMutation({
+    onSuccess: async () => {
+      await utils.participant.getBySessionToken.invalidate();
+      showAlert("名前を更新しました", {
+        variant: "success",
+        title: "成功",
+      });
+    },
+    onError: (error) => {
+      showAlert(`名前の更新に失敗しました: ${error.message}`, {
+        variant: "error",
+        title: "エラー",
+      });
+    },
+  });
 
   const {
     participant,
@@ -44,6 +62,17 @@ const SetupBingo: NextPage = () => {
 
   // 初期ロード中はグローバルローディングを表示
   useInitialLoading({ isLoading: !participant || !participant?.bingoGame });
+
+  const handleNameChange = (newName: string) => {
+    const sessionToken = localStorage.getItem("sessionToken");
+    if (!sessionToken || !id) return;
+
+    updateNameMutation.mutate({
+      sessionToken,
+      bingoGameId: id as string,
+      name: newName,
+    });
+  };
 
   const handleConfirmAction = () => {
     if (confirmAction === "clear") {
@@ -100,9 +129,12 @@ const SetupBingo: NextPage = () => {
           <div className="rounded-lg bg-white p-6 shadow-lg">
             <SetupHeader
               gameTitle={participant.bingoGame.title}
+              participantName={participant.name}
               selectedCount={selectedCount}
               totalPositions={totalPositions}
               selectedPosition={selectedPosition}
+              onNameChange={handleNameChange}
+              isUpdatingName={updateNameMutation.isPending}
             />
 
             <SetupGrid

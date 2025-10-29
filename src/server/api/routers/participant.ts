@@ -229,4 +229,35 @@ export const participantRouter = createTRPCRouter({
         wonAt: participant.wonAt,
       };
     }),
+
+  updateName: publicProcedure
+    .input(
+      z.object({
+        sessionToken: z.string(),
+        bingoGameId: z.string(),
+        name: z.string().min(1, "Name cannot be empty"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Find participant by session token and game ID
+      const participant = await ctx.repositories.participant.findFirst({
+        sessionToken: input.sessionToken,
+        bingoGameId: input.bingoGameId,
+      });
+
+      if (!participant) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Participant not found",
+        });
+      }
+
+      // Update participant name
+      const updatedParticipant = await ctx.repositories.participant.update(
+        participant.id,
+        { name: input.name }
+      );
+
+      return updatedParticipant;
+    }),
 });
