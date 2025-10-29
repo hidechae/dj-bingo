@@ -271,6 +271,7 @@ export const useBingoSetup = (
 
   return {
     participant,
+    sessionToken,
     selectedSongs,
     gridSize,
     selectedPosition,

@@ -43,6 +43,7 @@ const SetupBingo: NextPage = () => {
 
   const {
     participant,
+    sessionToken,
     selectedSongs,
     gridSize,
     selectedPosition,
@@ -69,7 +70,6 @@ const SetupBingo: NextPage = () => {
   useInitialLoading({ isLoading: !participant || !participant?.bingoGame });
 
   const handleNameSave = (newName: string) => {
-    const sessionToken = localStorage.getItem("sessionToken");
     if (!sessionToken || !id) {
       console.error("sessionToken or id is missing", { sessionToken, id });
       return;
