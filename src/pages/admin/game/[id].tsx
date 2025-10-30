@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import QRCode from "qrcode";
@@ -447,7 +447,7 @@ const AdminGameManagement: NextPage = () => {
                   </svg>
                 </button>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  {bingoGame.title} - 管理画面
+                  {bingoGame.title}
                 </h1>
               </div>
               <div className="relative" data-dropdown>
@@ -513,6 +513,25 @@ const AdminGameManagement: NextPage = () => {
                         className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {deleteMutation.isPending ? "削除中..." : "削除"}
+                      </button>
+                      <div className="border-t border-gray-100"></div>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          void router.push("/admin/profile");
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        マイページ
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          void signOut();
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        ログアウト
                       </button>
                     </div>
                   </div>

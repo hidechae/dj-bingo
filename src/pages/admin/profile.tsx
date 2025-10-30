@@ -38,7 +38,30 @@ const AdminProfile: NextPage = () => {
         <header className="bg-white shadow">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-900">プロフィール</h1>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => void router.push("/admin")}
+                  className="cursor-pointer text-gray-500 hover:text-gray-700"
+                  title="管理画面に戻る"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  プロフィール
+                </h1>
+              </div>
               <div className="relative">
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
@@ -63,14 +86,8 @@ const AdminProfile: NextPage = () => {
                   <div className="ring-opacity-5 absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black">
                     <div className="py-1">
                       <button
-                        onClick={() => void router.push("/admin")}
-                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        管理画面に戻る
-                      </button>
-                      <button
                         onClick={() => void signOut({ callbackUrl: "/" })}
-                        className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                       >
                         ログアウト
                       </button>
