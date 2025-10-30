@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { useModalZIndex } from "~/contexts/ModalStackContext";
 
 type ModalSize = "sm" | "md" | "lg" | "xl";
 
@@ -8,7 +9,6 @@ type ModalProps = {
   children: ReactNode;
   size?: ModalSize;
   className?: string;
-  zIndex?: string;
 };
 
 const sizeClasses: Record<ModalSize, string> = {
@@ -24,8 +24,9 @@ export const Modal = ({
   children,
   size = "md",
   className = "",
-  zIndex = "z-50",
 }: ModalProps) => {
+  const zIndex = useModalZIndex(isOpen);
+
   if (!isOpen) return null;
 
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -37,7 +38,8 @@ export const Modal = ({
 
   return (
     <div
-      className={`fixed inset-0 ${zIndex} h-full w-full overflow-y-auto bg-gray-600/20`}
+      className="fixed inset-0 h-full w-full overflow-y-auto bg-gray-600/20"
+      style={{ zIndex }}
       onClick={handleBackgroundClick}
     >
       <div
