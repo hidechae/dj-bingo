@@ -165,7 +165,7 @@ export const bingoRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message:
-            "このメールアドレスのユーザーはまだDJ Bingoにサインアップしていません。先にGoogle認証でサインインしてもらう必要があります。",
+            "このメールアドレスのユーザーはまだDJ Bingoにサインアップしていません。先にログインしてもらう必要があります。",
         });
       }
 
@@ -248,6 +248,14 @@ export const bingoRouter = createTRPCRouter({
         });
       }
 
+      // 自分自身を削除しようとしている場合はエラー
+      if (gameAdmin.userId === ctx.session.user.id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "自分自身を管理者から削除することはできません",
+        });
+      }
+
       await ctx.repositories.gameAdmin.delete(input.adminId);
 
       return { success: true };
@@ -284,12 +292,27 @@ export const bingoRouter = createTRPCRouter({
       return {
         creator: game.user,
         admins: game.gameAdmins,
+        gameTitle: game.title,
       };
     }),
 
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      // Check if current user has admin permission
+      const hasPermission = await checkGameAdminPermission(
+        ctx.repositories,
+        input.id,
+        ctx.session.user.id
+      );
+
+      if (!hasPermission) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "このゲームにアクセスする権限がありません",
+        });
+      }
+
       const bingoGame = await ctx.repositories.bingoGame.findByIdWithDetails(
         input.id
       );

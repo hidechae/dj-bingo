@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { useAlert } from "~/hooks/useAlert";
@@ -9,6 +10,7 @@ type AdminManagementProps = {
 };
 
 export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
+  const { data: session } = useSession();
   const [email, setEmail] = useState("");
   const [showCopyMessage, setShowCopyMessage] = useState<string | null>(null);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
@@ -23,10 +25,58 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
     onSuccess: async (newAdmin) => {
       await refetch();
       setEmail("");
-      // Show copy message for the newly added admin
-      if (newAdmin) {
+
+      // メール送信処理
+      if (newAdmin && adminData) {
         const adminName = newAdmin.user.name || newAdmin.user.email || "管理者";
-        setShowCopyMessage(generateInviteMessage(adminName));
+        const inviterName =
+          adminData.creator.name || adminData.creator.email || "管理者";
+        const baseUrl = window.location.origin;
+
+        try {
+          // メール送信APIを呼び出し
+          const response = await fetch("/api/send-admin-invite", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              to: newAdmin.user.email,
+              adminName,
+              gameTitle: adminData.gameTitle,
+              inviterName,
+              loginUrl: `${baseUrl}/admin`,
+            }),
+          });
+
+          if (response.ok) {
+            showAlert("管理者を追加し、招待メールを送信しました。", {
+              variant: "success",
+              title: "成功",
+            });
+          } else {
+            // メール送信失敗時もコピーメッセージを表示
+            setShowCopyMessage(generateInviteMessage(adminName));
+            showAlert(
+              "管理者を追加しましたが、メール送信に失敗しました。手動で招待メッセージを送信してください。",
+              {
+                variant: "warning",
+                title: "警告",
+              }
+            );
+          }
+        } catch (error) {
+          // メール送信エラー時もコピーメッセージを表示
+          console.error("Failed to send email:", error);
+          setShowCopyMessage(generateInviteMessage(adminName));
+          showAlert(
+            "管理者を追加しましたが、メール送信に失敗しました。手動で招待メッセージを送信してください。",
+            {
+              variant: "warning",
+              title: "警告",
+            }
+          );
+        }
       }
     },
     onError: () => {
@@ -87,9 +137,7 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
     return `${adminName}さんがDJ Bingoゲームの管理者に追加されました！
 
 以下のリンクからログインして管理画面にアクセスできます：
-${baseUrl}/admin
-
-※Google認証（Gmail または Google Workspace アカウント）でログインしてください。`;
+${baseUrl}/admin`;
   };
 
   const copyToClipboard = (text: string) => {
@@ -162,10 +210,6 @@ ${baseUrl}/admin
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   required
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  ※ Google認証でログインできるアドレス（Gmail または Google
-                  Workspace）のみ対応しています
-                </p>
               </div>
               <button
                 type="submit"
@@ -204,32 +248,42 @@ ${baseUrl}/admin
               </div>
 
               {/* Additional Admins */}
-              {adminData.admins.map((admin) => (
-                <div
-                  key={admin.id}
-                  className="flex items-center justify-between rounded-md bg-gray-50 p-3"
-                >
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {admin.user.name || admin.user.email}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {admin.user.email}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {new Date(admin.addedAt).toLocaleDateString("ja-JP")}{" "}
-                      に追加
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveAdmin(admin.id)}
-                    disabled={removeAdminMutation.isPending}
-                    className="cursor-pointer text-sm font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+              {adminData.admins.map((admin) => {
+                const isCurrentUser = session?.user?.id === admin.user.id;
+                return (
+                  <div
+                    key={admin.id}
+                    className="flex items-center justify-between rounded-md bg-gray-50 p-3"
                   >
-                    削除
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {admin.user.name || admin.user.email}
+                        {isCurrentUser && (
+                          <span className="ml-2 text-xs text-blue-600">
+                            (あなた)
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {admin.user.email}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {new Date(admin.addedAt).toLocaleDateString("ja-JP")}{" "}
+                        に追加
+                      </div>
+                    </div>
+                    {!isCurrentUser && (
+                      <button
+                        onClick={() => handleRemoveAdmin(admin.id)}
+                        disabled={removeAdminMutation.isPending}
+                        className="cursor-pointer text-sm font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        削除
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
 
               {adminData.admins.length === 0 && (
                 <div className="py-4 text-center text-gray-500">

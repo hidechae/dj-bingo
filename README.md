@@ -276,6 +276,68 @@ npm run db:migrate
 npm run db:push
 ```
 
+### マイグレーションのトラブルシューティング
+
+#### Drift Detected エラー
+
+`prisma migrate dev`実行時に「Drift detected」エラーが発生した場合：
+
+```
+Drift detected: Your database schema is not in sync with your migration history.
+```
+
+**原因**: データベースのスキーマとマイグレーション履歴が一致していない状態です。これは以下の場合に発生します：
+
+- スキーマファイル（`schema.prisma`）を変更したが、対応するマイグレーションファイルが存在しない
+- 手動でデータベースを変更した
+- マイグレーションファイルが欠落している
+
+**解決方法（開発環境）**:
+
+1. データベースをリセットして、すべてのマイグレーションを再適用：
+
+   ```bash
+   npx prisma migrate reset
+   ```
+
+   ⚠️ **注意**: ローカルのデータベースは完全に削除されます
+
+2. リセット後、新しいマイグレーションを作成：
+
+   ```bash
+   npm run db:migrate
+   ```
+
+3. マイグレーション履歴が同期されたことを確認：
+   ```bash
+   npm run db:migrate
+   # "Already in sync" と表示されればOK
+   ```
+
+#### デプロイ時のマイグレーションタイムアウト
+
+Vercelなどへのデプロイ時に以下のエラーが発生した場合：
+
+```
+Error: P1002
+The database server was reached but timed out.
+Context: Timed out trying to acquire a postgres advisory lock
+```
+
+**原因**: 通常、マイグレーションファイルの不整合が原因です。Prismaがスキーマとマイグレーション履歴の差分を検出し、アドバイザリーロックを取得した状態で処理が中断されます。
+
+**解決方法**:
+
+1. ローカルで`prisma migrate dev`を実行し、不足しているマイグレーションファイルを生成
+2. 生成されたマイグレーションファイルをコミット＆プッシュ
+3. 再デプロイ
+
+**予防策**:
+
+- スキーマを変更したら必ず`npm run db:migrate`でマイグレーションファイルを生成
+- マイグレーションファイル（`prisma/migrations/`）を必ずGitにコミット
+- `db:push`は開発時のみ使用し、本番環境では`migrate deploy`を使用
+
 ## 本番環境
 
 本番環境では以下を推奨：
