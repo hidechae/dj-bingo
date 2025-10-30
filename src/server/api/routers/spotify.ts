@@ -120,6 +120,16 @@ export const spotifyRouter = createTRPCRouter({
         return result;
       } catch (error) {
         console.error("Spotify API Error:", error);
+
+        // Spotifyのトークンエラーをチェック
+        if (error instanceof Error && error.message.includes("401")) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message:
+              "Spotifyのアクセストークンが無効です。ページを再読み込みしてください。",
+          });
+        }
+
         if (error instanceof Error) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -161,6 +171,16 @@ export const spotifyRouter = createTRPCRouter({
         };
       } catch (error) {
         console.error("Spotify API Error:", error);
+
+        // Spotifyのトークンエラーをチェック
+        if (error instanceof Error && error.message.includes("401")) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message:
+              "Spotifyのアクセストークンが無効です。ページを再読み込みしてください。",
+          });
+        }
+
         if (error instanceof Error) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -209,6 +229,16 @@ export const spotifyRouter = createTRPCRouter({
         return result;
       } catch (error) {
         console.error("Spotify API Error:", error);
+
+        // Spotifyのトークンエラーをチェック
+        if (error instanceof Error && error.message.includes("401")) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message:
+              "Spotifyのアクセストークンが無効です。ページを再読み込みしてください。",
+          });
+        }
+
         if (error instanceof Error) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -250,6 +280,16 @@ export const spotifyRouter = createTRPCRouter({
         };
       } catch (error) {
         console.error("Spotify API Error:", error);
+
+        // Spotifyのトークンエラーをチェック
+        if (error instanceof Error && error.message.includes("401")) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message:
+              "Spotifyのアクセストークンが無効です。ページを再読み込みしてください。",
+          });
+        }
+
         if (error instanceof Error) {
           throw new TRPCError({
             code: "BAD_REQUEST",

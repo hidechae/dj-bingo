@@ -80,6 +80,16 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
 
   const hasSpotifyAuth = !!session?.accessToken;
 
+  // トークンエラーのハンドリング関数
+  const handleTokenError = (error: { message: string }) => {
+    if (error.message.includes("アクセストークンが無効")) {
+      // トークンが無効な場合、ページをリロード（セッションが自動的にリフレッシュされる）
+      window.location.reload();
+    } else {
+      setError(error.message);
+    }
+  };
+
   // API呼び出し
   const getPlaylistTracksMutation = api.spotify.getPlaylistTracks.useMutation({
     onSuccess: (data) => {
@@ -88,9 +98,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
       setSelectedIndices(new Set(data.tracks.map((_, i) => i)));
       setStep("select");
     },
-    onError: (error) => {
-      setError(error.message);
-    },
+    onError: handleTokenError,
   });
 
   const getUserPlaylistsQuery = api.spotify.getUserPlaylists.useQuery(
@@ -102,6 +110,15 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
     }
   );
 
+  // getUserPlaylistsQueryのエラーハンドリング
+  useEffect(() => {
+    if (
+      getUserPlaylistsQuery.error?.message.includes("アクセストークンが無効")
+    ) {
+      window.location.reload();
+    }
+  }, [getUserPlaylistsQuery.error]);
+
   const getUserPlaylistTracksMutation =
     api.spotify.getUserPlaylistTracks.useMutation({
       onSuccess: (data) => {
@@ -110,9 +127,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
         setSelectedIndices(new Set(data.tracks.map((_, i) => i)));
         setStep("select");
       },
-      onError: (error) => {
-        setError(error.message);
-      },
+      onError: handleTokenError,
     });
 
   const searchMutation = api.spotify.search.useQuery(
@@ -127,9 +142,7 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
       setSelectedIndices(new Set(data.tracks.map((_, i) => i)));
       setStep("select");
     },
-    onError: (error) => {
-      setError(error.message);
-    },
+    onError: handleTokenError,
   });
 
   // マイプレイリストのデータ読み込み
@@ -245,7 +258,12 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
     if (result.data) {
       setSearchResults(result.data);
     } else if (result.error) {
-      setSearchError(result.error.message);
+      // トークンエラーの場合はページをリロード
+      if (result.error.message.includes("アクセストークンが無効")) {
+        window.location.reload();
+      } else {
+        setSearchError(result.error.message);
+      }
     } else {
       // データがない場合は空の結果を設定
       setSearchResults({

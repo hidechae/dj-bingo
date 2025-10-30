@@ -110,6 +110,40 @@ const createProviders = () => {
   return providers;
 };
 
+/**
+ * Spotifyのアクセストークンをリフレッシュする関数
+ */
+async function refreshSpotifyAccessToken(
+  refreshToken: string
+): Promise<{ accessToken: string; expiresAt: number; refreshToken?: string }> {
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${Buffer.from(
+        `${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`
+      ).toString("base64")}`,
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error("Failed to refresh Spotify token:", data);
+    throw new Error("Failed to refresh access token");
+  }
+
+  return {
+    accessToken: data.access_token,
+    expiresAt: Math.floor(Date.now() / 1000) + data.expires_in,
+    refreshToken: data.refresh_token,
+  };
+}
+
 export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, user }) {
@@ -129,6 +163,64 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
+        // Spotifyアカウントを取得
+        const spotifyAccount = await db.account.findFirst({
+          where: {
+            userId: user.id,
+            provider: "spotify",
+          },
+        });
+
+        // Spotifyアカウントが連携されている場合、トークンをセッションに追加
+        if (spotifyAccount) {
+          let accessToken = spotifyAccount.access_token;
+          let refreshToken = spotifyAccount.refresh_token;
+
+          // トークンの有効期限をチェック
+          const now = Math.floor(Date.now() / 1000);
+          const expiresAt = spotifyAccount.expires_at ?? 0;
+
+          // トークンが期限切れまたは5分以内に期限切れになる場合、リフレッシュ
+          if (refreshToken && expiresAt < now + 300) {
+            try {
+              console.log("🔄 Refreshing Spotify access token...");
+              const refreshedTokens =
+                await refreshSpotifyAccessToken(refreshToken);
+
+              // データベースを更新
+              await db.account.update({
+                where: {
+                  id: spotifyAccount.id,
+                },
+                data: {
+                  access_token: refreshedTokens.accessToken,
+                  expires_at: refreshedTokens.expiresAt,
+                  refresh_token: refreshedTokens.refreshToken ?? refreshToken,
+                },
+              });
+
+              accessToken = refreshedTokens.accessToken;
+              refreshToken = refreshedTokens.refreshToken ?? refreshToken;
+              console.log("✅ Spotify access token refreshed successfully");
+            } catch (error) {
+              console.error("❌ Error refreshing Spotify access token:", error);
+              // リフレッシュに失敗した場合でも、既存のトークンを返す
+              // （ユーザーに再ログインを促すため）
+            }
+          }
+
+          return {
+            ...session,
+            user: {
+              ...session.user,
+              id: user.id,
+              name: user.name,
+            },
+            accessToken,
+            refreshToken,
+          };
+        }
+
         return {
           ...session,
           user: {
@@ -139,64 +231,6 @@ export const authOptions: NextAuthOptions = {
         };
       }
       return session;
-    },
-    jwt: async ({ token, account }) => {
-      // Store Spotify access token and refresh token
-      if (account) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.accessTokenExpires = account.expires_at
-          ? account.expires_at * 1000
-          : undefined;
-      }
-
-      // Return previous token if the access token has not expired yet
-      if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
-        return token;
-      }
-
-      // Access token has expired, try to refresh it
-      if (token.refreshToken) {
-        try {
-          const response = await fetch(
-            "https://accounts.spotify.com/api/token",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                Authorization: `Basic ${Buffer.from(
-                  `${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`
-                ).toString("base64")}`,
-              },
-              body: new URLSearchParams({
-                grant_type: "refresh_token",
-                refresh_token: token.refreshToken as string,
-              }),
-            }
-          );
-
-          const refreshedTokens = await response.json();
-
-          if (!response.ok) {
-            throw refreshedTokens;
-          }
-
-          return {
-            ...token,
-            accessToken: refreshedTokens.access_token,
-            accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-            refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-          };
-        } catch (error) {
-          console.error("Error refreshing access token", error);
-          return {
-            ...token,
-            error: "RefreshAccessTokenError",
-          };
-        }
-      }
-
-      return token;
     },
   },
   // Use adapter for OAuth and Email providers
