@@ -43,9 +43,13 @@ export default async function handler(
       });
     }
 
+    // メール送信元アドレスを環境変数から取得
+    const emailAddress = env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
+    const fromEmail = `DJ Bingo <${emailAddress}>`;
+
     // メール送信
     const { data, error } = await resend.emails.send({
-      from: "DJ Bingo <onboarding@resend.dev>", // 本番環境では検証済みドメインに変更
+      from: fromEmail,
       to: [to],
       subject: `DJ Bingoゲーム「${gameTitle}」の管理者に追加されました`,
       react: AdminInviteEmail({
