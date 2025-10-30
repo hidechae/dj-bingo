@@ -107,20 +107,20 @@ const AdminDashboard: NextPage = () => {
               <div className="relative" data-dropdown>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="cursor-pointer rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                  title="メニュー"
+                  className="flex items-center gap-2 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
                 >
+                  <span>{session?.user?.name || session?.user?.email}</span>
                   <svg
-                    className="h-6 w-6"
+                    className="h-4 w-4"
                     fill="none"
-                    viewBox="0 0 24 24"
                     stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                      d="M19 9l-7 7-7-7"
                     />
                   </svg>
                 </button>
