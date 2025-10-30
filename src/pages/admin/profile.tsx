@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { Modal } from "~/components/ui/Modal";
 
 const AdminProfile: NextPage = () => {
   const { data: session, status } = useSession();
@@ -174,77 +175,62 @@ const AdminProfile: NextPage = () => {
         </div>
 
         {/* 名前編集モーダル */}
-        {showEditNameModal && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-              {/* 背景オーバーレイ */}
-              <div
-                className="bg-opacity-75 fixed inset-0 bg-gray-500 transition-opacity"
+        <Modal
+          isOpen={showEditNameModal}
+          onClose={() => {
+            setShowEditNameModal(false);
+            setEditedName("");
+          }}
+          size="lg"
+        >
+          <div className="space-y-4">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              名前を編集
+            </h3>
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                名前
+              </label>
+              <input
+                type="text"
+                id="name"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                placeholder="名前を入力"
+                autoFocus
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
                 onClick={() => {
                   setShowEditNameModal(false);
                   setEditedName("");
                 }}
-              ></div>
-
-              {/* モーダルコンテンツ */}
-              <div className="relative inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <div className="sm:flex sm:items-start">
-                    <div className="mt-3 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900">
-                        名前を編集
-                      </h3>
-                      <div className="mt-4">
-                        <label
-                          htmlFor="name"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          名前
-                        </label>
-                        <input
-                          type="text"
-                          id="name"
-                          value={editedName}
-                          onChange={(e) => setEditedName(e.target.value)}
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                          placeholder="名前を入力"
-                          autoFocus
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (editedName.trim()) {
-                        updateNameMutation.mutate({ name: editedName });
-                      }
-                    }}
-                    disabled={
-                      !editedName.trim() || updateNameMutation.isPending
-                    }
-                    className="inline-flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
-                  >
-                    {updateNameMutation.isPending ? "保存中..." : "保存"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowEditNameModal(false);
-                      setEditedName("");
-                    }}
-                    disabled={updateNameMutation.isPending}
-                    className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:mt-0 sm:w-auto"
-                  >
-                    キャンセル
-                  </button>
-                </div>
-              </div>
+                disabled={updateNameMutation.isPending}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (editedName.trim()) {
+                    updateNameMutation.mutate({ name: editedName });
+                  }
+                }}
+                disabled={!editedName.trim() || updateNameMutation.isPending}
+                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {updateNameMutation.isPending ? "保存中..." : "保存"}
+              </button>
             </div>
           </div>
-        )}
+        </Modal>
       </main>
     </>
   );
