@@ -9,13 +9,10 @@ import GoogleProvider from "next-auth/providers/google";
 import SpotifyProvider from "next-auth/providers/spotify";
 import EmailProvider from "next-auth/providers/email";
 import { type GetServerSidePropsContext } from "next";
-import { Resend } from "resend";
-import { MagicLinkEmail } from "~/components/email/MagicLinkEmail";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
-
-const resend = new Resend(env.RESEND_API_KEY);
+import { sendMagicLinkEmail } from "~/server/services/emailService";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -94,33 +91,14 @@ const createProviders = () => {
   // Add Email provider for passwordless authentication
   if (env.RESEND_API_KEY) {
     console.log("  ✅ Adding Email provider (passwordless)");
-    const emailAddress = env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
-    const fromEmail = `DJ Bingo <${emailAddress}>`;
     providers.push(
       EmailProvider({
         server: "", // Resendを使うので不要
-        from: fromEmail,
+        from: "DJ Bingo <noreply@example.com>", // ダミー値（実際の送信はsendMagicLinkEmailで行う）
         maxAge: 10 * 60, // 10分間有効
-        async sendVerificationRequest({ identifier: email, url, provider }) {
-          try {
-            const { host } = new URL(url);
-            const { data, error } = await resend.emails.send({
-              from: provider.from as string,
-              to: [email],
-              subject: `DJ Bingoにログイン`,
-              react: MagicLinkEmail({ url, host }),
-            });
-
-            if (error) {
-              console.error("Failed to send magic link email:", error);
-              throw new Error("Failed to send verification email");
-            }
-
-            console.log("✅ Magic link email sent to:", email, data);
-          } catch (error) {
-            console.error("Error sending magic link:", error);
-            throw error;
-          }
+        async sendVerificationRequest({ identifier: email, url }) {
+          const { host } = new URL(url);
+          await sendMagicLinkEmail({ email, url, host });
         },
       })
     );

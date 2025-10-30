@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { AdminInviteEmail } from "~/components/email/AdminInviteEmail";
-import { Resend } from "resend";
 import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
-
-const resend = new Resend(env.RESEND_API_KEY);
+import { sendAdminInviteEmail } from "~/server/services/emailService";
 
 export default async function handler(
   req: NextApiRequest,
@@ -43,29 +40,16 @@ export default async function handler(
       });
     }
 
-    // メール送信元アドレスを環境変数から取得
-    const emailAddress = env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
-    const fromEmail = `DJ Bingo <${emailAddress}>`;
-
     // メール送信
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: [to],
-      subject: `DJ Bingoゲーム「${gameTitle}」の管理者に追加されました`,
-      react: AdminInviteEmail({
-        adminName,
-        gameTitle,
-        inviterName,
-        loginUrl,
-      }),
+    const result = await sendAdminInviteEmail({
+      to,
+      adminName,
+      gameTitle,
+      inviterName,
+      loginUrl,
     });
 
-    if (error) {
-      console.error("Failed to send email:", error);
-      return res.status(400).json({ error: error.message });
-    }
-
-    return res.status(200).json({ success: true, data });
+    return res.status(200).json(result);
   } catch (error) {
     console.error("Error in send-admin-invite API:", error);
     return res.status(500).json({
