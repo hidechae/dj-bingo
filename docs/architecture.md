@@ -23,7 +23,7 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 
 **管理者側:**
 
-- Google OAuthまたはEmail/Passwordによる認証
+- パスワードレス認証（Magic Link）またはOAuth認証（Google、Spotify）
 - ビンゴゲームの作成・管理
 - ゲームステータス管理（編集中、エントリー中、ゲーム中、終了）
 - 楽曲リストの設定
@@ -46,23 +46,23 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 
 | 技術               | バージョン | 用途                                   |
 | ------------------ | ---------- | -------------------------------------- |
-| **Next.js**        | 15.5.0     | Reactフレームワーク、ルーティング、SSR |
-| **React**          | 19.0.0     | UIコンポーネント構築                   |
+| **Next.js**        | 16.0.1     | Reactフレームワーク、ルーティング、SSR |
+| **React**          | 19.2.0     | UIコンポーネント構築                   |
 | **TypeScript**     | 5.6.2      | 型安全性の確保                         |
 | **Tailwind CSS**   | 4.1.14     | スタイリング                           |
 | **TanStack Query** | 5.56.2     | データフェッチ、キャッシュ管理         |
 
 ### バックエンド
 
-| 技術            | バージョン | 用途                                 |
-| --------------- | ---------- | ------------------------------------ |
-| **tRPC**        | 11.0.0-rc  | 型安全なAPI通信                      |
-| **Prisma**      | 6.0.0      | ORM、データベース管理                |
-| **NextAuth.js** | 4.24.8     | 認証（Google OAuth、Email/Password） |
-| **PostgreSQL**  | 15+        | データベース                         |
-| **Zod**         | 4.0.0      | スキーマバリデーション               |
-| **SuperJSON**   | 2.2.1      | シリアライゼーション                 |
-| **bcryptjs**    | 3.0.2      | パスワードハッシュ化                 |
+| 技術            | バージョン | 用途                                            |
+| --------------- | ---------- | ----------------------------------------------- |
+| **tRPC**        | 11.0.0-rc  | 型安全なAPI通信                                 |
+| **Prisma**      | 6.0.0      | ORM、データベース管理                           |
+| **NextAuth.js** | 4.24.8     | 認証（Magic Link、Google OAuth、Spotify OAuth） |
+| **PostgreSQL**  | 15+        | データベース                                    |
+| **Zod**         | 4.0.0      | スキーマバリデーション                          |
+| **SuperJSON**   | 2.2.1      | シリアライゼーション                            |
+| **bcryptjs**    | 3.0.2      | パスワードハッシュ化                            |
 
 ### インフラ
 
@@ -152,7 +152,7 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
          │
          ▼
 ┌─────────────────┐      ┌──────────────────┐
-│ NextAuth.js     │─────▶│  Google OAuth    │
+│ NextAuth.js     │─────▶│  OAuth Providers │
 └────────┬────────┘      └──────────────────┘
          │
          ▼
@@ -265,7 +265,7 @@ DJ Bingoは、DJイベント向けのリアルタイムビンゴゲームプラ�
 
 **責務:**
 
-- 管理者認証（Google OAuth）
+- 管理者認証（Magic Link、Google OAuth、Spotify OAuth）
 - セッション管理
 - 参加者識別（sessionToken）
 - APIアクセス制御
@@ -415,16 +415,18 @@ dj-bingo/
 
 ### 管理者認証
 
-**技術:** NextAuth.js + Google OAuth / Email & Password
+**技術:** NextAuth.js + Magic Link / OAuth (Google, Spotify)
 
 **フロー:**
 
 1. ユーザーが `/auth/signin` にアクセス
 2. 認証方法を選択
+   - **Magic Link**: メールアドレスを入力してログインリンクを受信（Resend経由）
    - **Google OAuth**: Googleアカウントでログイン
-   - **Email/Password**: メールアドレスとパスワードでログイン（bcryptjsでハッシュ化）
+   - **Spotify OAuth**: Spotifyアカウントでログイン（プレイリストアクセス権限付き）
 3. 認証成功後、NextAuth.jsがセッションをDBに保存
 4. `useSession()` で認証状態を取得
+5. Spotifyトークンは自動的にリフレッシュされ、期限切れを防ぐ
 
 **実装箇所:**
 

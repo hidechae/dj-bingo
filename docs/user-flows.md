@@ -39,9 +39,16 @@
   │  Google OAuth認証画面
   │    ↓
   │  認証成功
-  └─ Email/Passwordでログイン
+  ├─ Spotify OAuthでログイン
+  │    ↓
+  │  Spotify認証画面
+  │    ↓
+  │  認証成功
+  └─ Magic Linkでログイン
        ↓
-     メールアドレスとパスワード入力
+     メールアドレス入力
+       ↓
+     ログインリンクをメールで受信
        ↓
      認証成功
   ↓
@@ -908,7 +915,7 @@ const createMutation = api.bingo.create.useMutation({
 
 ### 重要なポイント
 
-1. **管理者フロー**: 認証必須（Google OAuth または Email/Password）、protectedProcedureで保護
+1. **管理者フロー**: 認証必須（Magic Link、Google OAuth、Spotify OAuth）、protectedProcedureで保護
 2. **参加者フロー**: 認証不要、sessionTokenで識別
 3. **リアルタイム更新**: ポーリング（3秒間隔）で実現
 4. **エラーハンドリング**: tRPCのエラーコードで適切に処理
