@@ -162,16 +162,6 @@ const AdminProfile: NextPage = () => {
               </dl>
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="mt-6 flex justify-end gap-4">
-            <button
-              onClick={() => void router.push("/admin")}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-            >
-              管理画面に戻る
-            </button>
-          </div>
         </div>
 
         {/* 名前編集モーダル */}
