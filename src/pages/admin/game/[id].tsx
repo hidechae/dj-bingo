@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import QRCode from "qrcode";
@@ -447,26 +447,26 @@ const AdminGameManagement: NextPage = () => {
                   </svg>
                 </button>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  {bingoGame.title} - 管理画面
+                  {bingoGame.title}
                 </h1>
               </div>
               <div className="relative" data-dropdown>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="cursor-pointer rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                  title="メニュー"
+                  className="flex items-center gap-2 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
                 >
+                  <span>{session?.user?.name || session?.user?.email}</span>
                   <svg
-                    className="h-6 w-6"
+                    className="h-4 w-4"
                     fill="none"
-                    viewBox="0 0 24 24"
                     stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                      d="M19 9l-7 7-7-7"
                     />
                   </svg>
                 </button>
@@ -513,6 +513,25 @@ const AdminGameManagement: NextPage = () => {
                         className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {deleteMutation.isPending ? "削除中..." : "削除"}
+                      </button>
+                      <div className="border-t border-gray-100"></div>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          void router.push("/admin/profile");
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        マイページ
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          void signOut();
+                        }}
+                        className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        ログアウト
                       </button>
                     </div>
                   </div>
