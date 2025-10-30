@@ -135,9 +135,7 @@ export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
     return `${adminName}さんがDJ Bingoゲームの管理者に追加されました！
 
 以下のリンクからログインして管理画面にアクセスできます：
-${baseUrl}/admin
-
-※Google認証（Gmail または Google Workspace アカウント）でログインしてください。`;
+${baseUrl}/admin`;
   };
 
   const copyToClipboard = (text: string) => {
@@ -210,10 +208,6 @@ ${baseUrl}/admin
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   required
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  ※ Google認証でログインできるアドレス（Gmail または Google
-                  Workspace）のみ対応しています
-                </p>
               </div>
               <button
                 type="submit"

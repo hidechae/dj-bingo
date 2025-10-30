@@ -23,7 +23,7 @@ const Home: NextPage = () => {
             >
               <h3 className="text-2xl font-bold">管理者ログイン →</h3>
               <div className="text-lg">
-                メール・パスワードまたはGoogle認証でログイン
+                メールアドレスまたはOAuth認証でログイン
               </div>
             </Link>
 

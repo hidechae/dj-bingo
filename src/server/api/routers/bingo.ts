@@ -165,7 +165,7 @@ export const bingoRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message:
-            "このメールアドレスのユーザーはまだDJ Bingoにサインアップしていません。先にGoogle認証でサインインしてもらう必要があります。",
+            "このメールアドレスのユーザーはまだDJ Bingoにサインアップしていません。先にログインしてもらう必要があります。",
         });
       }
 

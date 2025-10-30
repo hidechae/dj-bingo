@@ -57,18 +57,6 @@ export function AdminInviteEmail({
         </a>
       </div>
 
-      <p
-        style={{
-          color: "#6b7280",
-          fontSize: "14px",
-          lineHeight: "1.5",
-          marginTop: "20px",
-        }}
-      >
-        ※ Google認証（Gmail または Google Workspace
-        アカウント）でログインしてください。
-      </p>
-
       <hr
         style={{
           border: "none",
