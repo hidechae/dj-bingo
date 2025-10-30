@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { useAlert } from "~/hooks/useAlert";
@@ -9,6 +10,7 @@ type AdminManagementProps = {
 };
 
 export const AdminManagement = ({ gameId, onClose }: AdminManagementProps) => {
+  const { data: session } = useSession();
   const [email, setEmail] = useState("");
   const [showCopyMessage, setShowCopyMessage] = useState<string | null>(null);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
@@ -246,32 +248,42 @@ ${baseUrl}/admin`;
               </div>
 
               {/* Additional Admins */}
-              {adminData.admins.map((admin) => (
-                <div
-                  key={admin.id}
-                  className="flex items-center justify-between rounded-md bg-gray-50 p-3"
-                >
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {admin.user.name || admin.user.email}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {admin.user.email}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {new Date(admin.addedAt).toLocaleDateString("ja-JP")}{" "}
-                      に追加
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveAdmin(admin.id)}
-                    disabled={removeAdminMutation.isPending}
-                    className="cursor-pointer text-sm font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+              {adminData.admins.map((admin) => {
+                const isCurrentUser = session?.user?.id === admin.user.id;
+                return (
+                  <div
+                    key={admin.id}
+                    className="flex items-center justify-between rounded-md bg-gray-50 p-3"
                   >
-                    削除
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {admin.user.name || admin.user.email}
+                        {isCurrentUser && (
+                          <span className="ml-2 text-xs text-blue-600">
+                            (あなた)
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {admin.user.email}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {new Date(admin.addedAt).toLocaleDateString("ja-JP")}{" "}
+                        に追加
+                      </div>
+                    </div>
+                    {!isCurrentUser && (
+                      <button
+                        onClick={() => handleRemoveAdmin(admin.id)}
+                        disabled={removeAdminMutation.isPending}
+                        className="cursor-pointer text-sm font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        削除
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
 
               {adminData.admins.length === 0 && (
                 <div className="py-4 text-center text-gray-500">
