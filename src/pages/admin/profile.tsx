@@ -9,7 +9,7 @@ const AdminProfile: NextPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [showEditNameModal, setShowEditNameModal] = useState(false);
   const [editedName, setEditedName] = useState("");
 
   const { data: userProfile, refetch } = api.user.getProfile.useQuery(
@@ -22,7 +22,8 @@ const AdminProfile: NextPage = () => {
   const updateNameMutation = api.user.updateName.useMutation({
     onSuccess: () => {
       void refetch();
-      setIsEditingName(false);
+      setShowEditNameModal(false);
+      setEditedName("");
     },
   });
 
@@ -126,56 +127,20 @@ const AdminProfile: NextPage = () => {
               <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <dt className="text-sm font-medium text-gray-500">名前</dt>
-                  {isEditingName ? (
-                    <div className="mt-2 flex gap-2">
-                      <input
-                        type="text"
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        className="block flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        placeholder="名前を入力"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => {
-                          if (editedName.trim()) {
-                            updateNameMutation.mutate({ name: editedName });
-                          }
-                        }}
-                        disabled={
-                          !editedName.trim() || updateNameMutation.isPending
-                        }
-                        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {updateNameMutation.isPending ? "保存中..." : "保存"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsEditingName(false);
-                          setEditedName("");
-                        }}
-                        disabled={updateNameMutation.isPending}
-                        className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        キャンセル
-                      </button>
-                    </div>
-                  ) : (
-                    <dd className="mt-1 flex items-center justify-between">
-                      <span className="text-sm text-gray-900">
-                        {userProfile?.name || "未設定"}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setEditedName(userProfile?.name || "");
-                          setIsEditingName(true);
-                        }}
-                        className="text-sm text-blue-600 hover:text-blue-700"
-                      >
-                        編集
-                      </button>
-                    </dd>
-                  )}
+                  <dd className="mt-1 flex items-center justify-between">
+                    <span className="text-sm text-gray-900">
+                      {userProfile?.name || "未設定"}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setEditedName(userProfile?.name || "");
+                        setShowEditNameModal(true);
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      編集
+                    </button>
+                  </dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">
@@ -207,6 +172,79 @@ const AdminProfile: NextPage = () => {
             </button>
           </div>
         </div>
+
+        {/* 名前編集モーダル */}
+        {showEditNameModal && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+              {/* 背景オーバーレイ */}
+              <div
+                className="bg-opacity-75 fixed inset-0 bg-gray-500 transition-opacity"
+                onClick={() => {
+                  setShowEditNameModal(false);
+                  setEditedName("");
+                }}
+              ></div>
+
+              {/* モーダルコンテンツ */}
+              <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mt-3 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        名前を編集
+                      </h3>
+                      <div className="mt-4">
+                        <label
+                          htmlFor="name"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          名前
+                        </label>
+                        <input
+                          type="text"
+                          id="name"
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)}
+                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                          placeholder="名前を入力"
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (editedName.trim()) {
+                        updateNameMutation.mutate({ name: editedName });
+                      }
+                    }}
+                    disabled={
+                      !editedName.trim() || updateNameMutation.isPending
+                    }
+                    className="inline-flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
+                  >
+                    {updateNameMutation.isPending ? "保存中..." : "保存"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditNameModal(false);
+                      setEditedName("");
+                    }}
+                    disabled={updateNameMutation.isPending}
+                    className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:mt-0 sm:w-auto"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );
