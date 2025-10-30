@@ -8,6 +8,7 @@ type ModalProps = {
   children: ReactNode;
   size?: ModalSize;
   className?: string;
+  zIndex?: string;
 };
 
 const sizeClasses: Record<ModalSize, string> = {
@@ -23,6 +24,7 @@ export const Modal = ({
   children,
   size = "md",
   className = "",
+  zIndex = "z-50",
 }: ModalProps) => {
   if (!isOpen) return null;
 
@@ -35,7 +37,7 @@ export const Modal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600/20"
+      className={`fixed inset-0 ${zIndex} h-full w-full overflow-y-auto bg-gray-600/20`}
       onClick={handleBackgroundClick}
     >
       <div

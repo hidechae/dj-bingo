@@ -77,7 +77,7 @@ export const AlertDialog = ({
   const styles = getVariantStyles();
 
   return (
-    <Modal isOpen={isOpen} size="sm" className="p-5">
+    <Modal isOpen={isOpen} size="sm" className="p-5" zIndex="z-[60]">
       <div className="text-center">
         <div className="mb-4 flex justify-center">
           <div
