@@ -105,6 +105,7 @@ export const AllIncomplete: Story = {
 export const Interactive: Story = {
   args: {},
   render: () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { sortField, sortDirection, handleSort, sortParticipants } =
       useParticipantSort();
     const sorted = sortParticipants(participants);
