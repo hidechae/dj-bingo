@@ -4,7 +4,8 @@ import { signIn, getProviders } from "next-auth/react";
 import { type GetServerSideProps } from "next";
 import { type LiteralUnion, type ClientSafeProvider } from "next-auth/react";
 import { type BuiltInProviderType } from "next-auth/providers/index";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 
 interface SignInProps {
   providers: Record<
@@ -14,10 +15,20 @@ interface SignInProps {
 }
 
 const SignIn: NextPage<SignInProps> = ({ providers }) => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+
+  // URLパラメータからエラーを取得
+  useEffect(() => {
+    if (router.query.error === "OAuthAccountNotLinked") {
+      setError(
+        "このメールアドレスは既に別の方法で登録されています。最初に使用した方法でログインしてください。"
+      );
+    }
+  }, [router.query.error]);
 
   // デバッグ用：コンソールに出力
   console.log("Providers:", providers);
@@ -77,6 +88,33 @@ const SignIn: NextPage<SignInProps> = ({ providers }) => {
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-[3rem]">
             管理者ログイン
           </h1>
+
+          {/* グローバルエラーメッセージ */}
+          {error && router.query.error && (
+            <div className="w-full rounded-lg border border-red-500/50 bg-red-500/20 p-4">
+              <div className="flex items-start gap-3">
+                <svg
+                  className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-200">{error}</p>
+                  <p className="mt-1 text-xs text-red-300">
+                    アカウントを連携したい場合は、マイページから設定できます。
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex w-full flex-col gap-6">
             {/* Email Authentication Form - Passwordless */}
