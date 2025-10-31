@@ -3,6 +3,7 @@ import { useSession, signIn } from "next-auth/react";
 import { api } from "~/utils/api";
 import { SpotifyIcon } from "~/components/icons/SpotifyIcon";
 import { Modal } from "~/components/ui/Modal";
+import { SearchInput } from "~/components/ui/SearchInput";
 
 interface SpotifyImportModalProps {
   isOpen: boolean;
@@ -336,55 +337,15 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
               </button>
             </div>
 
-            <div className="mb-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={trackSearchQuery}
-                  onChange={(e) => setTrackSearchQuery(e.target.value)}
-                  placeholder="楽曲名またはアーティスト名で絞り込み..."
-                  className="w-full rounded-md border border-gray-300 px-4 py-2 pl-10 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-                />
-                <svg
-                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                {trackSearchQuery && (
-                  <button
-                    onClick={() => setTrackSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              {trackSearchQuery && (
-                <p className="mt-2 text-sm text-gray-500">
-                  {filteredTracks.length}件の楽曲が見つかりました
-                </p>
-              )}
-            </div>
+            <SearchInput
+              value={trackSearchQuery}
+              onChange={setTrackSearchQuery}
+              placeholder="楽曲名またはアーティスト名で絞り込み..."
+              resultCount={filteredTracks.length}
+              resultLabel="件の楽曲が見つかりました"
+              focusColor="green"
+              className="mb-4"
+            />
 
             {error && (
               <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
@@ -583,50 +544,13 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
               ) : (
                 <>
                   {playlists.length > 0 && (
-                    <div className="mb-4">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={playlistSearchQuery}
-                          onChange={(e) => setPlaylistSearchQuery(e.target.value)}
-                          placeholder="プレイリスト名で絞り込み..."
-                          className="w-full rounded-md border border-gray-300 px-4 py-2 pl-10 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-                        />
-                        <svg
-                          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                          />
-                        </svg>
-                        {playlistSearchQuery && (
-                          <button
-                            onClick={() => setPlaylistSearchQuery("")}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                    <SearchInput
+                      value={playlistSearchQuery}
+                      onChange={setPlaylistSearchQuery}
+                      placeholder="プレイリスト名で絞り込み..."
+                      focusColor="green"
+                      className="mb-4"
+                    />
                   )}
 
                   {error && (
@@ -783,50 +707,13 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                       ) : (
                         <>
                           {/* 結果の絞り込み検索 */}
-                          <div className="mb-4">
-                            <div className="relative">
-                              <input
-                                type="text"
-                                value={searchResultsFilterQuery}
-                                onChange={(e) => setSearchResultsFilterQuery(e.target.value)}
-                                placeholder="検索結果を絞り込み..."
-                                className="w-full rounded-md border border-gray-300 px-4 py-2 pl-10 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none"
-                              />
-                              <svg
-                                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                />
-                              </svg>
-                              {searchResultsFilterQuery && (
-                                <button
-                                  onClick={() => setSearchResultsFilterQuery("")}
-                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                >
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M6 18L18 6M6 6l12 12"
-                                    />
-                                  </svg>
-                                </button>
-                              )}
-                            </div>
-                          </div>
+                          <SearchInput
+                            value={searchResultsFilterQuery}
+                            onChange={setSearchResultsFilterQuery}
+                            placeholder="検索結果を絞り込み..."
+                            focusColor="green"
+                            className="mb-4"
+                          />
 
                           <div className="mb-4 border-b border-gray-200">
                             <nav className="-mb-px flex space-x-6">
