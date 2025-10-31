@@ -582,33 +582,33 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                             return playlist.name.toLowerCase().includes(query);
                           })
                           .map((playlist) => (
-                          <button
-                            key={playlist.id}
-                            onClick={() => handlePlaylistSelect(playlist.id)}
-                            disabled={getUserPlaylistTracksMutation.isPending}
-                            className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {playlist.imageUrl ? (
-                              <img
-                                src={playlist.imageUrl}
-                                alt={playlist.name}
-                                className="h-12 w-12 flex-shrink-0 rounded object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
-                                <SpotifyIcon className="h-6 w-6 text-gray-400" />
+                            <button
+                              key={playlist.id}
+                              onClick={() => handlePlaylistSelect(playlist.id)}
+                              disabled={getUserPlaylistTracksMutation.isPending}
+                              className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {playlist.imageUrl ? (
+                                <img
+                                  src={playlist.imageUrl}
+                                  alt={playlist.name}
+                                  className="h-12 w-12 flex-shrink-0 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-gray-200">
+                                  <SpotifyIcon className="h-6 w-6 text-gray-400" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-gray-900">
+                                  {playlist.name}
+                                </p>
+                                <p className="truncate text-xs text-gray-500">
+                                  {playlist.owner} • {playlist.trackCount}曲
+                                </p>
                               </div>
-                            )}
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-gray-900">
-                                {playlist.name}
-                              </p>
-                              <p className="truncate text-xs text-gray-500">
-                                {playlist.owner} • {playlist.trackCount}曲
-                              </p>
-                            </div>
-                          </button>
-                        ))}
+                            </button>
+                          ))}
                         {getUserPlaylistsQuery.isFetching && (
                           <div className="py-4 text-center text-sm text-gray-500">
                             読み込み中...
@@ -759,28 +759,40 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                                   <p className="py-8 text-center text-sm text-gray-500">
                                     トラックが見つかりませんでした
                                   </p>
-                                ) : (() => {
-                                    const filteredTracks = searchResults.tracks!.filter((track) => {
-                                      if (!searchResultsFilterQuery.trim()) return true;
-                                      const query = searchResultsFilterQuery.toLowerCase();
-                                      const titleMatch = track.title.toLowerCase().includes(query);
-                                      const artistMatch = track.artist.toLowerCase().includes(query);
-                                      return titleMatch || artistMatch;
-                                    });
+                                ) : (
+                                  (() => {
+                                    const filteredTracks =
+                                      searchResults.tracks!.filter((track) => {
+                                        if (!searchResultsFilterQuery.trim())
+                                          return true;
+                                        const query =
+                                          searchResultsFilterQuery.toLowerCase();
+                                        const titleMatch = track.title
+                                          .toLowerCase()
+                                          .includes(query);
+                                        const artistMatch = track.artist
+                                          .toLowerCase()
+                                          .includes(query);
+                                        return titleMatch || artistMatch;
+                                      });
 
                                     return filteredTracks.length === 0 ? (
                                       <p className="py-8 text-center text-sm text-gray-500">
-                                        「{searchResultsFilterQuery}」に一致するトラックが見つかりませんでした
+                                        「{searchResultsFilterQuery}
+                                        」に一致するトラックが見つかりませんでした
                                       </p>
                                     ) : (
                                       <>
                                         <button
                                           onClick={() =>
-                                            handleSearchTrackSelect(filteredTracks)
+                                            handleSearchTrackSelect(
+                                              filteredTracks
+                                            )
                                           }
                                           className="w-full cursor-pointer rounded-lg border border-green-600 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition-colors hover:bg-green-100"
                                         >
-                                          すべてのトラックを選択 ({filteredTracks.length}曲)
+                                          すべてのトラックを選択 (
+                                          {filteredTracks.length}曲)
                                         </button>
                                         {filteredTracks.map((track, index) => (
                                           <div
@@ -792,13 +804,15 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                                             </p>
                                             <p className="text-xs text-gray-500">
                                               {track.artist}
-                                              {track.album && ` • ${track.album}`}
+                                              {track.album &&
+                                                ` • ${track.album}`}
                                             </p>
                                           </div>
                                         ))}
                                       </>
                                     );
-                                  })()}
+                                  })()
+                                )}
                               </div>
                             )}
 
@@ -809,18 +823,27 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                                   <p className="py-8 text-center text-sm text-gray-500">
                                     アルバムが見つかりませんでした
                                   </p>
-                                ) : (() => {
-                                    const filteredAlbums = searchResults.albums!.filter((album) => {
-                                      if (!searchResultsFilterQuery.trim()) return true;
-                                      const query = searchResultsFilterQuery.toLowerCase();
-                                      const nameMatch = album.name.toLowerCase().includes(query);
-                                      const artistMatch = album.artist.toLowerCase().includes(query);
-                                      return nameMatch || artistMatch;
-                                    });
+                                ) : (
+                                  (() => {
+                                    const filteredAlbums =
+                                      searchResults.albums!.filter((album) => {
+                                        if (!searchResultsFilterQuery.trim())
+                                          return true;
+                                        const query =
+                                          searchResultsFilterQuery.toLowerCase();
+                                        const nameMatch = album.name
+                                          .toLowerCase()
+                                          .includes(query);
+                                        const artistMatch = album.artist
+                                          .toLowerCase()
+                                          .includes(query);
+                                        return nameMatch || artistMatch;
+                                      });
 
                                     return filteredAlbums.length === 0 ? (
                                       <p className="py-8 text-center text-sm text-gray-500">
-                                        「{searchResultsFilterQuery}」に一致するアルバムが見つかりませんでした
+                                        「{searchResultsFilterQuery}
+                                        」に一致するアルバムが見つかりませんでした
                                       </p>
                                     ) : (
                                       filteredAlbums.map((album) => (
@@ -850,13 +873,15 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                                               {album.name}
                                             </p>
                                             <p className="truncate text-xs text-gray-500">
-                                              {album.artist} • {album.trackCount}曲
+                                              {album.artist} •{" "}
+                                              {album.trackCount}曲
                                             </p>
                                           </div>
                                         </button>
                                       ))
                                     );
-                                  })()}
+                                  })()
+                                )}
                               </div>
                             )}
 
@@ -868,18 +893,31 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                                     <p className="py-8 text-center text-sm text-gray-500">
                                       プレイリストが見つかりませんでした
                                     </p>
-                                  ) : (() => {
-                                      const filteredPlaylists = searchResults.playlists!.filter((playlist) => {
-                                        if (!searchResultsFilterQuery.trim()) return true;
-                                        const query = searchResultsFilterQuery.toLowerCase();
-                                        const nameMatch = playlist.name.toLowerCase().includes(query);
-                                        const ownerMatch = playlist.owner.toLowerCase().includes(query);
-                                        return nameMatch || ownerMatch;
-                                      });
+                                  ) : (
+                                    (() => {
+                                      const filteredPlaylists =
+                                        searchResults.playlists!.filter(
+                                          (playlist) => {
+                                            if (
+                                              !searchResultsFilterQuery.trim()
+                                            )
+                                              return true;
+                                            const query =
+                                              searchResultsFilterQuery.toLowerCase();
+                                            const nameMatch = playlist.name
+                                              .toLowerCase()
+                                              .includes(query);
+                                            const ownerMatch = playlist.owner
+                                              .toLowerCase()
+                                              .includes(query);
+                                            return nameMatch || ownerMatch;
+                                          }
+                                        );
 
                                       return filteredPlaylists.length === 0 ? (
                                         <p className="py-8 text-center text-sm text-gray-500">
-                                          「{searchResultsFilterQuery}」に一致するプレイリストが見つかりませんでした
+                                          「{searchResultsFilterQuery}
+                                          」に一致するプレイリストが見つかりませんでした
                                         </p>
                                       ) : (
                                         filteredPlaylists.map((playlist) => (
@@ -918,7 +956,8 @@ export const SpotifyImportModal: React.FC<SpotifyImportModalProps> = ({
                                           </button>
                                         ))
                                       );
-                                    })()}
+                                    })()
+                                  )}
                                 </div>
                               )}
                           </div>

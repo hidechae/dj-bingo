@@ -61,10 +61,7 @@ export const WithPlaceholder: Story = {
 
 export const BlueFocus: Story = {
   render: () => (
-    <SearchInputWithState
-      placeholder="Blue focus color..."
-      focusColor="blue"
-    />
+    <SearchInputWithState placeholder="Blue focus color..." focusColor="blue" />
   ),
 };
 
@@ -99,9 +96,7 @@ export const AllVariants: Story = {
         </div>
       </div>
       <div>
-        <h3 className="mb-2 text-sm font-medium text-gray-700">
-          Green Focus
-        </h3>
+        <h3 className="mb-2 text-sm font-medium text-gray-700">Green Focus</h3>
         <div className="w-96">
           <SearchInputWithState
             placeholder="プレイリスト名で絞り込み..."

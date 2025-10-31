@@ -33,7 +33,7 @@ export const SearchInput = ({
           className={`w-full rounded-md border border-gray-300 px-4 py-2 pl-10 text-sm focus:ring-1 focus:outline-none ${focusClasses}`}
         />
         <svg
-          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -48,7 +48,7 @@ export const SearchInput = ({
         {value && (
           <button
             onClick={() => onChange("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
             <svg
               className="h-4 w-4"
