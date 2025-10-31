@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { GameStatus, type BingoGame, type Song } from "~/types";
 import { SongInfo } from "~/components/common/SongInfo";
 import { SpotifyIcon } from "~/components/icons/SpotifyIcon";
+import { SearchInput } from "~/components/ui/SearchInput";
 
 type SongListProps = {
   bingoGame: BingoGame;
@@ -26,6 +28,7 @@ export const SongList = ({
   isDeletingSong = false,
 }: SongListProps) => {
   const currentStatus = bingoGame.status as GameStatus;
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Check for duplicate songs (same title and artist)
   const findDuplicates = () => {
@@ -41,6 +44,20 @@ export const SongList = ({
   };
 
   const duplicates = findDuplicates();
+
+  // Filter songs based on search query
+  const filterSongs = (songs: Song[]) => {
+    if (!searchQuery.trim()) return songs;
+
+    const query = searchQuery.toLowerCase();
+    return songs.filter((song) => {
+      const titleMatch = song.title.toLowerCase().includes(query);
+      const artistMatch = (song.artist || "").toLowerCase().includes(query);
+      return titleMatch || artistMatch;
+    });
+  };
+
+  const filteredSongs = filterSongs(bingoGame.songs);
 
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm">
@@ -76,6 +93,18 @@ export const SongList = ({
           </div>
         )}
       </div>
+
+      {bingoGame.songs.length > 0 && (
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="楽曲名またはアーティスト名で検索..."
+          resultCount={filteredSongs.length}
+          resultLabel="件の楽曲が見つかりました"
+          focusColor="blue"
+          className="mb-4"
+        />
+      )}
 
       {duplicates.length > 0 && (
         <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-4">
@@ -121,15 +150,21 @@ export const SongList = ({
       )}
 
       {bingoGame.songs.length > 0 ? (
-        <SongDisplayMode
-          songs={bingoGame.songs}
-          currentStatus={currentStatus}
-          onEditSong={onEditSong}
-          onDeleteSong={onDeleteSong}
-          onToggleSongPlayed={onToggleSongPlayed}
-          isMarkingPlayed={isMarkingPlayed}
-          isDeletingSong={isDeletingSong}
-        />
+        filteredSongs.length > 0 ? (
+          <SongDisplayMode
+            songs={filteredSongs}
+            currentStatus={currentStatus}
+            onEditSong={onEditSong}
+            onDeleteSong={onDeleteSong}
+            onToggleSongPlayed={onToggleSongPlayed}
+            isMarkingPlayed={isMarkingPlayed}
+            isDeletingSong={isDeletingSong}
+          />
+        ) : (
+          <div className="py-8 text-center text-gray-500">
+            <p>「{searchQuery}」に一致する楽曲が見つかりませんでした</p>
+          </div>
+        )
       ) : (
         <EmptyState currentStatus={currentStatus} />
       )}
