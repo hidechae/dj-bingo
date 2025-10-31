@@ -23,7 +23,8 @@
     "vercel-build": "prisma migrate deploy && next build",
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "chromatic": "chromatic --exit-zero-on-changes"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.4.2",
@@ -79,6 +80,7 @@
     "@vitest/browser-playwright": "^4.0.4",
     "@vitest/coverage-v8": "^4.0.4",
     "@vitest/ui": "^4.0.4",
+    "chromatic": "^13.3.2",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.0",
     "eslint-plugin-react": "^7.37.5",
