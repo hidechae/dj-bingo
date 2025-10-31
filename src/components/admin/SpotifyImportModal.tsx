@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { api } from "~/utils/api";
-import { SpotifyIcon } from "~/components/common/SpotifyIcon";
+import { SpotifyIcon } from "~/components/icons/SpotifyIcon";
 import { Modal } from "~/components/ui/Modal";
 
 interface SpotifyImportModalProps {

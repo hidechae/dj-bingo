@@ -1,4 +1,4 @@
-import { SpotifyIcon } from "~/components/common/SpotifyIcon";
+import { SpotifyIcon } from "~/components/icons/SpotifyIcon";
 
 type SongEditModeProps = {
   songs: Array<{ title: string; artist: string }>;

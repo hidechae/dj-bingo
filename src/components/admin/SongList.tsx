@@ -1,6 +1,6 @@
 import { GameStatus, type BingoGame, type Song } from "~/types";
 import { SongInfo } from "~/components/common/SongInfo";
-import { SpotifyIcon } from "~/components/common/SpotifyIcon";
+import { SpotifyIcon } from "~/components/icons/SpotifyIcon";
 
 type SongListProps = {
   bingoGame: BingoGame;
