@@ -63,6 +63,7 @@ const createProviders = () => {
       GoogleProvider({
         clientId: env.GOOGLE_CLIENT_ID,
         clientSecret: env.GOOGLE_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true, // 同じメールアドレスで複数のプロバイダーを使用可能にする
       })
     );
   } else {
@@ -76,6 +77,7 @@ const createProviders = () => {
       SpotifyProvider({
         clientId: env.SPOTIFY_CLIENT_ID,
         clientSecret: env.SPOTIFY_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true, // 同じメールアドレスで複数のプロバイダーを使用可能にする
         authorization: {
           params: {
             scope:
