@@ -2,18 +2,32 @@ import {
   type ParticipantSortField,
   type SortDirection,
 } from "~/hooks/useParticipantSort";
-import { type Participant } from "~/types";
+import { type Participant, type Song } from "~/types";
 import { SortableHeader } from "./SortableHeader";
 
 type ParticipantTableProps = {
   participants: Participant[];
+  songs: Song[];
   sortField: ParticipantSortField;
   sortDirection: SortDirection;
   onSort: (field: ParticipantSortField) => void;
 };
 
+// 勝利時点で何曲プレイされていたかを計算
+const getWinSongNumber = (wonAt: Date | null, songs: Song[]): number | null => {
+  if (!wonAt) return null;
+
+  // wonAt時点でプレイされていた曲の数を計算
+  const playedSongs = songs.filter(
+    (song) => song.playedAt && new Date(song.playedAt) <= wonAt
+  );
+
+  return playedSongs.length;
+};
+
 export const ParticipantTable = ({
   participants,
+  songs,
   sortField,
   sortDirection,
   onSort,
@@ -51,6 +65,13 @@ export const ParticipantTable = ({
                 onSort={onSort}
               />
               <SortableHeader
+                label="勝利曲数"
+                field="wonSongNumber"
+                currentSortField={sortField}
+                sortDirection={sortDirection}
+                onSort={onSort}
+              />
+              <SortableHeader
                 label="参加時間"
                 field="createdAt"
                 currentSortField={sortField}
@@ -60,36 +81,49 @@ export const ParticipantTable = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {participants.map((participant) => (
-              <tr key={participant.id}>
-                <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                  {participant.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                      participant.isGridComplete
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {participant.isGridComplete ? "完成" : "設定中"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {participant.hasWon ? (
-                    <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">
-                      勝利！
+            {participants.map((participant) => {
+              const winSongNumber = getWinSongNumber(participant.wonAt, songs);
+
+              return (
+                <tr key={participant.id}>
+                  <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                    {participant.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                        participant.isGridComplete
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {participant.isGridComplete ? "完成" : "設定中"}
                     </span>
-                  ) : (
-                    <span className="text-sm text-gray-500">未勝利</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                  {new Date(participant.createdAt).toLocaleString()}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {participant.hasWon ? (
+                      <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">
+                        勝利！
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-500">未勝利</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                    {winSongNumber !== null ? (
+                      <span className="font-medium text-gray-900">
+                        {winSongNumber}曲目
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                    {new Date(participant.createdAt).toLocaleString()}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

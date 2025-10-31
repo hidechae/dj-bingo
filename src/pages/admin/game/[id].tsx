@@ -413,7 +413,9 @@ const AdminGameManagement: NextPage = () => {
     return null;
   }
 
-  const sortedParticipants = participants ? sortParticipants(participants) : [];
+  const sortedParticipants = participants
+    ? sortParticipants(participants, bingoGame.songs)
+    : [];
   const currentStatus = bingoGame.status as GameStatus;
 
   return (
@@ -603,6 +605,7 @@ const AdminGameManagement: NextPage = () => {
               {activeTab === "participants" && (
                 <ParticipantTable
                   participants={sortedParticipants}
+                  songs={bingoGame.songs}
                   sortField={sortField}
                   sortDirection={sortDirection}
                   onSort={handleSort}
