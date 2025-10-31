@@ -12,6 +12,15 @@ jobs:
   chromatic:
     name: Run Chromatic
     runs-on: ubuntu-latest
+    env:
+      # Dummy values for build-time environment variables
+      DATABASE_URL: postgresql://user:password@localhost:5432/db
+      DIRECT_DATABASE_URL: postgresql://user:password@localhost:5432/db
+      NEXTAUTH_SECRET: dummy-secret-for-chromatic-build-only
+      NEXTAUTH_URL: http://localhost:3000
+      GOOGLE_CLIENT_ID: dummy-client-id
+      GOOGLE_CLIENT_SECRET: dummy-client-secret
+      SKIP_ENV_VALIDATION: true
     steps:
       - uses: actions/checkout@v5
         with:
