@@ -14,7 +14,7 @@ const QRCodePrintPage: NextPage = () => {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [participantUrl, setParticipantUrl] = useState<string>("");
 
-  const { data: bingoGame } = api.bingo.getById.useQuery(
+  const { data: bingoGame } = api.bingo.getByIdForAdmin.useQuery(
     { id: id as string },
     { enabled: !!id && !!session }
   );
