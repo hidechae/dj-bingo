@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import {
   getGridSize,
   getRequiredSongCount,
@@ -292,24 +292,10 @@ export const bingoRouter = createTRPCRouter({
       };
     }),
 
-  getById: protectedProcedure
+  getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      // Check if current user has admin permission
-      const hasPermission = await checkGameAdminPermission(
-        ctx.repositories,
-        input.id,
-        ctx.session.user.id
-      );
-
-      if (!hasPermission) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "このゲームにアクセスする権限がありません",
-        });
-      }
-
-      const bingoGame = await ctx.repositories.bingoGame.findByIdWithDetails(
+      const bingoGame = await ctx.repositories.bingoGame.findByIdWithSongs(
         input.id
       );
 
