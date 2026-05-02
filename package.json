@@ -100,7 +100,7 @@
     "vitest": "^4.0.4"
   },
   "engines": {
-    "node": ">=22.0.0 <23.0.0"
+    "node": "<25.0.0"
   },
   "ct3aMetadata": {
     "initVersion": "7.37.0"
