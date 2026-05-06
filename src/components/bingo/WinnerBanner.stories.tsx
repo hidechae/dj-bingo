@@ -31,7 +31,9 @@ export const NotWon: Story = {
 };
 
 export const Comparison: Story = {
-  args: {},
+  args: {
+    hasWon: false,
+  },
   render: () => (
     <div className="space-y-4">
       <div>

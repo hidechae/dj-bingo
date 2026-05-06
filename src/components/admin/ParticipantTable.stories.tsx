@@ -60,6 +60,7 @@ const manyParticipants: Participant[] = Array.from({ length: 20 }, (_, i) =>
 export const Default: Story = {
   args: {
     participants,
+    songs: [],
     sortField: "createdAt",
     sortDirection: "desc",
     onSort: () => {},
@@ -69,6 +70,7 @@ export const Default: Story = {
 export const Empty: Story = {
   args: {
     participants: [],
+    songs: [],
     sortField: "createdAt",
     sortDirection: "desc",
     onSort: () => {},
@@ -78,6 +80,7 @@ export const Empty: Story = {
 export const ManyParticipants: Story = {
   args: {
     participants: manyParticipants,
+    songs: [],
     sortField: "createdAt",
     sortDirection: "desc",
     onSort: () => {},
@@ -87,6 +90,7 @@ export const ManyParticipants: Story = {
 export const AllWinners: Story = {
   args: {
     participants: participants.map((p) => ({ ...p, hasWon: true })),
+    songs: [],
     sortField: "createdAt",
     sortDirection: "desc",
     onSort: () => {},
@@ -96,6 +100,7 @@ export const AllWinners: Story = {
 export const AllIncomplete: Story = {
   args: {
     participants: participants.map((p) => ({ ...p, isGridComplete: false })),
+    songs: [],
     sortField: "createdAt",
     sortDirection: "desc",
     onSort: () => {},
@@ -103,7 +108,13 @@ export const AllIncomplete: Story = {
 };
 
 export const Interactive: Story = {
-  args: {},
+  args: {
+    participants,
+    songs: [],
+    sortField: "createdAt",
+    sortDirection: "desc",
+    onSort: () => {},
+  },
   render: () => {
     const { sortField, sortDirection, handleSort, sortParticipants } =
       useParticipantSort();
@@ -112,6 +123,7 @@ export const Interactive: Story = {
     return (
       <ParticipantTable
         participants={sorted}
+        songs={[]}
         sortField={sortField}
         sortDirection={sortDirection}
         onSort={handleSort}

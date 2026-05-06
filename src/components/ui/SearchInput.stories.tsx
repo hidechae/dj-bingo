@@ -49,23 +49,32 @@ const SearchInputWithState = (args: {
   );
 };
 
+const baseArgs = {
+  value: "",
+  onChange: () => {},
+};
+
 export const Default: Story = {
+  args: baseArgs,
   render: () => <SearchInputWithState />,
 };
 
 export const WithPlaceholder: Story = {
+  args: baseArgs,
   render: () => (
     <SearchInputWithState placeholder="楽曲名またはアーティスト名で検索..." />
   ),
 };
 
 export const BlueFocus: Story = {
+  args: baseArgs,
   render: () => (
     <SearchInputWithState placeholder="Blue focus color..." focusColor="blue" />
   ),
 };
 
 export const GreenFocus: Story = {
+  args: baseArgs,
   render: () => (
     <SearchInputWithState
       placeholder="Green focus color..."
@@ -75,6 +84,7 @@ export const GreenFocus: Story = {
 };
 
 export const WithResultCount: Story = {
+  args: baseArgs,
   render: () => (
     <SearchInputWithState
       placeholder="Search with result count..."
@@ -85,6 +95,7 @@ export const WithResultCount: Story = {
 };
 
 export const AllVariants: Story = {
+  args: baseArgs,
   render: () => (
     <div className="flex flex-col gap-6 p-4">
       <div>
