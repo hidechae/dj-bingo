@@ -154,7 +154,10 @@ export const Interactive: Story = {
 };
 
 export const AllSizes: Story = {
-  args: {},
+  args: {
+    grid: partialGrid3x3,
+    gridSize: 3,
+  },
   render: () => (
     <div className="flex flex-col gap-8">
       <div>

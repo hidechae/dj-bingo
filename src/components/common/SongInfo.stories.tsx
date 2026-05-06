@@ -60,7 +60,9 @@ export const CustomClassName: Story = {
 };
 
 export const Examples: Story = {
-  args: {},
+  args: {
+    title: "",
+  },
   render: () => (
     <div className="flex w-96 flex-col gap-4">
       <div className="rounded-lg border border-gray-200 p-3">

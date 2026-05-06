@@ -84,7 +84,11 @@ export const RecentWin: Story = {
 };
 
 export const States: Story = {
-  args: {},
+  args: {
+    hasWon: false,
+    grid: noWinGrid,
+    gridSize: 3,
+  },
   render: () => (
     <div className="flex flex-col gap-8">
       <div>
