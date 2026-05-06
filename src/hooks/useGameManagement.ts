@@ -14,10 +14,8 @@ import { api } from "~/utils/api";
  */
 export const useGameManagement = (gameId: string) => {
   // ゲーム情報の取得
-  const { data: bingoGame, refetch: refetchGame } = api.bingo.getById.useQuery(
-    { id: gameId },
-    { enabled: !!gameId }
-  );
+  const { data: bingoGame, refetch: refetchGame } =
+    api.bingo.getByIdForAdmin.useQuery({ id: gameId }, { enabled: !!gameId });
 
   // 参加者一覧の取得
   const { data: participants, refetch: refetchParticipants } =

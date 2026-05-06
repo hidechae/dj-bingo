@@ -40,13 +40,13 @@
     "@types/qrcode": "^1.5.5",
     "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^3.0.2",
-    "next": "16.0.1",
+    "next": "16.0.10",
     "next-auth": "^4.24.8",
     "nodemailer": "^7.0.10",
     "prisma": "^6.0.0",
     "qrcode": "^1.5.4",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
     "resend": "^6.3.0",
     "server-only": "^0.0.1",
     "spotify-web-api-node": "^5.0.2",
@@ -70,8 +70,8 @@
     "@types/eslint": "^9.0.0",
     "@types/node": "^24.0.0",
     "@types/nodemailer": "^7.0.3",
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
     "@types/spotify-web-api-node": "^5.0.11",
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
@@ -100,7 +100,7 @@
     "vitest": "^4.0.4"
   },
   "engines": {
-    "node": ">=22.0.0 <23.0.0"
+    "node": "<25.0.0"
   },
   "ct3aMetadata": {
     "initVersion": "7.37.0"
@@ -115,7 +115,7 @@
     ]
   },
   "overrides": {
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2"
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
   }
 }
