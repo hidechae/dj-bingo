@@ -1,4 +1,4 @@
-import { type PrismaClient, Prisma } from "@prisma/client";
+import { type PrismaClient, Prisma } from "~/generated/prisma";
 import {
   type BingoGameEntity,
   type BingoGameWithSongs,

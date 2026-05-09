@@ -1,4 +1,4 @@
-import { type PrismaClient, type Song as PrismaSong } from "@prisma/client";
+import { type PrismaClient, type Song as PrismaSong } from "~/generated/prisma";
 import { type SongEntity, type CreateSongInput } from "~/domain/models";
 
 export class SongRepository {

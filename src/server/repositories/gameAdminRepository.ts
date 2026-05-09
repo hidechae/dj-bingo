@@ -1,7 +1,7 @@
 import {
   type PrismaClient,
   type GameAdmin as PrismaGameAdmin,
-} from "@prisma/client";
+} from "~/generated/prisma";
 import {
   type GameAdminEntity,
   type GameAdminWithUser,
