@@ -20,13 +20,13 @@ runs:
       run: npm install
       shell: bash
       env:
-        DATABASE_URL: ${{ env.DATABASE_URL || 'postgresql://user:password@localhost:5432/db' }}
-        DIRECT_DATABASE_URL: ${{ env.DIRECT_DATABASE_URL || 'postgresql://user:password@localhost:5432/db' }}
+        DATABASE_URL: postgresql://user:password@localhost:5432/db
+        DIRECT_DATABASE_URL: postgresql://user:password@localhost:5432/db
 
     - name: Generate Prisma Client
       if: inputs.generate-prisma == 'true'
       run: npm run db:generate
       shell: bash
       env:
-        DATABASE_URL: ${{ env.DATABASE_URL || 'postgresql://user:password@localhost:5432/db' }}
-        DIRECT_DATABASE_URL: ${{ env.DIRECT_DATABASE_URL || 'postgresql://user:password@localhost:5432/db' }}
+        DATABASE_URL: postgresql://user:password@localhost:5432/db
+        DIRECT_DATABASE_URL: postgresql://user:password@localhost:5432/db
