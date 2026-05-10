@@ -105,8 +105,13 @@
     "initVersion": "7.37.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["prettier --write", "eslint --fix"],
-    "*.{json,md,css}": ["prettier --write"]
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   },
   "overrides": {
     "@types/react": "19.2.14",
