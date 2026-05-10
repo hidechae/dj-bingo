@@ -1,9 +1,9 @@
 name: "Setup Project"
-description: "Setup Node.js, install dependencies, and generate Prisma client"
+description: "Setup Node.js, install dependencies, and optionally generate Prisma client"
 
 inputs:
   generate-prisma:
-    description: "Whether to generate Prisma client (deprecated: always generates now)"
+    description: "Whether to generate Prisma client"
     required: false
     default: "false"
 
@@ -17,7 +17,7 @@ runs:
         cache: "npm"
 
     - name: Install dependencies
-      run: npm install --ignore-scripts
+      run: npm install
       shell: bash
 
     - name: Generate Prisma Client

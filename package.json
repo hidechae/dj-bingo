@@ -13,7 +13,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint ./src",
-    "postinstall": "prisma generate",
     "start": "next start",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -106,13 +105,8 @@
     "initVersion": "7.37.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "*.{json,md,css}": [
-      "prettier --write"
-    ]
+    "*.{js,jsx,ts,tsx}": ["prettier --write", "eslint --fix"],
+    "*.{json,md,css}": ["prettier --write"]
   },
   "overrides": {
     "@types/react": "19.2.14",
