@@ -1,9 +1,9 @@
 name: "Setup Project"
-description: "Setup Node.js, install dependencies, and optionally generate Prisma client"
+description: "Setup Node.js, install dependencies, and generate Prisma client"
 
 inputs:
   generate-prisma:
-    description: "Whether to generate Prisma client"
+    description: "Whether to generate Prisma client (deprecated: always generates now)"
     required: false
     default: "false"
 
@@ -17,14 +17,10 @@ runs:
         cache: "npm"
 
     - name: Install dependencies
-      run: npm install
+      run: npm install --ignore-scripts
       shell: bash
-      env:
-        DATABASE_URL: postgresql://user:password@localhost:5432/db
-        DIRECT_DATABASE_URL: postgresql://user:password@localhost:5432/db
 
     - name: Generate Prisma Client
-      if: inputs.generate-prisma == 'true'
       run: npm run db:generate
       shell: bash
       env:
