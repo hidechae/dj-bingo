@@ -1,4 +1,7 @@
-import { type PrismaClient, type User as PrismaUser } from "@prisma/client";
+import {
+  type PrismaClient,
+  type User as PrismaUser,
+} from "~/generated/prisma/client";
 import { type UserEntity } from "~/domain/models";
 
 export class UserRepository {

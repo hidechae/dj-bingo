@@ -14,6 +14,8 @@ const eslintConfig = [
       "storybook-static/**",
       "next-env.d.ts",
       "**/*.stories.tsx",
+      "src/generated/",
+      "src/generated/**",
     ],
   },
   js.configs.recommended,

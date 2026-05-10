@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ParticipantRepository } from "../participantRepository";
 import { createMockPrismaClient } from "~/test/mockPrisma";
-import { type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "~/generated/prisma/client";
 
 describe("ParticipantRepository", () => {
   let mockPrisma: PrismaClient;

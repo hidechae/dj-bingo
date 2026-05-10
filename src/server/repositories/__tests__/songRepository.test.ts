@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { SongRepository } from "../songRepository";
 import { createMockPrismaClient } from "~/test/mockPrisma";
-import { type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "~/generated/prisma/client";
 
 describe("SongRepository", () => {
   let mockPrisma: PrismaClient;

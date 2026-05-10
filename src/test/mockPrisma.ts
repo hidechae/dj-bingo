@@ -1,10 +1,6 @@
-import { type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "~/generated/prisma/client";
 import { vi } from "vitest";
 
-/**
- * Create a mock Prisma client for testing
- * This provides type-safe mocks for all Prisma operations
- */
 export function createMockPrismaClient(): PrismaClient {
   return {
     bingoGame: {
@@ -117,7 +113,6 @@ export function createMockPrismaClient(): PrismaClient {
     $queryRawUnsafe: vi.fn(),
     $transaction: vi.fn(),
     $on: vi.fn(),
-    $use: vi.fn(),
     $extends: vi.fn(),
   } as unknown as PrismaClient;
 }
