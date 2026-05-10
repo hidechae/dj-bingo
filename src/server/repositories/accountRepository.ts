@@ -1,7 +1,7 @@
 import {
   type PrismaClient,
   type Account as PrismaAccount,
-} from "~/generated/prisma";
+} from "~/generated/prisma/client";
 
 export interface AccountEntity {
   id: string;

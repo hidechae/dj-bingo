@@ -1,7 +1,7 @@
 import {
   type PrismaClient,
   type ParticipantSong as PrismaParticipantSong,
-} from "~/generated/prisma";
+} from "~/generated/prisma/client";
 import {
   type ParticipantSongEntity,
   type ParticipantSongWithSong,
