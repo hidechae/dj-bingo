@@ -120,9 +120,7 @@ export const api = createTRPCNext<AppRouter>({
   config() {
     return {
       links: [
-        loggerLink({
-          /* ... */
-        }),
+        loggerLink({/* ... */}),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`, // APIエンドポイント
           transformer: superjson, // 型変換
