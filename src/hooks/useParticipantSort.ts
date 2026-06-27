@@ -9,11 +9,7 @@ import { type Participant, type Song } from "~/types";
 
 /** ソート可能なフィールド */
 export type ParticipantSortField =
-  | "name"
-  | "createdAt"
-  | "isGridComplete"
-  | "hasWon"
-  | "wonSongNumber";
+  "name" | "createdAt" | "isGridComplete" | "hasWon" | "wonSongNumber";
 
 /** ソート方向 */
 export type SortDirection = "asc" | "desc";
