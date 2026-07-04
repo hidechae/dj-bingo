@@ -82,7 +82,7 @@
     "@vitest/browser-playwright": "^4.0.4",
     "@vitest/coverage-v8": "^4.0.4",
     "@vitest/ui": "^4.0.4",
-    "chromatic": "^17.0.0",
+    "chromatic": "^18.0.0",
     "eslint": "^10.0.0",
     "eslint-config-next": "^16.0.0",
     "eslint-plugin-react": "^7.37.5",
