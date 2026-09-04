@@ -78,10 +78,10 @@
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
     "@vitejs/plugin-react": "^6.0.0",
-    "@vitest/browser": "^4.0.4",
-    "@vitest/browser-playwright": "^4.0.4",
-    "@vitest/coverage-v8": "^4.0.4",
-    "@vitest/ui": "^4.0.4",
+    "@vitest/browser": "^5.0.0",
+    "@vitest/browser-playwright": "^5.0.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "@vitest/ui": "^5.0.0",
     "chromatic": "^18.0.0",
     "eslint": "^10.0.0",
     "eslint-config-next": "^16.0.0",
@@ -99,7 +99,8 @@
     "tailwindcss": "^4.1.14",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.46.2",
-    "vitest": "^4.0.4"
+    "vite": "^8.0.0",
+    "vitest": "^5.0.0"
   },
   "engines": {
     "node": "<25.0.0"
