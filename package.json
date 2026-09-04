@@ -43,7 +43,7 @@
     "bcryptjs": "^3.0.2",
     "next": "16.3.4",
     "next-auth": "^4.24.8",
-    "nodemailer": "^9.0.0",
+    "nodemailer": "^10.0.0",
     "pg": "^8.20.0",
     "prisma": "^7.0.0",
     "qrcode": "^1.5.4",
