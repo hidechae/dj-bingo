@@ -44,24 +44,36 @@ Prisma のマイグレーションは、以下の操作を含む複雑なトラ�
 
 ## 解決方法
 
-### Prisma Schema で `directUrl` を設定する
+### `prisma.config.ts` で CLI の接続先を分ける
 
-`prisma/schema.prisma` で `directUrl` を設定することで、マイグレーション時には Direct Connection を使用し、通常のクエリ時には Transaction Pooler を使用できます。
+Prisma 7 で `datasource` ブロックの `directUrl` は廃止されました。接続先は次の 2 か所に分かれています。
 
-#### 現在の設定（`prisma/schema.prisma:8-12`）
+#### 現在の設定
 
-```prisma
-datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_DATABASE_URL")
-}
+`prisma.config.ts` が Prisma CLI（`migrate` / `introspect`）の接続先を決めます。
+
+```ts
+export default defineConfig({
+  datasource: {
+    url: process.env.DIRECT_DATABASE_URL,
+  },
+});
 ```
 
-この設定により：
+実行時のクエリは `src/server/db.ts` のドライバアダプタが担当し、こちらは `DATABASE_URL` を使います。
 
-- `url` (DATABASE_URL) → 通常のクエリ実行に使用
-- `directUrl` (DIRECT_DATABASE_URL) → マイグレーション実行時に使用
+```ts
+new PrismaClient({
+  adapter: new PrismaPg({ connectionString: env.DATABASE_URL }),
+});
+```
+
+この構成により：
+
+- `DATABASE_URL` → 通常のクエリ実行に使用（Transaction Pooler）
+- `DIRECT_DATABASE_URL` → マイグレーション実行時に使用（Direct Connection）
+
+`DIRECT_DATABASE_URL` が未設定の場合、`prisma migrate deploy` は接続先なしで即座に失敗します。プーラー経由で走ってタイムアウトするより原因が分かりやすいため、意図的にフォールバックを置いていません。
 
 #### Vercel 環境変数の設定
 
@@ -110,12 +122,13 @@ DIRECT_DATABASE_URL="postgresql://[user]:[password]@[host]:5432/postgres?sslmode
 
 ### package.json のビルドスクリプト
 
-`package.json` に `vercel-build` スクリプトが設定されていることを確認してください（`package.json:22`）：
+`package.json` に `vercel-build` スクリプトが設定されていることを確認してください：
 
 ```json
 {
   "scripts": {
-    "vercel-build": "prisma migrate deploy && next build"
+    "build": "prisma generate && next build",
+    "vercel-build": "prisma migrate deploy && npm run build"
   }
 }
 ```
@@ -123,7 +136,12 @@ DIRECT_DATABASE_URL="postgresql://[user]:[password]@[host]:5432/postgres?sslmode
 このスクリプトにより：
 
 1. `prisma migrate deploy` が `DIRECT_DATABASE_URL` を使用してマイグレーション実行
-2. `next build` でアプリケーションをビルド
+2. `prisma generate` が `src/generated/prisma` に Prisma Client を生成
+3. `next build` でアプリケーションをビルド
+
+`src/generated` は gitignore 対象なので、`prisma generate` を省くとビルドが
+`Cannot find module '~/generated/prisma/client'` で失敗します。CI も同じ `npm run build` を
+実行するため、この手順が壊れれば CI で検知できます。
 
 ## よくある間違い
 
@@ -135,17 +153,18 @@ DATABASE_URL="postgresql://[user]:[password]@[host]:6543/postgres?pgbouncer=true
 DIRECT_DATABASE_URL="postgresql://[user]:[password]@[host]:6543/postgres?pgbouncer=true"
 ```
 
-### ❌ directUrl を設定していない
+### ❌ CLI の接続先にプーラーを指定している
 
-```prisma
-datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-    // directUrl が設定されていない
-}
+```ts
+export default defineConfig({
+  datasource: {
+    // Transaction Pooler の URL を指定してしまっている
+    url: process.env.DATABASE_URL,
+  },
+});
 ```
 
-この場合、マイグレーションも `DATABASE_URL` を使用するため、Transaction Pooler 経由でマイグレーションを実行しようとして失敗します。
+この場合、マイグレーションも Transaction Pooler 経由で実行されるため失敗します。
 
 ### ✅ 正しい設定
 
@@ -157,12 +176,13 @@ DATABASE_URL="postgresql://[user]:[password]@[host]:6543/postgres?pgbouncer=true
 DIRECT_DATABASE_URL="postgresql://[user]:[password]@[host]:5432/postgres?sslmode=require"
 ```
 
-```prisma
-datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_DATABASE_URL")
-}
+```ts
+// prisma.config.ts
+export default defineConfig({
+  datasource: {
+    url: process.env.DIRECT_DATABASE_URL,
+  },
+});
 ```
 
 ## ローカル開発環境
@@ -204,7 +224,7 @@ All migrations have been successfully applied.
 
 - **マイグレーションには Direct Connection または Session Pooler が必須**
 - Transaction Pooler はマイグレーションに適していない
-- `prisma/schema.prisma` で `directUrl` を必ず設定する
+- `prisma.config.ts` の `datasource.url` に `DIRECT_DATABASE_URL` を必ず設定する
 - Vercel で `DATABASE_URL`（Transaction Pooler）と `DIRECT_DATABASE_URL`（Direct/Session）を分ける
 
 ## 関連ドキュメント
