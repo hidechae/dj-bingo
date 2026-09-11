@@ -108,7 +108,8 @@ DATABASE_URL="postgresql://[user]:[password]@[host]:5432/postgres?sslmode=requir
 
 #### 関連ファイル
 
-- `prisma/schema.prisma:10-11` - DATABASE_URL と DIRECT_DATABASE_URL の設定
+- `prisma.config.ts` - Prisma CLI（マイグレーション）が使う DIRECT_DATABASE_URL の設定
+- `src/env.js` - 環境変数のスキーマ定義
 - `src/server/db.ts` - Prisma クライアントの初期化
 
 #### 参考リンク
