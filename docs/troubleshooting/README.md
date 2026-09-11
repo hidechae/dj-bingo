@@ -14,7 +14,7 @@ DJ Bingo アプリケーションで発生する可能性のある問題とそ�
 - [Vercel デプロイ時のマイグレーションタイムアウト](./migration-timeout.md)
   - `prisma migrate deploy` で処理が止まる問題
   - Transaction Pooler でマイグレーションが失敗する原因
-  - `directUrl` の設定方法
+  - `prisma.config.ts` でのマイグレーション接続先の設定方法
 
 ---
 
