@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useInitialLoading } from "~/hooks/useInitialLoading";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { useAlert } from "~/hooks/useAlert";
-import { getBingoSizeDisplay } from "~/types";
+import { getBingoSizeDisplay, getStatusDisplay } from "~/types";
 
 const AdminDashboard: NextPage = () => {
   const { data: session, status } = useSession();
@@ -187,7 +187,12 @@ const AdminDashboard: NextPage = () => {
                       <p>
                         作成日: {new Date(game.createdAt).toLocaleDateString()}
                       </p>
-                      <div className="mt-2">
+                      <div className="mt-2 flex gap-2">
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getStatusDisplay(game.status).color}`}
+                        >
+                          {getStatusDisplay(game.status).text}
+                        </span>
                         {game.createdBy === session.user.id ? (
                           <span className="inline-flex items-center rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
                             作成者
