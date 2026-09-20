@@ -1,12 +1,29 @@
 name: Chromatic
 
+# 一時停止中。このリポジトリはほぼ Renovate の依存更新のみが動く
+# メンテナンスモードで、ビジュアル回帰を見る意味が薄いわりに
+# Chromatic のスナップショット無料枠を使い切ってしまうため、
+# 自動実行を止めて手動実行のみにしている。
+#
+# 再開するときは下の workflow_dispatch を push / pull_request に戻す:
+#
+#   on:
+#     push:
+#       branches:
+#         - main
+#     pull_request:
+#       branches:
+#         - main
+#
+# 再開直後の 1 回目はベースライン作成のためフルビルドになる。
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+
+# Cancel superseded runs on PR branches. Never cancel on main so that the
+# visual baseline is always published for every commit that lands.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   chromatic:
@@ -26,12 +43,17 @@ jobs:
         with:
           fetch-depth: 0 # Chromatic needs full git history for baseline comparison
 
+      # The Storybook build never reaches the Prisma client, so this job skips
+      # `prisma generate` (verified with a clean `build-storybook`).
       - uses: ./.github/actions/setup
 
       - name: Publish to Chromatic
-        uses: chromaui/action@latest
+        uses: chromaui/action@v18
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          # TurboSnap: only snapshot the stories the diff can actually affect.
+          # Dependency-bump PRs that touch no component cost ~0 snapshots.
+          onlyChanged: true
           # Auto-accept changes on main branch, manual review on PRs
           autoAcceptChanges: ${{ github.ref == 'refs/heads/main' }}
           # Exit with error if there are visual changes (optional, can be removed)
