@@ -1,12 +1,23 @@
 name: Chromatic
 
+# 一時停止中。このリポジトリはほぼ Renovate の依存更新のみが動く
+# メンテナンスモードで、ビジュアル回帰を見る意味が薄いわりに
+# Chromatic のスナップショット無料枠を使い切ってしまうため、
+# 自動実行を止めて手動実行のみにしている。
+#
+# 再開するときは下の workflow_dispatch を push / pull_request に戻す:
+#
+#   on:
+#     push:
+#       branches:
+#         - main
+#     pull_request:
+#       branches:
+#         - main
+#
+# 再開直後の 1 回目はベースライン作成のためフルビルドになる。
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 # Cancel superseded runs on PR branches. Never cancel on main so that the
 # visual baseline is always published for every commit that lands.

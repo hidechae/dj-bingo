@@ -1,18 +1,16 @@
 name: CI
 
+# PR でのみ実行する。main へは PR 経由でしか入らないため、マージ直後に
+# 同じコードをもう一度検証する push トリガーは重複でしかなかった。
 on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
 
-# Cancel superseded runs on PR branches. Never cancel on main so that every
-# commit that lands keeps a conclusive result.
+# Cancel superseded runs when a PR branch is pushed again.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: true
 
 jobs:
   # A single job on purpose: each check finishes in well under a minute, so
