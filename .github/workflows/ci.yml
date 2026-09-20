@@ -8,54 +8,18 @@ on:
     branches:
       - main
 
+# Cancel superseded runs on PR branches. Never cancel on main so that every
+# commit that lands keeps a conclusive result.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
-  format:
-    name: Check Formatting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/setup
-
-      - name: Check code formatting
-        run: npm run format:check
-
-  lint:
-    name: Lint Code
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/setup
-
-      - name: Run ESLint
-        run: npm run lint
-
-  type-check:
-    name: Type Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/setup
-        with:
-          generate-prisma: "true"
-
-      - name: Run TypeScript type check
-        run: npm run type-check
-
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/setup
-        with:
-          generate-prisma: "true"
-
-      - name: Run tests
-        run: npm run test:run
-
-  build:
-    name: Build Application
-    needs: [format, lint, type-check, test]
+  # A single job on purpose: each check finishes in well under a minute, so
+  # splitting them made us pay for five checkouts + five `npm ci` runs, and
+  # Actions bills every job rounded up to a whole minute.
+  ci:
+    name: Lint, Test & Build
     runs-on: ubuntu-latest
     env:
       # Dummy values for build-time environment variables
@@ -72,6 +36,25 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           generate-prisma: "true"
+
+      # The checks run even after an earlier one fails, so a single run still
+      # reports every problem. The build is left on the default `success()`
+      # so we don't build on top of a failing check.
+      - name: Check code formatting
+        if: ${{ !cancelled() }}
+        run: npm run format:check
+
+      - name: Run ESLint
+        if: ${{ !cancelled() }}
+        run: npm run lint
+
+      - name: Run TypeScript type check
+        if: ${{ !cancelled() }}
+        run: npm run type-check
+
+      - name: Run tests
+        if: ${{ !cancelled() }}
+        run: npm run test:run
 
       - name: Build application
         run: npm run build

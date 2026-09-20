@@ -8,6 +8,12 @@ on:
     branches:
       - main
 
+# Cancel superseded runs on PR branches. Never cancel on main so that the
+# visual baseline is always published for every commit that lands.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   chromatic:
     name: Run Chromatic
@@ -26,12 +32,17 @@ jobs:
         with:
           fetch-depth: 0 # Chromatic needs full git history for baseline comparison
 
+      # The Storybook build never reaches the Prisma client, so this job skips
+      # `prisma generate` (verified with a clean `build-storybook`).
       - uses: ./.github/actions/setup
 
       - name: Publish to Chromatic
-        uses: chromaui/action@latest
+        uses: chromaui/action@v18
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          # TurboSnap: only snapshot the stories the diff can actually affect.
+          # Dependency-bump PRs that touch no component cost ~0 snapshots.
+          onlyChanged: true
           # Auto-accept changes on main branch, manual review on PRs
           autoAcceptChanges: ${{ github.ref == 'refs/heads/main' }}
           # Exit with error if there are visual changes (optional, can be removed)

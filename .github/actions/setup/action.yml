@@ -17,10 +17,11 @@ runs:
         cache: "npm"
 
     - name: Install dependencies
-      run: npm install
+      run: npm ci
       shell: bash
 
     - name: Generate Prisma Client
+      if: inputs.generate-prisma == 'true'
       run: npm run db:generate
       shell: bash
       env:
